@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lobsters At Sea</title>
+
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <link rel="stylesheet" href="stylesheets/main.css">
+
+    <!-- Data -->
+    <script src="data/main_data_json.js"></script>
+    <script src="data/menu_specification_data.js"></script>
+
+    <!-- Dependencies -->
+
+    <!-- 2d Canvas Helper --> 
+    <script src="scripts/general/simple_2d_canvas_helper.js"></script>
+
+    <!-- General -->
+    <script src="scripts/general/helper_functions.js"></script>
+
+    <script src="scripts/general/seeded_randomizer.js"></script>
+
+    <script src="scripts/general/notsam_linked_list.js"></script>
+
+    <script src="scripts/general/lock.js"></script>
+    <script src="scripts/general/cooldown_lock.js"></script>
+
+    <script src="scripts/general/frame_rate_counter.js"></script>
+    <script src="scripts/general/user_input_manager.js"></script>
+    <script src="scripts/general/hud.js"></script>
+    <script src="scripts/general/loading_screen.js"></script>
+    <script src="scripts/general/sound_manager.js"></script>
+    <script src="scripts/general/tick_scheduler.js"></script>
+    <script src="scripts/general/ns_event_handler.js"></script>
+
+    <!-- Menu Specific -->
+    <script src="scripts/menu/menu.js"></script>
+    <script src="scripts/menu/component.js"></script>
+
+    <script src="scripts/menu/menus/main_menu.js"></script>
+    <script src="scripts/menu/menus/pause_menu.js"></script>
+    <script src="scripts/menu/menus/help_menu.js"></script>
+    <script src="scripts/menu/menus/my_projects_menu.js"></script>
+    
+    <script src="scripts/menu/components/loading_screen_component.js"></script>
+    <script src="scripts/menu/components/static_image.js"></script>
+    <script src="scripts/menu/components/text_component.js"></script>
+    <script src="scripts/menu/components/rectangle_button.js"></script>
+    
+    <script src="scripts/menu/menu_manager.js"></script>
+
+    <!-- Gamemode -->
+    <script src="scripts/gamemodes/gamemode.js"></script>
+    <script src="scripts/gamemodes/gamemode_manager.js"></script>
+
+    <script src="scripts/gamemodes/playground/playground.js"></script>
+
+    <!-- Specific to this game -->
+    <script src="scripts/las/las_sea_display.js"></script>
+    <script src="scripts/las/las_game.js"></script>
+
+    <!-- Main Scripts --> 
+    <script src="scripts/main/game_container.js"></script>
+    <script src="scripts/main/game_launcher.js"></script>
+</head>
+<body>
+    <main id="main_area">
+        <canvas id="canvas"></canvas>
+    </main>
+</body>
+</html>

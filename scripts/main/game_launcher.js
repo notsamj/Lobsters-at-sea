@@ -1,0 +1,34 @@
+let gameProperties = {
+    "tick_rate": MD["game_properties"]["tick_rate"],
+    "ms_between_ticks": MD["game_properties"]["ms_between_ticks"],
+    "approximate_zoom_peek_time_ms": MD["game_properties"]["approximate_zoom_peek_time_ms"],
+    "game_zoom": 1, // default
+    "ms_between_ticks_floor": MD["game_properties"]["ms_between_ticks_floor"],
+    "sound_data": MD["sound_data"],
+    "loading_screen_data": MD["loading_screen_data"],
+    "frame_rate": MD["game_properties"]["frame_rate"],
+    "hud_json": MD["hud"]
+}
+
+// Create container
+const GC = new GameContainer(new LasGame(), gameProperties);
+
+
+// Start Up
+window.addEventListener("load", () => {
+    registerMenus();
+    GC.setup();
+});
+
+// Helper
+function launcherTickHandler(timeElapsedMS){
+    GC.tick();
+}
+
+function registerMenus(){
+    GC.getMenuManager().registerMenu(new MyProjectsMenu());
+}
+
+function stop(){
+    GC.stop();
+}
