@@ -7,11 +7,12 @@ let gameProperties = {
     "sound_data": MD["sound_data"],
     "loading_screen_data": MD["loading_screen_data"],
     "frame_rate": MD["game_properties"]["frame_rate"],
-    "hud_json": MD["hud"]
+    "hud_json": MD["hud"],
+    "tick_proportion_of_a_second": MD["game_properties"]["ms_between_ticks"] / 1000
 }
 
 // Create container
-const GC = new GameContainer(new LasGame(), gameProperties);
+const GC = new GameContainer(new LasLocalGame(gameProperties), gameProperties);
 
 
 // Start Up

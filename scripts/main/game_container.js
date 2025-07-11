@@ -157,7 +157,7 @@ class GameContainer {
         requestAnimationFrame(launcherTickHandler);
 
         // Tell the game to load its images
-        await this.gameInstance.loadImages();
+        await this.gameInstance.constructor.loadImages();
 
         // Setup menus
         this.MENU_MANAGER.setup();

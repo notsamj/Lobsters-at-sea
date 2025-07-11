@@ -1,5 +1,15 @@
 class Playground extends Gamemode {
 
+    constructor(){
+        this.prepareTestEnvironment();
+    }
+
+    prepareTestEnvironment(){
+        let game = this.getGame();
+
+        game.addShip(new );
+    }
+
     tick(){
         // TODO
     }

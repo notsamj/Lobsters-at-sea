@@ -157,4 +157,13 @@ class TickScheduler {
     getLastTickTime(){
         return this.lastTickTime;
     }
+
+    getDisplayMSSinceLastTick(){
+        // If the game is paused -> return the time between tick and display at the start of the pause
+        if (this.isPaused()){
+            return this.pauseStartTime - this.lastTickTime;
+        }
+        // Game is not paused, return the time between the time of the current frame and the last tick time
+        return GC.getFrameCounter().getLastFrameTime() - this.lastTickTime;
+    }
 }
