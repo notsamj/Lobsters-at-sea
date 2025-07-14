@@ -6,6 +6,14 @@ class LasGame {
         this.ships = new NotSamLinkedList();
     }
 
+    getShips(){
+        return this.ships;
+    }
+
+    addShip(newShip){
+        this.ships.add(newShip);
+    }
+
     tick(){
         throw new Exception("Expect to be overwritten.");
     }
@@ -19,6 +27,7 @@ class LasGame {
     }
 
     reset(){
+        console.debug("Reset")
         // Resets world data
         this.ships.clear();
     }

@@ -12,18 +12,34 @@ class LasLocalGame extends LasGame {
 
     tick(){
         // TODO: Update ship orientations, power based on decisions
+        this.updateShipOrientationAndSailPower();
 
         // TODO: Move ships based on orientation and sail power
+        this.moveShips();
 
-
+        // Take input from the user
         updateShipDecisions();
 
         // Update wind
         this.wind.update();
     }
 
+    moveShips(){
+        for (let [ship, shipIndex] of this.getShips()){
+            ship.moveOneTick();
+        }
+    }
+
+    updateShipOrientationAndSailPower(){
+        // TODO
+    }
+
     getFocusedShip(){
         return this.focusedShip;
+    }
+
+    setFocusedShip(ship){
+        this.focusedShip = ship; 
     }
 
     hasFocusedShip(){
@@ -51,6 +67,11 @@ class LasLocalGame extends LasGame {
     display(){
         // Display the seas
         this.seaDisplay.display(this.getFocusedFrameX(), this.getFocusedFrameY());
+
+        // Display ships
+        for (let [ship, shipIndex] of this.getShips()){
+            ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
+        }
     }
 
     static registerAllKeybinds(){
@@ -108,8 +129,8 @@ class LasLocalGame extends LasGame {
         await GC.getMenuManager().getMenuByName("help_menu").loadImages();
 
         // Load boat
-        await GC.loadToImages("generic_ship_left");
-        await GC.loadToImages("generic_ship_up");
+        await GC.loadToImages("generic_ship_left", "/ships/generic_ship/");
+        await GC.loadToImages("generic_ship_up", "/ships/generic_ship/");
 
         console.log("Finished loading game images.")
     }

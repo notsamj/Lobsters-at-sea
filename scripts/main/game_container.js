@@ -48,9 +48,9 @@ class GameContainer {
         return this.HUD;
     }
 
-    newGame(gamemode){
+    newGame(gamemodeType){
         this.gameInstance.reset();
-        this.GAMEMODE_MANAGER.setActiveGamemode(gamemode);
+        this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
     }
 
     getLastClickedMouseX(){
