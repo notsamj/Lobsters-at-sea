@@ -8,7 +8,9 @@ let gameProperties = {
     "loading_screen_data": MD["loading_screen_data"],
     "frame_rate": MD["game_properties"]["frame_rate"],
     "hud_json": MD["hud"],
-    "tick_proportion_of_a_second": MD["game_properties"]["ms_between_ticks"] / 1000
+    "tick_proportion_of_a_second": MD["game_properties"]["ms_between_ticks"] / 1000,
+    "air_resistance_coefficient": MD["game_properties"]["air_resistance_coefficient"],
+    "ship_data": SD
 }
 
 // Create container

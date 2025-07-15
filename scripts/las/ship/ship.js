@@ -13,25 +13,77 @@ class Ship {
         this.shipModel = shipJSON["ship_model"];
 
         this.gameInstance = shipJSON["game_instance"];
+
+        this.establishedDecisions = {
+            "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
+            "orientation_power_change": 0 // is either < 0, === 0, > 0
+        }
+
+        this.pendingDecisions = {
+            "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
+            "orientation_power_change": 0 // is either < 0, === 0, > 0
+        }
+    }
+
+    resetPendingDecisions(){
+        this.pendingDecisions["orientation_power_change"] = 0;
+        this.pendingDecisions["orientation_direction_change"] = 0;
     }
 
     getShipModel(){
         return this.shipModel;
     }
 
-    updateFromPilot(orientationDirection, shipOrientationPowerChange){
-        // orientationDirection is either < 0, === 0, > 0 indicating how to turn
+    updateFromPilot(shipOrientationDirectionChange, shipOrientationPowerChange){
+        this.pendingDecisions["orientation_power_change"] = shipOrientationPowerChange;
+        this.pendingDecisions["orientation_direction_change"] = shipOrientationDirectionChange;
+    }
 
-        // orientationPower is either < 0, === 0, > 0
+    updateShipOrientationAndSailPower(){
+        // orientationDirectionChange is either < 0, === 0, > 0 indicating how to turn
+        this.establishedDecisions["orientation_direction_change"] = this.pendingDecisions["orientation_direction_change"];
 
+        // orientationPowerChange is either < 0, === 0, > 0
+        this.establishedDecisions["orientation_power_change"] = this.pendingDecisions["orientation_power_change"];
+
+        // Reset the pending decisions
+        this.resetPendingDecisions();
     }
 
     moveOneTick(){
         let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
-        
+
+        let xInfo = this.getXInfoInMS(tickMS);
+        let yInfo = this.getYInfoInMS(tickMS);
+
+        // Get old positions
+        let oldX = this.xPos;
+        let oldY = this.yPos;
+
+        // Get new positions
+        let newX = xInfo["x"];
+        let newY = yInfo["y"];
+
+        let distanceMoved = calculateEuclideanDistance(oldX, oldY, newX, newY);
+
         // Update x,y
-        this.x = this.getXInMS(tickMS);
-        this.y = this.getYInMS(tickMS);
+        this.xPos = newX;
+        this.yPos = newY;
+
+        // Update xv, yv
+        this.xV = xInfo["x_v"];
+        this.yV = yInfo["y_v"];
+
+        // Update orientation
+        if (this.establishedDecisions["orientation_direction_change"] > 0){
+            this.orientationRAD = rotateCWRAD(this.orientationRAD, distanceMoved / 1000 * toRadians(this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["turning_radius_degrees"]));
+        }else if (this.establishedDecisions["orientation_direction_change"] < 0){
+            this.orientationRAD = rotateCCWRAD(this.orientationRAD, distanceMoved / 1000 * toRadians(this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["turning_radius_degrees"]));
+        }
+
+        // Update power
+        let changeAmount = 0.01; // TODO save this somewhere (how fast you can change the sails)
+        this.shipOrientationPower = Math.max(0, Math.min(1, this.establishedDecisions["orientation_power_change"] * changeAmount + this.shipOrientationPower))
     }
 
     getGame(){
@@ -72,10 +124,10 @@ class Ship {
         let myCenterYOffsetFromScreenCenter = this.getFrameY() - centerYOfScreen;
 
         // Get ship size
-        let shipWidth = SD[this.getShipModel()]["ship_width"];
-        let shipHeight = SD[this.getShipModel()]["ship_height"];
-        let shipImageSizeConstantX = SD[this.getShipModel()]["image_width"] / shipWidth;
-        let shipImageSizeConstantY = SD[this.getShipModel()]["image_height"] / shipHeight;
+        let shipWidth = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_width"];
+        let shipHeight = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_height"];
+        let shipImageSizeConstantX = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["image_width"] / shipWidth;
+        let shipImageSizeConstantY = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["image_height"] / shipHeight;
 
         // Get zoomed ship size
         let zoomedShipWidth = shipWidth * gameZoom;
@@ -121,42 +173,105 @@ class Ship {
         let rotateY = myYScreenCoordINT + (zoomedShipHeight-1)/2;
         let interpolatedOrientation = this.getFrameOrientation();
 
+        let imageToUse;
+        let isFacingRight = false;
+        let displayImageOrientation;
+        
+        // Determine orientation
+
+        // If in top range
+        if (angleBetweenCWRAD(interpolatedOrientation, toRadians(135), toRadians(45))){
+            displayImageOrientation = rotateCWRAD(interpolatedOrientation, toRadians(90)); // Rotate the top image 90 deg CW for proper display
+            imageToUse = "up";
+        }
+        // If it is in the right range
+        else if (angleBetweenCWRAD(interpolatedOrientation, toRadians(45), toRadians(315))){
+            displayImageOrientation = interpolatedOrientation; // No need to rotate
+            isFacingRight = true;
+            imageToUse = "left"; // right uses left image but flipped
+        }
+
+        // If it is in the bottom range
+        else if (angleBetweenCWRAD(interpolatedOrientation, toRadians(315), toRadians(225))){
+            displayImageOrientation = rotateCWRAD(interpolatedOrientation, 270); // Rotate the bottom image 270 deg CW for proper display
+            imageToUse = "down";
+        }
+
+        // Otherwise it is in the left range
+        else{
+            displayImageOrientation = rotateCWRAD(interpolatedOrientation, 180); // Rotate the bottom image 180 deg CW for proper display
+            imageToUse = "left";
+        }
+
+
 
         // Prepare the display
         translate(rotateX, rotateY);
-        rotate(-1 * interpolatedOrientation);
+        rotate(-1 * displayImageOrientation);
 
+        // Flip for right side
+        if (isFacingRight){
+            scale(-1, 1);
+        }
 
         // Game zoom
         scale(gameZoom * 1 / shipImageSizeConstantX, gameZoom * 1 / shipImageSizeConstantY);
 
         // Display Ship
         // TEMP
-        displayImage(GC.getImage("generic_ship_up"), 0 - (shipWidth-1) / 2 * shipImageSizeConstantX, 0 - (shipHeight-1) / 2 * shipImageSizeConstantY); 
+        displayImage(GC.getImage("generic_ship_" + imageToUse), 0 - (shipWidth-1) / 2 * shipImageSizeConstantX, 0 - (shipHeight-1) / 2 * shipImageSizeConstantY); 
 
         // Undo game zoom
         scale(1/gameZoom * shipImageSizeConstantX, 1/gameZoom * shipImageSizeConstantY);
 
+        // Undo Flip for right side
+        if (isFacingRight){
+            scale(-1, 1);
+        }
+
         // Reset the rotation and translation
-        rotate(interpolatedOrientation);
+        rotate(displayImageOrientation);
         translate(-1 * rotateX, -1 * rotateY);
     }
 
     getXInMS(ms){
+        return this.getXInfoInMS(ms)["x"];
+    }
+
+    getXInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
         let msProportionOfASecond = ms / 1000;
-        let newXV = this.xV + windObJ.getXA() * msProportionOfASecond;
+        let windA = windObJ.getXA();
+        // How strong the sails are affects the wind
+        windA *= this.shipOrientationPower;
 
-        return this.xPos + newXV * msProportionOfASecond;
+        let airResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["size_metric"] * this.getGame().getGameProperties()["air_resistance_coefficient"];
+        let totalA = windA + airResistanceA;
+        let newXV = this.xV + totalA * msProportionOfASecond;
+        let newXP = this.xPos + newXV * msProportionOfASecond;
+        return {"x": newXP, "x_v": newXV}
+    }
+
+    getYInfoInMS(ms){
+        let game = this.getGame();
+        let windObJ = this.getGame().getWind();
+        let msProportionOfASecond = ms / 1000;
+        let windA = windObJ.getYA();
+
+        // How strong the sails are affects the wind
+        windA *= this.shipOrientationPower;
+
+        let sizeMetric = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["size_metric"];
+        let airResistanceCoefficient = this.getGame().getGameProperties()["air_resistance_coefficient"];
+        let airResistanceA = 1/2 * -1 * this.yV * Math.abs(this.yV) * sizeMetric * airResistanceCoefficient;
+        let totalA = windA + airResistanceA;
+        let newYV = this.yV + totalA * msProportionOfASecond;
+        let newYP = this.yPos + newYV * msProportionOfASecond;
+        return {"y": newYP, "y_v": newYV}
     }
 
     getYInMS(ms){
-        let game = this.getGame();
-        let windObJ = this.getGame().getWind();
-        let msProportionOfASecond = ms / 1000;
-        let newYV = this.yV + windObJ.getYA() * msProportionOfASecond;
-
-        return this.yPos + newYV * msProportionOfASecond;
+        return this.getYInfoInMS(ms)["y"];
     }
 }

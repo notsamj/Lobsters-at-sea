@@ -8,7 +8,8 @@ const MD = {
         "expected_canvas_width": 1920,
         "expected_canvas_height": 927,
         "cursor_enabled": true,
-        "frame_rate": 80
+        "frame_rate": 80,
+        "air_resistance_coefficient": 0.00000125
     },
 
     "sound_data": {
@@ -60,7 +61,11 @@ const MD = {
         "zoom_1/4": 100, // num 4
         "zoom_1/2": 99, // num 3
         "zoom_1": 98, // num 2
-        "zoom_2": 97 // num 1
+        "zoom_2": 97, // num 1
+        "sails_inc": 82, // R
+        "sails_dec": 70, // F
+        "ship_left": 65, // A
+        "ship_right": 68 // D
     },
 
     "hud": {

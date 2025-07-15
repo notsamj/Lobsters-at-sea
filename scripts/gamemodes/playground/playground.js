@@ -27,7 +27,8 @@ class Playground extends Gamemode {
     }
 
     tick(){
-        // TODO
+        // Tick the game
+        this.getGame().tick();
     }
 
     getName(){ return "playground"; }
@@ -40,11 +41,20 @@ class Playground extends Gamemode {
         // Display game
         this.getGame().display();
 
+        let hud = GC.getHUD();
+
+        // Display HUD for focused ship
+        if (this.getGame().hasFocusedShip()){
+            let focusedShip = this.getGame().getFocusedShip();
+            hud.updateElement("x", focusedShip.getTickX());
+            hud.updateElement("y", focusedShip.getTickY());
+        }
 
         // Display FPS
         let fps = GC.getFrameCounter().getFPS();
-        let hud = GC.getHUD();
         hud.updateElement("fps", fps);
+
+        // Display HUD
         hud.display();
     }
 }
