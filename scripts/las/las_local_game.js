@@ -93,6 +93,9 @@ class LasLocalGame extends LasGame {
         for (let [ship, shipIndex] of this.getShips()){
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
+
+        // Display windsock
+        this.getWind().display();
     }
 
     static registerAllKeybinds(){
@@ -162,6 +165,9 @@ class LasLocalGame extends LasGame {
     static async loadImages(){
         // Load logo
         await GC.loadToImages("logo");
+
+        // Load windsock
+        await GC.loadToImages("wind_sock");
 
         // Load project images
         await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();

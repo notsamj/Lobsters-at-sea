@@ -43,16 +43,23 @@ class Playground extends Gamemode {
 
         let hud = GC.getHUD();
 
-        // Display HUD for focused ship
-        if (this.getGame().hasFocusedShip()){
-            let focusedShip = this.getGame().getFocusedShip();
-            hud.updateElement("x", focusedShip.getTickX());
-            hud.updateElement("y", focusedShip.getTickY());
-        }
-
         // Display FPS
         let fps = GC.getFrameCounter().getFPS();
         hud.updateElement("fps", fps);
+
+        // Display wind direction
+        let windDirection = toDegrees(this.getGame().getWind().getWindDirectionRAD());
+        hud.updateElement("wind direction", windDirection);
+
+        // Display HUD for focused ship
+        if (this.getGame().hasFocusedShip()){
+            let focusedShip = this.getGame().getFocusedShip();
+            hud.updateElement("x", focusedShip.getTickX().toFixed(2));
+            hud.updateElement("x_v", focusedShip.getTickXV().toFixed(2));
+            hud.updateElement("y", focusedShip.getTickY().toFixed(2));
+            hud.updateElement("y_v", focusedShip.getTickYV().toFixed(2));
+            hud.updateElement("orientation", toDegrees(focusedShip.getTickOrientation()).toFixed(2));
+        }
 
         // Display HUD
         hud.display();

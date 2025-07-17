@@ -9,7 +9,7 @@ const MD = {
         "expected_canvas_height": 927,
         "cursor_enabled": true,
         "frame_rate": 80,
-        "air_resistance_coefficient": 0.00000125
+        "ship_movement_resistance_coefficient": 0.00000525
     },
 
     "sound_data": {

@@ -98,6 +98,14 @@ class Ship {
         return this.yPos;
     }
 
+    getTickXV(){
+        return this.xV;
+    }
+
+    getTickYV(){
+        return this.yV;
+    }
+
     // Note: Local only
     getFrameX(){
         return this.getXInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
@@ -199,7 +207,7 @@ class Ship {
 
         // Otherwise it is in the left range
         else{
-            displayImageOrientation = rotateCWRAD(interpolatedOrientation, 180); // Rotate the bottom image 180 deg CW for proper display
+            displayImageOrientation = rotateCWRAD(interpolatedOrientation, 135); // Rotate the bottom image 180 deg CW for proper display
             imageToUse = "left";
         }
 
@@ -238,6 +246,14 @@ class Ship {
         return this.getXInfoInMS(ms)["x"];
     }
 
+    static calculateWindEffect(shipOrientationRAD, windOrientationRAD){
+        return Math.sin(Math.abs(shipOrientationRAD - windOrientationRAD) + toRadians(90))
+    }
+
+    getTickOrientation(){
+        return this.orientationRAD;
+    }
+
     getXInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
@@ -246,8 +262,13 @@ class Ship {
         // How strong the sails are affects the wind
         windA *= this.shipOrientationPower;
 
-        let airResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["size_metric"] * this.getGame().getGameProperties()["air_resistance_coefficient"];
-        let totalA = windA + airResistanceA;
+        // Modify based on wind direction and ship orientation
+        windA *= Ship.calculateWindEffect(this.getTickOrientation(), windObJ.getWindDirectionRAD());
+
+        let willPowerA = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["will_power_acceleration"] * Math.cos(this.getTickOrientation()); // TODO: Resume here
+
+        let shipMovementResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["size_metric"] * this.getGame().getGameProperties()["ship_movement_resistance_coefficient"];
+        let totalA = windA + shipMovementResistanceA + willPowerA;
         let newXV = this.xV + totalA * msProportionOfASecond;
         let newXP = this.xPos + newXV * msProportionOfASecond;
         return {"x": newXP, "x_v": newXV}
@@ -262,10 +283,15 @@ class Ship {
         // How strong the sails are affects the wind
         windA *= this.shipOrientationPower;
 
+        // Modify based on wind direction and ship orientation
+        windA *= Ship.calculateWindEffect(this.getTickOrientation(), windObJ.getWindDirectionRAD());
+
+        let willPowerA = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["will_power_acceleration"] * Math.sin(this.getTickOrientation()); // TODO: Resume here
+
         let sizeMetric = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["size_metric"];
-        let airResistanceCoefficient = this.getGame().getGameProperties()["air_resistance_coefficient"];
-        let airResistanceA = 1/2 * -1 * this.yV * Math.abs(this.yV) * sizeMetric * airResistanceCoefficient;
-        let totalA = windA + airResistanceA;
+        let airResistanceCoefficient = this.getGame().getGameProperties()["ship_movement_resistance_coefficient"];
+        let shipMovementResistanceA = 1/2 * -1 * this.yV * Math.abs(this.yV) * sizeMetric * airResistanceCoefficient;
+        let totalA = windA + shipMovementResistanceA + willPowerA;
         let newYV = this.yV + totalA * msProportionOfASecond;
         let newYP = this.yPos + newYV * msProportionOfASecond;
         return {"y": newYP, "y_v": newYV}
