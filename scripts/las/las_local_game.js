@@ -21,7 +21,7 @@ class LasLocalGame extends LasGame {
         this.updateShipDecisions();
 
         // Update wind
-        this.wind.update();
+        this.wind.tickUpdate();
     }
 
     moveShips(){

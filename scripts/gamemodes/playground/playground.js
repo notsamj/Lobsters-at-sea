@@ -14,7 +14,7 @@ class Playground extends Gamemode {
             "starting_x_velocity": 0,
             "starting_y_velocity": 0,
             "starting_orientation_rad": toRadians(90),
-            "orientation_power": 1,
+            "sail_strength": 1,
             "ship_model": "generic_ship",
             "game_instance": game
         }
@@ -23,7 +23,22 @@ class Playground extends Gamemode {
 
         // Focus
         game.setFocusedShip(tempShip);
-        console.debug("Setup ships")
+        
+
+        // Add test ship
+        let tempShip2JSON = {
+            "starting_x_pos": 500,
+            "starting_y_pos": 0,
+            "starting_x_velocity": 0,
+            "starting_y_velocity": 0,
+            "starting_orientation_rad": toRadians(90),
+            "sail_strength": 0,
+            "ship_model": "generic_ship",
+            "game_instance": game
+        }
+
+        let tempShip2 = new Ship(tempShip2JSON);
+        game.addShip(tempShip2);
     }
 
     tick(){
@@ -48,8 +63,9 @@ class Playground extends Gamemode {
         hud.updateElement("fps", fps);
 
         // Display wind direction
-        let windDirection = toDegrees(this.getGame().getWind().getWindDirectionRAD());
+        let windDirection = toDegrees(this.getGame().getWind().getWindDirectionRAD()).toFixed(2);
         hud.updateElement("wind direction", windDirection);
+        hud.updateElement("wind force", this.getGame().getWind().getWindMagnitude().toFixed(2));
 
         // Display HUD for focused ship
         if (this.getGame().hasFocusedShip()){
@@ -59,6 +75,7 @@ class Playground extends Gamemode {
             hud.updateElement("y", focusedShip.getTickY().toFixed(2));
             hud.updateElement("y_v", focusedShip.getTickYV().toFixed(2));
             hud.updateElement("orientation", toDegrees(focusedShip.getTickOrientation()).toFixed(2));
+            hud.updateElement("sail strength", focusedShip.getTickSailStrength().toFixed(2));
         }
 
         // Display HUD

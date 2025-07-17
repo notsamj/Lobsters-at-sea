@@ -2,8 +2,13 @@
 class LasGame {
     constructor(gameProperties){
         this.gameProperties = gameProperties;
-        this.wind = new Wind();
+        this.randomizer = new SeededRandomizer(gameProperties["random_seed"]);
+        this.wind = new Wind(this);
         this.ships = new NotSamLinkedList();
+    }
+
+    getRandom(){
+        return this.randomizer;
     }
 
     getShips(){

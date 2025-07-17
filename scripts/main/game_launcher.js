@@ -10,7 +10,9 @@ let gameProperties = {
     "hud_json": MD["hud"],
     "tick_proportion_of_a_second": MD["game_properties"]["ms_between_ticks"] / 1000,
     "ship_movement_resistance_coefficient": MD["game_properties"]["ship_movement_resistance_coefficient"],
-    "ship_data": SD
+    "ship_data": SD,
+    "wind_settings": MD["wind_settings"],
+    "random_seed": 5
 }
 
 // Create container

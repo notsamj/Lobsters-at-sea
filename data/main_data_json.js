@@ -12,6 +12,12 @@ const MD = {
         "ship_movement_resistance_coefficient": 0.00000525
     },
 
+    "wind_settings": {
+        "wind_initial_magnitude": 20,
+        "wind_magnitude_change_amount_per_second": 8,
+        "wind_direction_change_amount_per_second_deg": 40 
+    },
+
     "sound_data": {
         "sounds": [
         ],
@@ -71,7 +77,7 @@ const MD = {
     "hud": {
         "text_size": 20,
         "key_colour": "#ff6700",
-        "value_colour": "#0066ff",
+        "value_colour": "#9966ff",
         "extra_time_ms": 1000,
         "display_x_offset": 10,
         "priorities": {

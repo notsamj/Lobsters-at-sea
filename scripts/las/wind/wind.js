@@ -1,14 +1,33 @@
 class Wind {
-    constructor(){
-        let initialWindMagnitude = 5;
-        let initialWindDirection = toRadians(90);
+    constructor(game){
+        this.game = game;
+        let initialWindMagnitude = this.game.getGameProperties()["wind_settings"]["wind_initial_magnitude"];
+        let initialWindDirection = toRadians(this.game.getRandom().getFloatInRange(0, 2*Math.PI));
 
         this.windMagntiude = initialWindMagnitude;
         this.windDirectionRAD = initialWindDirection;
+        this.windMagnitudeChangeAmountPerSecond = this.game.getGameProperties()["wind_settings"]["wind_magnitude_change_amount_per_second"];
+        this.windDirectionChangeAmountPerSecondRAD = toRadians(this.game.getGameProperties()["wind_settings"]["wind_direction_change_amount_per_second_deg"]);
     }
 
-    update(){
-        // TODO
+
+    getGame(){
+        return this.game;
+    }
+
+    tickUpdate(){
+        let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
+        let msProportionOfASecond = tickMS / 1000;
+
+        let windChangeMagnitude = this.windMagnitudeChangeAmountPerSecond * msProportionOfASecond;
+        let newWindMagntiude = this.windMagntiude + this.getGame().getRandom().getFloatInRange(windChangeMagnitude * -1, windChangeMagnitude);
+        
+        // Cannot be negative
+        this.windMagntiude = Math.max(newWindMagntiude, 0);
+
+        let maxDirectionChangeAmount = this.windDirectionChangeAmountPerSecondRAD * msProportionOfASecond;
+        let newWindDirectionRAD = fixRadians(this.windDirectionRAD + this.getGame().getRandom().getFloatInRange(maxDirectionChangeAmount * -1, maxDirectionChangeAmount));
+        this.windDirectionRAD = newWindDirectionRAD;
     }
 
     getXA(){
@@ -21,6 +40,10 @@ class Wind {
 
     getWindDirectionRAD(){
         return this.windDirectionRAD;
+    }
+
+    getWindMagnitude(){
+        return this.windMagntiude;
     }
 
     // Local only

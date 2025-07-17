@@ -8,7 +8,7 @@ class Ship {
 
         this.orientationRAD = shipJSON["starting_orientation_rad"];
 
-        this.shipOrientationPower = shipJSON["orientation_power"];
+        this.shipSailStrength = shipJSON["sail_strength"];
 
         this.shipModel = shipJSON["ship_model"];
 
@@ -16,17 +16,21 @@ class Ship {
 
         this.establishedDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "orientation_power_change": 0 // is either < 0, === 0, > 0
+            "sail_strength_change": 0 // is either < 0, === 0, > 0
         }
 
         this.pendingDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "orientation_power_change": 0 // is either < 0, === 0, > 0
+            "sail_strength_change": 0 // is either < 0, === 0, > 0
         }
     }
 
+    getTickSailStrength(){
+        return this.shipSailStrength;
+    }
+
     resetPendingDecisions(){
-        this.pendingDecisions["orientation_power_change"] = 0;
+        this.pendingDecisions["sail_strength_change"] = 0;
         this.pendingDecisions["orientation_direction_change"] = 0;
     }
 
@@ -34,8 +38,8 @@ class Ship {
         return this.shipModel;
     }
 
-    updateFromPilot(shipOrientationDirectionChange, shipOrientationPowerChange){
-        this.pendingDecisions["orientation_power_change"] = shipOrientationPowerChange;
+    updateFromPilot(shipOrientationDirectionChange, shipSailStrengthChange){
+        this.pendingDecisions["sail_strength_change"] = shipSailStrengthChange;
         this.pendingDecisions["orientation_direction_change"] = shipOrientationDirectionChange;
     }
 
@@ -44,7 +48,7 @@ class Ship {
         this.establishedDecisions["orientation_direction_change"] = this.pendingDecisions["orientation_direction_change"];
 
         // orientationPowerChange is either < 0, === 0, > 0
-        this.establishedDecisions["orientation_power_change"] = this.pendingDecisions["orientation_power_change"];
+        this.establishedDecisions["sail_strength_change"] = this.pendingDecisions["sail_strength_change"];
 
         // Reset the pending decisions
         this.resetPendingDecisions();
@@ -83,7 +87,7 @@ class Ship {
 
         // Update power
         let changeAmount = 0.01; // TODO save this somewhere (how fast you can change the sails)
-        this.shipOrientationPower = Math.max(0, Math.min(1, this.establishedDecisions["orientation_power_change"] * changeAmount + this.shipOrientationPower))
+        this.shipSailStrength = Math.max(0, Math.min(1, this.establishedDecisions["sail_strength_change"] * changeAmount + this.shipSailStrength));
     }
 
     getGame(){
@@ -250,6 +254,10 @@ class Ship {
         return Math.sin(Math.abs(shipOrientationRAD - windOrientationRAD) + toRadians(90))
     }
 
+    static calculateWindEffectMagnitude(shipOrientationRAD, windOrientationRAD){
+        return Math.abs(Ship.calculateWindEffect(shipOrientationRAD, windOrientationRAD));
+    }
+
     getTickOrientation(){
         return this.orientationRAD;
     }
@@ -260,10 +268,10 @@ class Ship {
         let msProportionOfASecond = ms / 1000;
         let windA = windObJ.getXA();
         // How strong the sails are affects the wind
-        windA *= this.shipOrientationPower;
+        windA *= this.shipSailStrength;
 
         // Modify based on wind direction and ship orientation
-        windA *= Ship.calculateWindEffect(this.getTickOrientation(), windObJ.getWindDirectionRAD());
+        windA *= Math.abs(Ship.calculateWindEffectMagnitude(this.getTickOrientation(), windObJ.getWindDirectionRAD()));
 
         let willPowerA = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["will_power_acceleration"] * Math.cos(this.getTickOrientation()); // TODO: Resume here
 
@@ -281,10 +289,10 @@ class Ship {
         let windA = windObJ.getYA();
 
         // How strong the sails are affects the wind
-        windA *= this.shipOrientationPower;
+        windA *= this.shipSailStrength;
 
         // Modify based on wind direction and ship orientation
-        windA *= Ship.calculateWindEffect(this.getTickOrientation(), windObJ.getWindDirectionRAD());
+        windA *= Ship.calculateWindEffectMagnitude(this.getTickOrientation(), windObJ.getWindDirectionRAD());
 
         let willPowerA = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["will_power_acceleration"] * Math.sin(this.getTickOrientation()); // TODO: Resume here
 
