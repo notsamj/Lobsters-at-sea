@@ -7,7 +7,7 @@ const SD = {
         "size_metric": 1000, // used for ship movement resistance calculations. No unit
         "turning_radius_degrees": 90, // degrees per thousand pixels moved
         "will_power_acceleration": 12, // how much acceleration the ship can muster in it's desired direction in pixels/second
-        "cannons": {
+        "cannons": [
             // right side
             {
                 "x": 283,
@@ -107,6 +107,6 @@ const SD = {
                 "y": 399,
                 "range_cw": [315, 225]
             }
-        }
+        ]
     }
 }

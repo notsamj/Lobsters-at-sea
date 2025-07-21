@@ -12,6 +12,11 @@ const MD = {
         "ship_movement_resistance_coefficient": 0.00000525
     },
 
+    "camera_settings": {
+        "left_right_cooldown_ms": 250,
+        "move_speed_px_sec": 500
+    },
+
     "wind_settings": {
         "wind_initial_magnitude": 20,
         "wind_magnitude_change_amount_per_second": 8,
@@ -58,8 +63,8 @@ const MD = {
     },
 
     "default_key_binds": {
-        "scroll_left": 37, // left arrow
-        "scroll_right": 39, // right arrow
+        "scroll_left_ticked": 37, // left arrow
+        "scroll_right_ticked": 39, // right arrow
         "left_click_ticked": 1, // left click
         "help_access_ticked": 72, // h
         "escape_ticked": 27, // esc
@@ -71,7 +76,12 @@ const MD = {
         "sails_inc": 82, // R
         "sails_dec": 70, // F
         "ship_left": 65, // A
-        "ship_right": 68 // D
+        "ship_right": 68, // D
+        "camera_move_left": 37, // left arrow
+        "camera_move_right": 39, // right arrow
+        "camera_move_up": 38, // up arrow
+        "camera_move_down": 40, // down arrow
+        "camera_snap_follow_toggle": 70 // F
     },
 
     "hud": {

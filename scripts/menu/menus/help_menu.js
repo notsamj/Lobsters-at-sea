@@ -56,7 +56,7 @@ class HelpMenu extends Menu {
         if (this.origin != null){
             helpMenuName = this.origin.getName();
         }else{
-            helpMenuName = GAMEMODE_MANAGER.getActiveGameName();
+            helpMenuName = GC.getGamemodeManager().getActiveGameName();
         }
         if (helpMenuName === null){
             helpMenuName = "default";
@@ -214,9 +214,9 @@ class HelpMenu extends Menu {
         Method Return: void
     */
     tick(){
-        if (GC.getGameUserInputManager().isActivated("scroll_left_ticked")){
+        if (GC.getMenuUserInputManager().isActivated("scroll_left_ticked")){
             this.slide(-1);
-        }else if (GC.getGameUserInputManager().isActivated("scroll_right_ticked")){
+        }else if (GC.getMenuUserInputManager().isActivated("scroll_right_ticked")){
             this.slide(1);
         }
         super.tick();

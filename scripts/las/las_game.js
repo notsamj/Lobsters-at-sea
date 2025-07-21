@@ -2,9 +2,14 @@
 class LasGame {
     constructor(gameProperties){
         this.gameProperties = gameProperties;
+        this.idManager = new IDManager();
         this.randomizer = new SeededRandomizer(gameProperties["random_seed"]);
         this.wind = new Wind(this);
         this.ships = new NotSamLinkedList();
+    }
+
+    getIDManager(){
+        return this.idManager;
     }
 
     getRandom(){

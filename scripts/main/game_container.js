@@ -21,6 +21,7 @@ class GameContainer {
         this.GAME_TICK_SCHEDULER = new TickScheduler(gameProperties["tick_rate"]);
         this.GAMEMODE_MANAGER = new GamemodeManager();
         this.GAME_USER_INPUT_MANAGER = new UserInputManager();
+        this.MENU_USER_INPUT_MANAGER = new UserInputManager();
         this.SOUND_MANAGER = new SoundManager(gameProperties["sound_data"]);
         this.LOADING_SCREEN = new LoadingScreen(gameProperties["loading_screen_data"]);
         this.GAME_CONTAINER_EVENT_HANDLER = new NSEventHandler();
@@ -77,6 +78,10 @@ class GameContainer {
 
     getGameUserInputManager(){
         return this.GAME_USER_INPUT_MANAGER;
+    }
+
+    getMenuUserInputManager(){
+        return this.MENU_USER_INPUT_MANAGER;
     }
 
     /*
@@ -322,7 +327,7 @@ class GameContainer {
         this.MENU_MANAGER.tick();
 
         // Tick the GAME_USER_INPUT_MANAGER
-        this.GAME_USER_INPUT_MANAGER.tick();
+        this.MENU_USER_INPUT_MANAGER.tick();
 
         let expectedTicks = this.GAME_TICK_SCHEDULER.getExpectedNumberOfTicksPassed();
         let tickDifference = expectedTicks - this.GAME_TICK_SCHEDULER.getNumTicks()

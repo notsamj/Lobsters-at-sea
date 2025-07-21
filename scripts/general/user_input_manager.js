@@ -127,7 +127,10 @@ class UserInputManager {
         Method Return: boolean, true -> activated, false -> not activated
     */
     isActivated(alias){
-        return this.has(alias) ? this.get(alias).isActivated() : false;
+        if (!this.has(alias)){
+            throw new Error("Alias not found: " + alias + ".");
+        }
+        return this.get(alias).isActivated();
     }
 
     /*
@@ -252,6 +255,9 @@ class UserInputNode {
         Method Parameters: None
         Method Description: Handles the tick actions
         Method Return: void
+        Note:
+        ticked_activation means that on a tick it gets disabled
+        If you use key_down for a press. key_down will get called by browser say 5x/second while its down
     */
     tick(){
         this.activated = this.extraInfo["ticked_activation"];

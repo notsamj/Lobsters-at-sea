@@ -1,5 +1,7 @@
 class Ship {
     constructor(shipJSON){
+        this.id = shipJSON["id"];
+
         this.xPos = shipJSON["starting_x_pos"];
         this.yPos = shipJSON["starting_y_pos"];
 
@@ -25,6 +27,10 @@ class Ship {
         }
     }
 
+    getID(){
+        return this.id;
+    }
+
     getTickSailStrength(){
         return this.shipSailStrength;
     }
@@ -38,9 +44,14 @@ class Ship {
         return this.shipModel;
     }
 
-    updateFromPilot(shipOrientationDirectionChange, shipSailStrengthChange){
-        this.pendingDecisions["sail_strength_change"] = shipSailStrengthChange;
-        this.pendingDecisions["orientation_direction_change"] = shipOrientationDirectionChange;
+    updateFromPilot(updateJSON){
+        this.pendingDecisions["sail_strength_change"] = updateJSON["sail_strength_change"];
+        this.pendingDecisions["orientation_direction_change"] = updateJSON["orientation_direction_change"];
+    }
+
+    // local
+    displayWhenFocused(){
+
     }
 
     updateShipOrientationAndSailPower(){
@@ -175,8 +186,8 @@ class Ship {
         // If not on screen then return
         if (myRightX < 0){ return; }
         if (myLeftX >= screenWidth){ return; }
-        if (myTopY < 0){ return; }
-        if (myBottomY >= screenHeight){ return; }
+        if (myBottomY < 0){ return; }
+        if (myTopY >= screenHeight){ return; }
 
         // So we know at least part of this ship is on the screen
 

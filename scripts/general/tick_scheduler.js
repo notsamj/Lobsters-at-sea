@@ -163,6 +163,10 @@ class TickScheduler {
         if (this.isPaused()){
             return this.pauseStartTime - this.lastTickTime;
         }
+        // No longer paused but the tick was before pause start
+        else if (!this.isPaused() && this.lastTickTime < this.pauseStartTime){
+            return this.pauseStartTime - this.lastTickTime;
+        }
         // Game is not paused, return the time between the time of the current frame and the last tick time
         return GC.getFrameCounter().getLastFrameTime() - this.lastTickTime;
     }

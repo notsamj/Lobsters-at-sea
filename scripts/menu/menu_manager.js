@@ -149,17 +149,17 @@ class MenuManager {
         Method Return: void
     */
     tick(){
-        let leftClick = GC.getGameUserInputManager().isActivated("left_click_ticked");
+        let leftClick = GC.getMenuUserInputManager().isActivated("left_click_ticked");
         if (leftClick){
             this.click(GC.getLastClickedMouseX(), GC.getLastClickedMouseY());
         }
 
-        let escape = GC.getGameUserInputManager().isActivated("escape_ticked");
+        let escape = GC.getMenuUserInputManager().isActivated("escape_ticked");
         if (escape){
             this.escapeKey();
         }
 
-        let help = GC.getGameUserInputManager().isActivated("help_access_ticked");
+        let help = GC.getMenuUserInputManager().isActivated("help_access_ticked");
         if (help){
             this.helpKey();
         }
@@ -178,7 +178,7 @@ class MenuManager {
         Method Return: void
     */
     helpKey(){
-        if (this.activeMenu.getName() === this.helpMenu.getName()){
+        if (this.activeMenu != null && this.activeMenu.getName() === this.helpMenu.getName()){
             this.helpMenu.returnToOrigin();
         }else{
             this.switchTo(this.helpMenu.getName());

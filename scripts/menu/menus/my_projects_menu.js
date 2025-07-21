@@ -37,9 +37,9 @@ class MyProjectsMenu extends Menu {
         Method Return: void
     */
     tick(){
-        if (GC.getGameUserInputManager().isActivated("scroll_left_ticked")){
+        if (GC.getMenuUserInputManager().isActivated("scroll_left_ticked")){
             this.slide(-1);
-        }else if (GC.getGameUserInputManager().isActivated("scroll_right_ticked")){
+        }else if (GC.getMenuUserInputManager().isActivated("scroll_right_ticked")){
             this.slide(1);
         }
         super.tick();

@@ -16,13 +16,14 @@ class Playground extends Gamemode {
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
-            "game_instance": game
+            "game_instance": game,
+            "id": this.getGame().getIDManager().generateNewID()
         }
         let tempShip = new Ship(tempShipJSON);
         game.addShip(tempShip);
 
         // Focus
-        game.setFocusedShip(tempShip);
+        //game.setFocusedShip(tempShip);
         
 
         // Add test ship
@@ -34,11 +35,12 @@ class Playground extends Gamemode {
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 0,
             "ship_model": "generic_ship",
-            "game_instance": game
+            "game_instance": game,
+            "id": this.getGame().getIDManager().generateNewID()
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        game.addShip(tempShip2);
+        //game.addShip(tempShip2);
     }
 
     tick(){
@@ -68,15 +70,13 @@ class Playground extends Gamemode {
         hud.updateElement("wind force", this.getGame().getWind().getWindMagnitude().toFixed(2));
 
         // Display HUD for focused ship
-        if (this.getGame().hasFocusedShip()){
-            let focusedShip = this.getGame().getFocusedShip();
-            hud.updateElement("x", focusedShip.getTickX().toFixed(2));
-            hud.updateElement("x_v", focusedShip.getTickXV().toFixed(2));
-            hud.updateElement("y", focusedShip.getTickY().toFixed(2));
-            hud.updateElement("y_v", focusedShip.getTickYV().toFixed(2));
-            hud.updateElement("orientation", toDegrees(focusedShip.getTickOrientation()).toFixed(2));
-            hud.updateElement("sail strength", focusedShip.getTickSailStrength().toFixed(2));
-        }
+        hud.updateElement("x", this.getGame().getFocusedEntity().getTickX().toFixed(2));
+        hud.updateElement("x_v", this.getGame().getFocusedEntity().getTickXV().toFixed(2));
+        hud.updateElement("y", this.getGame().getFocusedEntity().getTickY().toFixed(2));
+        hud.updateElement("y_v", this.getGame().getFocusedEntity().getTickYV().toFixed(2));
+        hud.updateElement("orientation", toDegrees(this.getGame().getFocusedEntity().getTickOrientation()).toFixed(2));
+        hud.updateElement("sail strength", this.getGame().getFocusedEntity().getTickSailStrength().toFixed(2));
+        
 
         // Display HUD
         hud.display();

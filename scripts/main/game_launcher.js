@@ -12,7 +12,8 @@ let gameProperties = {
     "ship_movement_resistance_coefficient": MD["game_properties"]["ship_movement_resistance_coefficient"],
     "ship_data": SD,
     "wind_settings": MD["wind_settings"],
-    "random_seed": 5
+    "random_seed": 5,
+    "camera_settings": MD["camera_settings"]
 }
 
 // Create container
