@@ -204,6 +204,9 @@ class LasLocalGame extends LasGame {
         // Load windsock
         await GC.loadToImages("wind_sock");
 
+        // Load crosshair
+        await GC.loadToImages("crosshair");
+
         // Load project images
         await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();
         await GC.getMenuManager().getMenuByName("help_menu").loadImages();

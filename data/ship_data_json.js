@@ -8,6 +8,14 @@ const SD = {
         "turning_radius_degrees": 90, // degrees per thousand pixels moved
         "will_power_acceleration": 12, // how much acceleration the ship can muster in it's desired direction in pixels/second
         "cannons": [
+            // Front cannon
+            {
+                "x": 250,
+                "y": 107,
+                "range_cw": [135, 45]
+            }
+        ]
+        /*"cannons": [
             // right side
             {
                 "x": 283,
@@ -107,6 +115,6 @@ const SD = {
                 "y": 399,
                 "range_cw": [315, 225]
             }
-        ]
+        ]*/
     }
 }

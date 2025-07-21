@@ -16,6 +16,9 @@ class Ship {
 
         this.gameInstance = shipJSON["game_instance"];
 
+        this.cannons = [];
+        this.setupCannons();
+
         this.establishedDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
             "sail_strength_change": 0 // is either < 0, === 0, > 0
@@ -24,6 +27,13 @@ class Ship {
         this.pendingDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
             "sail_strength_change": 0 // is either < 0, === 0, > 0
+        }
+    }
+
+    setupCannons(){
+        let cannonJSONList = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["cannons"];
+        for (let cannonJSON of cannonJSONList){
+            this.cannons.push(new Cannon(this, cannonJSON));
         }
     }
 
@@ -51,8 +61,59 @@ class Ship {
 
     // local
     displayWhenFocused(){
-
+        // Display cannon crosshair
+        this.displayCannonCrosshair();
     }
+
+    // local
+    displayCannonCrosshair(){
+        // Allowed to display?
+        if (!this.establishedDecisions["aiming_cannons"]){
+            return;
+        }
+
+        // Check with cannons can be aimed at the position
+        let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
+        let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
+
+        let aimingAngleRAD = 1; // TODO
+
+        let cannonCount = 0;
+    
+        // Count the number of cannons that can aim at the current position
+        for (let cannon of this.cannons){
+            if (cannon.canAimAt(aimingAngleRAD) && cannon.isLoaded()){
+                cannonCount++;
+            }
+        }
+
+        // No cannons can hit this angle ->
+        if (cannonCount === 0){
+            return;
+        }
+
+        // Cannons can hit it, display crosshair
+        // TODO: GET centerXOfScreen, centerYOfScreen
+
+        let screenX = 1; // TODO
+        let screenY = 1; // TODO
+        let crosshairImage = GC.getImage("crosshair");
+        let crosshairWidth = crosshairImage.width;
+        let crosshairHeight = crosshairImage.height;
+        translate(screenX, screenY);
+
+        // Game zoom
+        scale(gameZoom, gameZoom);
+
+        drawingContext.drawImage(crosshairImage, -1 * crosshairWidth / 2, -1 * crosshairHeight / 2);
+
+        // Game zoom
+        scale(1 / gameZoom, 1 / gameZoom);
+
+        translate(-1 * screenX, -1 * screenY);
+    }
+
+
 
     updateShipOrientationAndSailPower(){
         // orientationDirectionChange is either < 0, === 0, > 0 indicating how to turn
