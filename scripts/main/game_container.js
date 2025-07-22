@@ -37,6 +37,14 @@ class GameContainer {
         this.setupOngoing = false;
     }
 
+    getGMouseX(){
+        return this.gMouseX;
+    }
+
+    getGMouseY(){
+        return this.gMouseY;
+    }
+
     getGameInstance(){
         return this.gameInstance;
     }

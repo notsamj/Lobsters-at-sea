@@ -23,7 +23,7 @@ class Playground extends Gamemode {
         game.addShip(tempShip);
 
         // Focus
-        //game.setFocusedShip(tempShip);
+        game.setFocusedShip(tempShip);
         
 
         // Add test ship

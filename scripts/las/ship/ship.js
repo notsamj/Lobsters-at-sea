@@ -21,19 +21,39 @@ class Ship {
 
         this.establishedDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "sail_strength_change": 0 // is either < 0, === 0, > 0
+            "sail_strength_change": 0, // is either < 0, === 0, > 0
+            "aiming_cannons": false, // false or true
+            "fire_cannons": false, // false or true
+            "aiming_cannons_position_x": null, // null or a float
+            "aiming_cannons_position_y": null // null or a float
         }
 
         this.pendingDecisions = {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "sail_strength_change": 0 // is either < 0, === 0, > 0
+            "sail_strength_change": 0, // is either < 0, === 0, > 0
+            "aiming_cannons": false, // false or true
+            "fire_cannons": false, // false or true
+            "aiming_cannons_position_x": null, // null or a float
+            "aiming_cannons_position_y": null // null or a float
+        }
+    }
+
+    tick(){
+        // Maintenance
+        this.tickCannons();
+    }
+
+    tickCannons(){
+        for (let cannon of this.cannons){
+            cannon.tick();
         }
     }
 
     setupCannons(){
         let cannonJSONList = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["cannons"];
+        let gameCannonSettings = this.getGame().getGameProperties()["cannon_settings"];
         for (let cannonJSON of cannonJSONList){
-            this.cannons.push(new Cannon(this, cannonJSON));
+            this.cannons.push(new Cannon(this, cannonJSON, gameCannonSettings));
         }
     }
 
@@ -48,6 +68,11 @@ class Ship {
     resetPendingDecisions(){
         this.pendingDecisions["sail_strength_change"] = 0;
         this.pendingDecisions["orientation_direction_change"] = 0;
+
+        this.pendingDecisions["aiming_cannons"] = false;
+        this.pendingDecisions["fire_cannons"] = false;
+        this.pendingDecisions["aiming_cannons_position_x"] = null;
+        this.pendingDecisions["aiming_cannons_position_y"] = null;
     }
 
     getShipModel(){
@@ -57,12 +82,36 @@ class Ship {
     updateFromPilot(updateJSON){
         this.pendingDecisions["sail_strength_change"] = updateJSON["sail_strength_change"];
         this.pendingDecisions["orientation_direction_change"] = updateJSON["orientation_direction_change"];
+
+        this.pendingDecisions["aiming_cannons"] = updateJSON["aiming_cannons"];
+        this.pendingDecisions["fire_cannons"] = updateJSON["fire_cannons"];
+        this.pendingDecisions["aiming_cannons_position_x"] = updateJSON["aiming_cannons_position_x"];
+        this.pendingDecisions["aiming_cannons_position_y"] = updateJSON["aiming_cannons_position_y"];
     }
 
     // local
     displayWhenFocused(){
         // Display cannon crosshair
         this.displayCannonCrosshair();
+    }
+
+    checkShoot(){
+        // If not bothing aiming and firing then you can't shoot
+        if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
+            return;
+        }
+
+        let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
+        let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
+
+        let aimingAngleRAD = displacementToRadians(aimingCannonsPositionX - this.getTickX(), aimingCannonsPositionY - this.getTickY());
+
+        // Fire elligible cannons
+        for (let cannon of this.cannons){
+            if (cannon.canAimAt(aimingAngleRAD) && cannon.isLoaded()){
+                cannon.fire(aimingAngleRAD);
+            }
+        }
     }
 
     // local
@@ -76,7 +125,7 @@ class Ship {
         let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
         let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
 
-        let aimingAngleRAD = 1; // TODO
+        let aimingAngleRAD = displacementToRadians(aimingCannonsPositionX - this.getTickX(), aimingCannonsPositionY - this.getTickY());
 
         let cannonCount = 0;
     
@@ -93,24 +142,62 @@ class Ship {
         }
 
         // Cannons can hit it, display crosshair
-        // TODO: GET centerXOfScreen, centerYOfScreen
+        let centerXOfScreen = this.getGame().getFocusedTickX();
+        let centerYOfScreen = this.getGame().getFocusedTickY();
+        let myCenterXOffsetFromScreenCenter = aimingCannonsPositionX - centerXOfScreen;
+        let myCenterYOffsetFromScreenCenter = aimingCannonsPositionY - centerYOfScreen;
 
-        let screenX = 1; // TODO
-        let screenY = 1; // TODO
+        // Get ship size
         let crosshairImage = GC.getImage("crosshair");
         let crosshairWidth = crosshairImage.width;
         let crosshairHeight = crosshairImage.height;
-        translate(screenX, screenY);
+
+        // Save current screen width and height
+        let screenWidth = getScreenWidth();
+        let screenHeight = getScreenHeight();
+
+
+        // 0,0 to screen coordinates (floats)
+        let zeroXScreenCoordFL = screenWidth / 2;
+        let zeroYScreenCoordFL = screenHeight / 2;
+
+        // Adjust based on offsets and zoom
+        let zoomedXOffset = myCenterXOffsetFromScreenCenter * gameZoom;
+        let zoomedYOffset = myCenterYOffsetFromScreenCenter * gameZoom;
+
+        // Determine my top left coordinates (float)
+        let myXScreenCoordFL = zeroXScreenCoordFL + zoomedXOffset;
+        let myYScreenCoordFL = zeroYScreenCoordFL - zoomedYOffset; // when doing screen coordinates, y is inversed
+
+        // Convert to integers
+        let myXScreenCoordINT = Math.floor(myXScreenCoordFL); // Left according to screen
+        let myYScreenCoordINT = Math.ceil(myYScreenCoordFL); // Down according to screen
+
+        let myLeftX = myXScreenCoordINT;
+        let myTopY = myYScreenCoordINT;
+        let myRightX = myXScreenCoordINT + crosshairWidth-1;
+        let myBottomY = myYScreenCoordINT + crosshairHeight-1;
+
+        // If not on screen then return
+        if (myRightX < 0){ return; }
+        if (myLeftX >= screenWidth){ return; }
+        if (myBottomY < 0){ return; }
+        if (myTopY >= screenHeight){ return; }
+
+        // So we know at least part of this crosshair is on the screen
+
+        translate(myXScreenCoordINT, myYScreenCoordINT);
 
         // Game zoom
         scale(gameZoom, gameZoom);
 
-        drawingContext.drawImage(crosshairImage, -1 * crosshairWidth / 2, -1 * crosshairHeight / 2);
+        // Display crosshair
+        displayImage(crosshairImage, 0 - (crosshairWidth-1) / 2, 0 - (crosshairHeight-1) / 2); 
 
         // Game zoom
         scale(1 / gameZoom, 1 / gameZoom);
 
-        translate(-1 * screenX, -1 * screenY);
+        translate(-1 * myXScreenCoordINT, -1 * myYScreenCoordINT);
     }
 
 
@@ -121,6 +208,12 @@ class Ship {
 
         // orientationPowerChange is either < 0, === 0, > 0
         this.establishedDecisions["sail_strength_change"] = this.pendingDecisions["sail_strength_change"];
+
+        this.establishedDecisions["aiming_cannons"] = this.pendingDecisions["aiming_cannons"];
+        this.establishedDecisions["fire_cannons"] = this.pendingDecisions["fire_cannons"];
+        this.establishedDecisions["aiming_cannons_position_x"] = this.pendingDecisions["aiming_cannons_position_x"];
+        this.establishedDecisions["aiming_cannons_position_y"] = this.pendingDecisions["aiming_cannons_position_y"];
+
 
         // Reset the pending decisions
         this.resetPendingDecisions();

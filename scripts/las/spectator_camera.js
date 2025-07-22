@@ -394,6 +394,9 @@ class SpectatorCamera {
         Method Return: void
     */
     display(){
+    }
+
+    displayWhenFocused(){
         if (this.isFollowingAShip()){
             this.followedShip.displayWhenFocused();
         }

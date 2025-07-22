@@ -15,22 +15,69 @@ class LasLocalGame extends LasGame {
     }
 
     tick(){
+        // Maintenace ticks
+        this.tickShips();
+
         // TODO: Update ship orientations, power based on decisions
         this.updateShipOrientationAndSailPower();
 
         // TODO: Move ships based on orientation and sail power
         this.moveShips();
 
+        // Allow ships to shoot
+        this.allowShipsToShoot();
+
+        // Process cannon shots
+        this.handleCannonShotMovement();
+        this.handleNewCannonShots();
+        this.checkForCannonShotHits();
+
         // Take input from the user
         this.updateShipDecisions();
 
         // Update wind
         this.wind.tickUpdate();
+
+        // Up the tick count
+        this.incrementTickCount();
+    }
+
+    handleCannonShotMovement(){
+        for (let [cannonBall, index] of this.cannonBalls){
+            cannonBall.move();
+        }
+    }
+
+    handleNewCannonShots(){
+        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+        let idManager = this.getIDManager();
+        let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
+        for (let [cannonShotObj, index] of newCannonShots){
+            // Add an id
+            cannonShotObj["id"] = idManager.generateNewID();
+            this.cannonBalls.push(new CannonBall(this, cannonShotObj));
+        }
+    }
+
+    processAllCannonShots(){
+        // TODO: Collissions
+    }
+
+    tickShips(){
+        for (let [ship, shipIndex] of this.getShips()){
+            ship.tick();
+        }
     }
 
     moveShips(){
         for (let [ship, shipIndex] of this.getShips()){
             ship.moveOneTick();
+        }
+    }
+
+    allowShipsToShoot(){
+        for (let [ship, shipIndex] of this.getShips()){
+            ship.checkShoot();
         }
     }
 
@@ -82,6 +129,14 @@ class LasLocalGame extends LasGame {
         return this.getFocusedEntity().getFrameY();
     }
 
+    getFocusedTickX(){
+        return this.getFocusedEntity().getTickX();
+    }
+
+    getFocusedTickY(){
+        return this.getFocusedEntity().getTickY();
+    }
+
     reset(){
         super.reset();
     }
@@ -98,10 +153,8 @@ class LasLocalGame extends LasGame {
         // Display windsock
         this.getWind().display();
 
-        // Display ship crosshair and stuff
-        if (this.hasFocusedShip()){
-            this.humanShipController.display();
-        }
+        // Display relevant things when focused
+        this.getFocusedEntity().displayWhenFocused();
     }
 
     static registerAllKeybinds(){
@@ -129,6 +182,8 @@ class LasLocalGame extends LasGame {
         let keyCodeSailsDec = MD["default_key_binds"]["sails_dec"];
         let keyCodeShipLeft = MD["default_key_binds"]["ship_left"];
         let keyCodeShipRight = MD["default_key_binds"]["ship_right"];
+        let mouseCodeAimingCannon = MD["default_key_binds"]["aiming_cannon"];
+        let mouseCodeFireCannon = MD["default_key_binds"]["fire_cannons"];
 
 
         // Camera controls
@@ -182,6 +237,11 @@ class LasLocalGame extends LasGame {
         gameInputManager.register("ship_right", "keydown", (event) => { return event.keyCode === keyCodeShipRight; }, true);
         gameInputManager.register("ship_right", "keyup", (event) => { return event.keyCode === keyCodeShipRight; }, false);
 
+        gameInputManager.register("aiming_cannon", "mousedown", (event) => { return event.which===mouseCodeAimingCannon; });
+        gameInputManager.register("aiming_cannon", "mouseup", (event) => { return event.which===mouseCodeAimingCannon; }, false);
+
+        gameInputManager.register("fire_cannons", "click", (event) => { return event.which===mouseCodeFireCannon; }, true, {"ticked": true, "ticked_activation": false});
+
         gameInputManager.register("camera_move_left", "keydown", (event) => { return event.keyCode === keyCodeCameraMoveLeft; }, true);
         gameInputManager.register("camera_move_left", "keyup", (event) => { return event.keyCode === keyCodeCameraMoveLeft; }, false);
 
@@ -195,6 +255,7 @@ class LasLocalGame extends LasGame {
         gameInputManager.register("camera_move_down", "keyup", (event) => { return event.keyCode === keyCodeCameraMoveDown; }, false);
 
         gameInputManager.register("camera_snap_follow_toggle", "keydown", (event) => { return event.keyCode===keyCodeCameraSnapToggle; }, true, {"ticked": true, "ticked_activation": false});
+
     }
 
     static async loadImages(){

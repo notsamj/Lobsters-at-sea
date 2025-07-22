@@ -73,6 +73,8 @@ const MD = {
         "zoom_1/2": 99, // num 3
         "zoom_1": 98, // num 2
         "zoom_2": 97, // num 1
+        "fire_cannons": 1, // left click
+        "aiming_cannon": 3, // right click
         "sails_inc": 82, // R
         "sails_dec": 70, // F
         "ship_left": 65, // A
@@ -94,9 +96,20 @@ const MD = {
             "fps": 1
         }
     },
+
+    "cannon_settings": {
+        "reload_ms": 1000, // 1s for now
+        "shot_speed": 500,
+        "reload_ticks": null // calculated
+    },
+
+    "cannon_ball_settings": {
+        "ms_until_hit_water": 5000,
+    }
 }
 
 // Perform data calculations
 MD["game_properties"]["ms_between_ticks"] = 1000 / MD["game_properties"]["tick_rate"];
 MD["game_properties"]["ms_between_ticks_floor"] = Math.floor(MD["game_properties"]["ms_between_ticks"]);
 MD["game_properties"]["ms_between_ticks_ceil"] = Math.ceil(MD["game_properties"]["ms_between_ticks"]);
+MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 1000 * MD["game_properties"]["tick_rate"];

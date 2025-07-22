@@ -132,3 +132,38 @@ function fixRadians(angle){
 function calculateEuclideanDistance(x1, y1, x2, y2){
     return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2));
 }
+
+/*
+    Method Name: displacementToRadians
+    Method Parameters:
+        dX:
+            The displacement in x
+        dY:
+            The displacement in y
+    Method Description: Converts displacement in x, y to an angle in radians
+    Method Return: float
+*/
+function displacementToRadians(dX, dY){
+    // Handle incredibly small displacements
+    if (Math.abs(dY) < 1){
+        return (dX >= 0) ? toRadians(0) : toRadians(180);
+    }else if (Math.abs(dX) < 1){
+        return (dY >= 0) ? toRadians(90) : toRadians(270);
+    }
+
+    // Convert angle to positive positive
+    let angleRAD = Math.atan(Math.abs(dY) / Math.abs(dX));
+
+    // If -,- (x,y)
+    if (dX < 0 && dY < 0){
+        angleRAD = Math.PI + angleRAD;
+    // If -,+ (x,y)
+    }else if (dX < 0 && dY > 0){
+        angleRAD = Math.PI - angleRAD;
+    // If +,- (x,y)
+    }else if (dX > 0 && dY < 0){
+        angleRAD = 2 * Math.PI - angleRAD;
+    }
+    // +,+ Needs no modification
+    return angleRAD;
+}

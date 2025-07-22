@@ -13,7 +13,9 @@ let gameProperties = {
     "ship_data": SD,
     "wind_settings": MD["wind_settings"],
     "random_seed": 5,
-    "camera_settings": MD["camera_settings"]
+    "camera_settings": MD["camera_settings"],
+    "cannon_settings": MD["cannon_settings"],
+    "cannon_ball_settings": MD["cannon_ball_settings"]
 }
 
 // Create container

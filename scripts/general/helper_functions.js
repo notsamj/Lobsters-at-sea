@@ -138,3 +138,56 @@ function XYToSeed(x, y){
 async function sleep(ms){
     return new Promise((resolve, reject) => { setTimeout(resolve, ms); })
 }
+
+/*
+    Method Name: copyObject
+    Method Parameters:
+        obj:
+            Object to copy
+    Method Description: Creates a copy of an object (to some extent)
+    Method Return: JSON Object
+    Note: If you give it and instance of a class it will produce a reference not a copy
+*/
+function copyObject(obj){
+    // Deep copy, copy inner objects aswell
+    let newObject = {};
+    for (let key of Object.keys(obj)){
+        if (obj[key] === null){
+            newObject[key] = null;
+        }else if (Array.isArray(obj[key])){
+            newObject[key] = copyArray(obj[key]);
+        }else if (isJSON(obj[key])){
+            newObject[key] = copyObject(obj[key]);
+        }else{
+            newObject[key] = obj[key];
+        }
+    }
+    return newObject;
+}
+
+
+/*
+    Method Name: copyArray
+    Method Parameters:
+        array:
+            An array to copy
+        limit:
+            Index limit for copying
+    Method Description: Creates a copy of an array
+    Method Return: void
+*/
+function copyArray(array, limit=array.length){
+    let newArray = [];
+    for (let i = 0; i < Math.min(array.length, limit); i++){
+        if (array[i] === null){
+            newArray.push(null);
+        }else if (Array.isArray(array[i])){
+            newArray.push(copyArray(array[i]));
+        }else if (isJSON(array[i])){
+            newArray.push(copyObject(array[i]));
+        }else{
+            newArray.push(array[i]);
+        }
+    }
+    return newArray;
+}
