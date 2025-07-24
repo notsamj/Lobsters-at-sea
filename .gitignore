@@ -1,3 +1,6 @@
 *.privtext
 /priv_idea_scribbling
 *.pdn
+*.pem
+/server/node_modules
+server/run_server.bat

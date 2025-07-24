@@ -57,3 +57,7 @@ class LasGame {
         this.ships.clear();
     }
 }
+
+if (typeof window === "undefined"){
+    module.exports = { LasGame }
+}
