@@ -129,5 +129,5 @@ class SeededRandomizer {
 
 // If using Node JS Export the class
 if (typeof window === "undefined"){
-    module.exports = SeededRandomizer;
+    module.exports = { SeededRandomizer } ;
 }

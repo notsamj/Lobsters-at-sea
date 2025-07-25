@@ -1,4 +1,7 @@
-let gameProperties = {
+const MD = require("../data/main_data_json.js").MD;
+const SD = require("../data/ship_data_json.js").SD;
+
+module.exports = {
     "tick_rate": MD["game_properties"]["tick_rate"],
     "ms_between_ticks": MD["game_properties"]["ms_between_ticks"],
     "approximate_zoom_peek_time_ms": MD["game_properties"]["approximate_zoom_peek_time_ms"],
@@ -16,28 +19,4 @@ let gameProperties = {
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
     "cannon_ball_settings": MD["cannon_ball_settings"]
-}
-
-// Create container
-const GC = new GameContainer(new LasLocalGame(gameProperties), gameProperties);
-const SC = new ServerConnection();
-
-// Start Up
-window.addEventListener("load", () => {
-    registerMenus();
-    GC.setup();
-});
-
-// Helper
-function launcherTickHandler(timeElapsedMS){
-    GC.tick();
-}
-
-function registerMenus(){
-    GC.getMenuManager().registerMenu(new MyProjectsMenu());
-    GC.getMenuManager().registerMenu(new ServerConnectionMenu());
-}
-
-function stop(){
-    GC.stop();
 }

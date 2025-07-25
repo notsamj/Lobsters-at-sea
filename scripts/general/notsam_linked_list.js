@@ -481,5 +481,5 @@ class DLLNode {
 }
 // If using NodeJS -> Export the class
 if (typeof window === "undefined"){
-    module.exports = NotSamLinkedList;
+    module.exports = { NotSamLinkedList };
 }

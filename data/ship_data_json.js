@@ -118,3 +118,8 @@ const SD = {
         ]*/
     }
 }
+
+// If NodeJS -> Exports
+if (typeof window === "undefined"){
+    module.exports = { SD }
+}

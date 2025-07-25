@@ -1,3 +1,11 @@
+// If using NodeJS then do imports
+if (typeof window === "undefined"){
+    GameRecorder = require("./game_recorder.js").GameRecorder;
+    IDManager = require("../general/id_manager.js").IDManager;
+    SeededRandomizer = require("../general/seeded_randomizer.js").SeededRandomizer;
+    Wind = require("./wind/wind.js").Wind;
+    NotSamLinkedList = require("../general/notsam_linked_list.js").NotSamLinkedList;
+}
 
 class LasGame {
     constructor(gameProperties){

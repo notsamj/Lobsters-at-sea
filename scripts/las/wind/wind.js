@@ -1,3 +1,9 @@
+// If NodeJS -> Import
+if (typeof window === "undefined"){
+    toRadians = require("../../general/math_helper.js").toRadians;
+    fixRadians = require("../../general/math_helper.js").toRadians;
+}
+
 class Wind {
     constructor(game){
         this.game = game;
@@ -68,4 +74,10 @@ class Wind {
         rotate(displayImageOrientation);
         translate(-1 * rotateX, -1 * rotateY);
     }
+}
+
+
+// If using Node JS Export the class
+if (typeof window === "undefined"){
+    module.exports = { Wind } ;
 }

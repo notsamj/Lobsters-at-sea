@@ -113,3 +113,8 @@ MD["game_properties"]["ms_between_ticks"] = 1000 / MD["game_properties"]["tick_r
 MD["game_properties"]["ms_between_ticks_floor"] = Math.floor(MD["game_properties"]["ms_between_ticks"]);
 MD["game_properties"]["ms_between_ticks_ceil"] = Math.ceil(MD["game_properties"]["ms_between_ticks"]);
 MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+
+// If NodeJS -> Exports
+if (typeof window === "undefined"){
+    module.exports = { MD }
+}

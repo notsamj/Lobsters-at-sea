@@ -13,6 +13,17 @@ const MSD = {
         "info_text": "Made by notsamj.\nPress 'H' at any time for help!",
         "info_color_code": "#000000"
     },
+    "server_connection_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 25,
+            "x_size": 100,
+            "y_size": 50
+        }
+    },
     "my_projects_menu": {
         "back_button": {
             "colour_code": "#3bc44b",

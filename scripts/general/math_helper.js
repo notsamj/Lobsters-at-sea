@@ -167,3 +167,11 @@ function displacementToRadians(dX, dY){
     // +,+ Needs no modification
     return angleRAD;
 }
+
+// If NodeJS -> Export
+if (typeof window === "undefined"){
+    module.exports = {
+        fixRadians,
+        toRadians
+    }
+}

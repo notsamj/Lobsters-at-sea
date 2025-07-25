@@ -1,3 +1,8 @@
+// If using NodeJS then do imports
+if (typeof window === "undefined"){
+    NotSamLinkedList = require("./notsam_linked_list.js").NotSamLinkedList;
+}
+
 class IDManager {
     constructor(){
         this.data = new NotSamLinkedList();
@@ -44,4 +49,9 @@ class IDManager {
         }
         return this.getIDReference(id) != null;
     }
+}
+
+// If using NodeJS then do export
+if (typeof window === "undefined"){
+    module.exports = { IDManager }
 }

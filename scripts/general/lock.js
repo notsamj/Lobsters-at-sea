@@ -1,6 +1,6 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
-    NotSamLinkedList = require("./notsam_linked_list.js");
+    NotSamLinkedList = require("./notsam_linked_list.js").NotSamLinkedList;
 }
 
 /*
@@ -141,5 +141,5 @@ class Lock {
 
 // If using NodeJS then export the lock class
 if (typeof window === "undefined"){
-    module.exports = Lock;
+    module.exports = { Lock } ;
 }

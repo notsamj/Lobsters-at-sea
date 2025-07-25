@@ -5,6 +5,10 @@ class LasServerGame extends LasGame {
         super(gameProperties);
     }
 
+    isRunning(){
+        return false; // TODO
+    }
+
     tick(){
         // Maintenace ticks
         this.tickShips();
@@ -80,3 +84,5 @@ class LasServerGame extends LasGame {
     }
 
 }
+
+module.exports = { LasServerGame } ;

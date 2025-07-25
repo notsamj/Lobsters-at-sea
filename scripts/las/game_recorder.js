@@ -1,3 +1,7 @@
+// If using NodeJS then do imports
+if (typeof window === "undefined"){
+    copyObject = require("../general/helper_functions.js").copyObject;
+}
 class GameRecorder {
     constructor(gameProperties){
         this.gameProperties = copyObject(gameProperties);
@@ -37,4 +41,9 @@ class GameRecorder {
         }
         return outputList;
     }
+}
+
+// If using NodeJS then do export
+if (typeof window === "undefined"){
+    module.exports = { GameRecorder }
 }

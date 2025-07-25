@@ -191,3 +191,23 @@ function copyArray(array, limit=array.length){
     }
     return newArray;
 }
+
+/*
+    Function Name: isJSON
+    Function Parameters: 
+        e:
+            A value
+    Function Description: Checks if a value is JSON or not
+    Function Return: boolean
+*/
+function isJSON(e){
+    return e != null && e.constructor === ({}).constructor;
+}
+
+
+// If using NodeJS then do an export
+if (typeof window === "undefined"){
+    module.exports = {
+        copyObject,
+    }
+}
