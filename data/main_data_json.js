@@ -83,7 +83,9 @@ const MD = {
         "camera_move_right": 39, // right arrow
         "camera_move_up": 38, // up arrow
         "camera_move_down": 40, // down arrow
-        "camera_snap_follow_toggle": 70 // F
+        "camera_snap_follow_toggle": 70, // F
+        "message_feed_up": 33, // pgup
+        "message_feed_down": 34 // pgdown
     },
 
     "hud": {

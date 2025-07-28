@@ -171,6 +171,11 @@ class LasLocalGame extends LasGame {
         let keyCodeScrollR = MD["default_key_binds"]["scroll_right_ticked"];
         let keyCodeAccessHelp = MD["default_key_binds"]["help_access_ticked"];
         let keyCodePressEscape = MD["default_key_binds"]["escape_ticked"];
+
+        let keyCodeScrollUp = MD["default_key_binds"]["message_feed_up"];
+        let keyCodeScrollDown = MD["default_key_binds"]["message_feed_down"];
+
+
         let keyCodeZoom18 = MD["default_key_binds"]["zoom_1/8"];
         let keyCodeZoom14 = MD["default_key_binds"]["zoom_1/4"];
         let keyCodeZoom12 = MD["default_key_binds"]["zoom_1/2"];
@@ -200,10 +205,14 @@ class LasLocalGame extends LasGame {
         // Click
         menuInputManager.register("left_click_ticked", "click", (event) => { return event.which===keyCodeLeftClick; }, true, {"ticked": true, "ticked_activation": false});
 
+        // Other important menu stuff
         menuInputManager.register("scroll_left_ticked", "keydown", (event) => { return event.which===keyCodeScrollL; }, true, {"ticked": true, "ticked_activation": false});
         menuInputManager.register("scroll_right_ticked", "keydown", (event) => { return event.which===keyCodeScrollR; }, true, {"ticked": true, "ticked_activation": false});
         menuInputManager.register("help_access_ticked", "keydown", (event) => { return event.keyCode===keyCodeAccessHelp; }, true, {"ticked": true, "ticked_activation": false});
         menuInputManager.register("escape_ticked", "keydown", (event) => { return event.keyCode===keyCodePressEscape; }, true, {"ticked": true, "ticked_activation": false});
+
+        menuInputManager.register("message_feed_up", "keydown", (event) => { return event.keyCode===keyCodeScrollUp; }, true, {"ticked": true, "ticked_activation": false});
+        menuInputManager.register("message_feed_down", "keydown", (event) => { return event.keyCode===keyCodeScrollDown; }, true, {"ticked": true, "ticked_activation": false});
 
         // Register
         let gameInputManager = GC.getGameUserInputManager();

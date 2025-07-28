@@ -22,6 +22,18 @@ const MSD = {
             "x": 25,
             "x_size": 100,
             "y_size": 50
+        },
+        "default_message_color_code": "#000000",
+        "text_size": 12,
+        "x_size": 500,
+        "y_size": 500,
+        "background_color_code": "#000000",
+        "category_to_color_code": {
+            "green": "#16e04c",
+            "red": "#a12506",
+            "yellow": "#fcf92d",
+            "white": "#ffffff",
+            "blue": "#2b27f5"
         }
     },
     "my_projects_menu": {

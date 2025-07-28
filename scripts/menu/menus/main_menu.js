@@ -48,8 +48,7 @@ class MainMenu extends Menu {
         // Battle
         let battleButtonY = (innerHeight) => { return playgroundButtonY(innerHeight) - buttonSizeY - gapSize; }
         this.components.push(new RectangleButton("Battle", buttonColorCode, buttonTextColorCode, buttonX, battleButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
-            // TODO: Start Battle
-            GC.getMenuManager().switchTo("game");
+            GC.getMenuManager().switchTo("server_connection_menu");
         }));
 
         // Replays

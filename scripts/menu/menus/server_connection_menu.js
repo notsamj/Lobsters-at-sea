@@ -11,6 +11,9 @@ class ServerConnectionMenu extends Menu {
     */
     constructor(){
         super("server_connection_menu");
+
+        // Declare
+        this.scrollingMessageDisplay = undefined;
     }
 
     /*
@@ -32,8 +35,34 @@ class ServerConnectionMenu extends Menu {
         let backButtonXSize = menuDataBackButton["x_size"];
         let backButtonYSize = menuDataBackButton["y_size"];
         let backButtonX = menuDataBackButton["x"];
+        let selfReference = this;
         this.components.push(new RectangleButton(menuDataBackButton["text"], menuDataBackButton["colour_code"], menuDataBackButton["text_colour_code"], backButtonX, backButtonY, backButtonXSize, backButtonYSize, (instance) => {
+            selfReference.informSwitchedFrom();
             GC.getMenuManager().switchTo("main_menu");
         }));
+
+        // Scrolling message display
+        this.scrollingMessageDisplay = new ScrollingMessageDisplay(MSD["server_connection_menu"]);
+        this.components.push(this.scrollingMessageDisplay);
+
+        // Set up message sharing
+        let statusUpdateHandlerFunction = (eventJSON) => {
+            selfReference.serverMessage(eventJSON);
+        }
+        SC.getEventHandler().addHandler("status_update", statusUpdateHandlerFunction);
+    }
+
+    serverMessage(eventJSON){
+        let messageText = eventJSON["text"];
+        let messageCategory = eventJSON["category"];
+        this.scrollingMessageDisplay.addMessage(messageText, MSD["server_connection_menu"]["category_to_color_code"][messageCategory])
+    }
+
+    informSwitchedTo(){
+        SC.initiateConnection();
+    }
+
+    informSwitchedFrom(){
+        SC.terminateConnection();
     }
 }
