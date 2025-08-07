@@ -37,7 +37,7 @@ class ServerConnectionMenu extends Menu {
         let backButtonX = menuDataBackButton["x"];
         let selfReference = this;
         this.components.push(new RectangleButton(menuDataBackButton["text"], menuDataBackButton["colour_code"], menuDataBackButton["text_colour_code"], backButtonX, backButtonY, backButtonXSize, backButtonYSize, (instance) => {
-            selfReference.informSwitchedFrom();
+            selfReference.informChangedToMainMenu();
             GC.getMenuManager().switchTo("main_menu");
         }));
 
@@ -47,22 +47,49 @@ class ServerConnectionMenu extends Menu {
 
         // Set up message sharing
         let statusUpdateHandlerFunction = (eventJSON) => {
+            selfReference.statusUpdate(eventJSON);
+        }
+
+        let serverMessageHandlerFunction = (eventJSON) => {
             selfReference.serverMessage(eventJSON);
         }
+
         SC.getEventHandler().addHandler("status_update", statusUpdateHandlerFunction);
+
+        SC.getEventHandler().addHandler("server_message", serverMessageHandlerFunction);
     }
 
     serverMessage(eventJSON){
+        console.log(GC.isInGame(), eventJSON["message_json"]["subject"], eventJSON)
+        // Ignore if in game
+        if (GC.isInGame()){
+            return;
+        }
+
+        // Expect a game_start message
+        if (eventJSON["message_json"]["subject"] === "game_start"){
+            GC.newGame(Battle);
+            GC.getGamemodeManager().getActiveGamemode().setup(eventJSON["game_details"]);
+            GC.getMenuManager().switchTo("game");
+        }else{
+            throw new Error("Unexpected message from server: " + JSON.stringify(eventJSON));
+        }
+    }
+
+    statusUpdate(eventJSON){
         let messageText = eventJSON["text"];
         let messageCategory = eventJSON["category"];
-        this.scrollingMessageDisplay.addMessage(messageText, MSD["server_connection_menu"]["category_to_color_code"][messageCategory])
+        this.scrollingMessageDisplay.addMessage(messageText, MSD["server_connection_menu"]["category_to_color_code"][messageCategory]);
     }
 
     informSwitchedTo(){
+        SC.setUserInterest(true);
         SC.initiateConnection();
     }
 
-    informSwitchedFrom(){
+    informChangedToMainMenu(){
+        // Switched to main main
+        SC.setUserInterest(false);
         SC.terminateConnection();
     }
 }

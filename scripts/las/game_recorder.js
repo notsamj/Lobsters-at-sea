@@ -8,6 +8,10 @@ class GameRecorder {
         this.timeline = new NotSamLinkedList();
     }
 
+    reset(){
+        this.timeline.clear();
+    }
+
     addToTimeline(tick, obj){
         let tickList = this.getMakeTickList(tick);
         tickList.push(obj);

@@ -90,19 +90,19 @@ class ScrollingMessageDisplay extends Component {
         }
         this.messageFeedOffsetLock.lock();
         if (up){
-            newmessageFeedOffset += 1;
+            messageFeedOffset += 1;
         }else if (down){
-            newmessageFeedOffset -= 1;
+            messageFeedOffset -= 1;
         }
 
         // Don't allow < 0
-        if (newmessageFeedOffset < 0){
+        if (messageFeedOffset < 0){
             return;
         }
 
         // Must be in range [0, this.messages.length - this.maxMessageRowsToDisplay]
-        newmessageFeedOffset = Math.min(newmessageFeedOffset, Math.max(0, this.messages.length - this.maxMessageRowsToDisplay));
-        this.messageFeedOffset = newmessageFeedOffset;
+        messageFeedOffset = Math.min(messageFeedOffset, Math.max(0, this.messages.length - this.maxMessageRowsToDisplay));
+        this.messageFeedOffset = messageFeedOffset;
     }
 
 }

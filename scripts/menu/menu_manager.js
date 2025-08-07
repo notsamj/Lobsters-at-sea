@@ -26,6 +26,14 @@ class MenuManager {
         return this.activeMenu;
     }
 
+    getActiveMenuName(){
+        if (!this.hasActiveMenu()){
+            return null;
+        }else{
+            return this.getActiveMenu().getName();
+        }
+    }
+
     /*
         Method Name: setup
         Method Parameters: None

@@ -204,6 +204,9 @@ function isJSON(e){
     return e != null && e.constructor === ({}).constructor;
 }
 
+function getPrettyTime(){
+    return new Date().toLocaleTimeString("en-US");
+}
 
 // If using NodeJS then do an export
 if (typeof window === "undefined"){

@@ -24,6 +24,18 @@ class NotSamLinkedList {
         }
     }
 
+    copy(){
+        let newList = new NotSamLinkedList();
+        newList.addAllFromLL(this);
+        return newList;
+    }
+
+    addAllFromLL(linkedList){
+        for (let [value, index] of linkedList){
+            this.push(value);
+        }
+    }
+
     /*
         Method Name: updateFromList
         Method Parameters: 

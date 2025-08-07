@@ -62,6 +62,10 @@ class GameContainer {
         this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
     }
 
+    isInGame(){
+        return this.GAMEMODE_MANAGER.hasActiveGamemode();
+    }
+
     getLastClickedMouseX(){
         return this.gLastClickedMouseX;
     }

@@ -1,3 +1,10 @@
+// If run in NodeJS
+if (typeof window === "undefined"){
+    Cannon = require("./cannon/cannon.js").Cannon;
+    angleBetweenCWRAD = require("../../general/math_helper.js").angleBetweenCWRAD;
+    calculateEuclideanDistance = require("../../general/math_helper.js").calculateEuclideanDistance;
+}
+
 class Ship {
     constructor(shipJSON){
         this.id = shipJSON["id"];
@@ -36,6 +43,10 @@ class Ship {
             "aiming_cannons_position_x": null, // null or a float
             "aiming_cannons_position_y": null // null or a float
         }
+    }
+
+    isDead(){
+        return false; // TODO
     }
 
     tick(){
@@ -473,4 +484,9 @@ class Ship {
     getYInMS(ms){
         return this.getYInfoInMS(ms)["y"];
     }
+}
+
+// If run in NodeJS
+if (typeof window === "undefined"){
+    module.exports = { Ship }
 }

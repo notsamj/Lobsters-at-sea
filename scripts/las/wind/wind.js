@@ -7,6 +7,10 @@ if (typeof window === "undefined"){
 class Wind {
     constructor(game){
         this.game = game;
+        this.initialize();   
+    }
+
+    initialize(){
         let initialWindMagnitude = this.game.getGameProperties()["wind_settings"]["wind_initial_magnitude"];
         let initialWindDirection = toRadians(this.game.getRandom().getFloatInRange(0, 2*Math.PI));
 
@@ -14,6 +18,10 @@ class Wind {
         this.windDirectionRAD = initialWindDirection;
         this.windMagnitudeChangeAmountPerSecond = this.game.getGameProperties()["wind_settings"]["wind_magnitude_change_amount_per_second"];
         this.windDirectionChangeAmountPerSecondRAD = toRadians(this.game.getGameProperties()["wind_settings"]["wind_direction_change_amount_per_second_deg"]);
+    }
+
+    reset(){
+        this.initialize();
     }
 
 

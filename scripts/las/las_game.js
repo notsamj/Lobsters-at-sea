@@ -66,6 +66,7 @@ class LasGame {
     }
 }
 
+// If run in NodeJS
 if (typeof window === "undefined"){
     module.exports = { LasGame }
 }

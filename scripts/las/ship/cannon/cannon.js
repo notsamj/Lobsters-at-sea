@@ -1,3 +1,9 @@
+// If run in NodeJS
+if (typeof window === "undefined"){
+    rotateCWRAD = require("../../../general/math_helper.js").rotateCWRAD;
+    toRadians = require("../../../general/math_helper.js").toRadians;
+    TickLock = require("../../../general/tick_lock.js").TickLock;
+}
 class Cannon {
     constructor(ship, cannonJSON, gameCannonSettings){
         this.ship = ship;
@@ -85,4 +91,10 @@ class Cannon {
     tick(){
         this.reloadLock.tick();
     }
+}
+
+
+// If run in NodeJS
+if (typeof window === "undefined"){
+    module.exports = { Cannon }
 }

@@ -1,6 +1,7 @@
 class ServerConnection {
     constructor(){
         this.eventHandler = new NSEventHandler();
+        this.clientMailbox = new ClientMailbox();
         this.connectionWS = null;
 
         this.userDesiresServerConnection = false;
@@ -9,12 +10,18 @@ class ServerConnection {
     }
 
     notifyConnectionActive(){
-        // If the user is on the page, do nothing
+        // Update status
+        this.setConnectionActive(true);
+        this.setAttemptingToConnect(false);
+
+        // If the user is on the page, do nothing, user wishes to continue connection
         if (this.connectionIsDesired()){
             return;
         }
 
-        // TODO: Send a GOODBYE message
+        // Else, connection is no longer desired
+
+        // TODO: Send a GOODBYE message?
 
         // Close WS
         this.connectionWS.close();
@@ -23,11 +30,18 @@ class ServerConnection {
         this.eventHandler.emit({
             "name": "status_update",
             "category": "blue",
-            "text": "Terminated the server connection due to user activity."
+            "text": getPrettyTime() + ' ' + "Terminated the server connection due to user activity."
         });
 
     }
     notifyConnectionFailed(){
+        this.setConnectionActive(false);
+
+        // If in the process of connecting, end that process
+        if (this.isAttemptingConnection()){
+            this.setAttemptingToConnect(false);
+        }
+
         // If the user left the page, do nothing
         if (!this.connectionIsDesired()){
             return;
@@ -41,9 +55,9 @@ class ServerConnection {
         this.eventHandler.emit({
             "name": "status_update",
             "category": "yellow",
-            "text": "Automatically trying to reconnect..."
+            "text": getPrettyTime() + ' ' + "Automatically trying to reconnect..."
         });
-        // TODO
+        this.initiateConnection();
     }
 
     connectionIsDesired(){
@@ -62,20 +76,24 @@ class ServerConnection {
         return this.eventHandler;
     }
 
+    setUserInterest(value){
+        this.userDesiresServerConnection = value;
+    }
+
     initiateConnection(){
-        // User has indicated that a connection is desired
-        this.userDesiresServerConnection = true;
+        // If a connection is currently being attempted then ignore
+        if (this.isAttemptingConnection()){
+            return;
+        }
 
         this.eventHandler.emit({
             "name": "status_update",
             "category": "white",
-            "text": "Attempting to initiate a server connection."
+            "text": getPrettyTime() + ' ' + "Attempting to initiate a server connection."
         });
 
         // Create the web socket object
-        if (this.connectionWS === null){
-            this.createWSSObject();
-        }
+        this.createWSSObject();
     }
 
     createWSSObject(){
@@ -90,7 +108,7 @@ class ServerConnection {
         /*this.eventHandler.emit({
             "name": "status_update",
             "category": "yellow",
-            "text": "WSS object initialized."
+            "text": getPrettyTime() + ' ' + "WSS object initialized."
         })*/
 
         let thisReference = this;
@@ -100,10 +118,8 @@ class ServerConnection {
             thisReference.getEventHandler().emit({
                 "name": "status_update",
                 "category": "green",
-                "text": "Connected to: " + fullAddrString + "!"
+                "text": getPrettyTime() + ' ' + "Connected to: " + fullAddrString + "!"
             })
-
-            thisReference.setConnectionActive(true);
 
             thisReference.notifyConnectionActive();
         });
@@ -113,11 +129,28 @@ class ServerConnection {
             thisReference.getEventHandler().emit({
                 "name": "status_update",
                 "category": "red",
-                "text": "Connection failed."
+                "text": getPrettyTime() + ' ' + "Connection failed."
             })
 
-            thisReference.setConnectionActive(false);
             thisReference.notifyConnectionFailed();
+        });
+
+        // Connection message listener
+        this.connectionWS.addEventListener("message", (event) => {
+            thisReference.handleNewMessageFromServer(event);
+        })
+    }
+
+    handleNewMessageFromServer(event){
+        let dataJSON = JSON.parse(event["data"]);
+
+        // Deliver the data
+        this.clientMailbox.deliver(dataJSON);
+
+        // Send out an event
+        this.eventHandler.emit({
+            "name": "server_message",
+            "message_json": dataJSON 
         });
     }
 
@@ -130,22 +163,20 @@ class ServerConnection {
     }
 
     terminateConnection(){
-        // User has indicated that a connection is not desired
-        this.userDesiresServerConnection = false;
-
         // Do nothing if connection is not active and also not attempting to connect
         if ((!this.hasConnectionActive()) && (!this.isAttemptingConnection())){
             return;
         }
 
         // TODO 
-        // SEND BYE MESSAGE
-        // CLOSE THE WS
+        // SEND BYE MESSAGE?
+        this.connectionWS.close();
+        this.setConnectionActive(false);
 
         this.eventHandler.emit({
             "name": "status_update",
             "category": "blue",
-            "text": "User terminated the server connection."
+            "text": getPrettyTime() + ' ' + "User terminated the server connection."
         });
     }
 }

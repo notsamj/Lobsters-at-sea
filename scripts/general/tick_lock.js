@@ -1,12 +1,12 @@
 // When this is opened in NodeJS, import the required files
 if (typeof window === "undefined"){
-    Lock = require("./lock.js");
+    Lock = require("./lock.js").Lock;
 }
 /*
     Class Name: TickLock
     Description: Subclass of Lock, unlocks after a given number of ticks
 */
-class TickLock extends Lock{
+class TickLock extends Lock {
     /*
         Method Name: constructor
         Method Parameters:
@@ -135,5 +135,5 @@ class TickLock extends Lock{
 }
 // When this is opened in NodeJS, export the class
 if (typeof window === "undefined"){
-    module.exports = TickLock;
+    module.exports = { TickLock };
 }

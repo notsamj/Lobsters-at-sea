@@ -7,12 +7,25 @@ class Client {
         });
     }
 
+    sendJSON(messageJSON){
+        this.send(JSON.stringify(messageJSON));
+    }
+
+    send(message){
+        // Little protection here
+        if (this.connectionIsDead()){
+            return;
+        }
+        this.clientWS.send(message);
+    }
+
     messageFromClient(message){
 
     }
 
     connectionIsDead(){
-        
+        // 2 closing, 3 closed
+        return this.clientWS.readyState===2 || this.clientWS.readyState === 3;
     }
 }
 

@@ -171,7 +171,10 @@ function displacementToRadians(dX, dY){
 // If NodeJS -> Export
 if (typeof window === "undefined"){
     module.exports = {
+        angleBetweenCWRAD,
+        calculateEuclideanDistance,
         fixRadians,
+        rotateCWRAD,
         toRadians
     }
 }

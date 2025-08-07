@@ -2,8 +2,8 @@ class LobbyManager {
 
     constructor(lobbySettingsJSON){
         this.lobbySettingsJSON = lobbySettingsJSON;
-        this.playerCount = this.lobbySettingsJSON["player_count"];
-        this.playerRole = this.lobbySettingsJSON["player_role"];
+        this.playerCount = this.lobbySettingsJSON["expected_players_data"]["player_count"];
+        this.playerRole = this.lobbySettingsJSON["expected_players_data"]["player_role"];
 
         this.runningALobby = true;
 
@@ -11,6 +11,7 @@ class LobbyManager {
     }
 
     addClient(client){
+        let old = this.clients.getLength();
         this.clients.push(client);
     }
 
@@ -26,7 +27,7 @@ class LobbyManager {
     }
 
     getAvailableSlotCount(){
-        return this.clients.getLength() - this.playerCount;
+        return this.playerCount - this.clients.getLength();
     }
 
     isFull(){
@@ -34,7 +35,7 @@ class LobbyManager {
     }
 
     transferToGame(){
-
+        return this.clients.copy();
     }
 }
 module.exports = { LobbyManager }

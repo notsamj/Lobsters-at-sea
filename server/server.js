@@ -43,7 +43,6 @@ class LASServer{
         await this.newClientQueue.requestAccess();
 
         let clientsToAdd = Math.min(this.newClientQueue.getLength(), availableLobbySlots);
-
         // Add clients
         for (let i = 0; i < clientsToAdd; i++){
             this.lobbyManager.addClient(this.newClientQueue.pop(0));
@@ -63,7 +62,7 @@ class LASServer{
 
         // If the game is running
         if (this.game.isRunning()){
-            // TODO
+            this.game.tick();
         }
         // Else, game is not running, I am instead running a lobby
         else{
@@ -96,7 +95,7 @@ class LASServer{
         */
 
         // Unlock allowing for a new tick
-        this.tickLock.lock();
+        this.tickLock.unlock();
     }
 
     setupWSSServer(){

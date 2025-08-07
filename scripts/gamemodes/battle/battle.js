@@ -1,0 +1,91 @@
+class Battle extends Gamemode {
+
+    constructor(){
+        super();
+    }
+
+    end(){
+        // When receive end, tlel the Server connection that it's not needed anymore
+        SC.setUserInterest(false);
+        SC.terminateConnection();
+    }
+
+    setup(gameDetailsJSON){
+        console.log("received", gameDetailsJSON);
+        return;
+        let game = this.getGame();
+
+        let tempShipJSON = {
+            "starting_x_pos": 0,
+            "starting_y_pos": 0,
+            "starting_x_velocity": 0,
+            "starting_y_velocity": 0,
+            "starting_orientation_rad": toRadians(90),
+            "sail_strength": 1,
+            "ship_model": "generic_ship",
+            "game_instance": game,
+            "id": this.getGame().getIDManager().generateNewID()
+        }
+        let tempShip = new Ship(tempShipJSON);
+        game.addShip(tempShip);
+
+        // Focus
+        game.setFocusedShip(tempShip);
+        
+
+        // Add test ship
+        let tempShip2JSON = {
+            "starting_x_pos": 500,
+            "starting_y_pos": 0,
+            "starting_x_velocity": 0,
+            "starting_y_velocity": 0,
+            "starting_orientation_rad": toRadians(90),
+            "sail_strength": 0,
+            "ship_model": "generic_ship",
+            "game_instance": game,
+            "id": this.getGame().getIDManager().generateNewID()
+        }
+
+        let tempShip2 = new Ship(tempShip2JSON);
+        //game.addShip(tempShip2);
+    }
+
+    tick(){
+        // Tick the game
+        this.getGame().tick();
+    }
+
+    getName(){ return "battle"; }
+
+    getGame(){
+        return GC.getGameInstance();
+    }
+
+    display(){
+        // Display game
+        this.getGame().display();
+
+        let hud = GC.getHUD();
+
+        // Display FPS
+        let fps = GC.getFrameCounter().getFPS();
+        hud.updateElement("fps", fps);
+
+        // Display wind direction
+        let windDirection = toDegrees(this.getGame().getWind().getWindDirectionRAD()).toFixed(2);
+        hud.updateElement("wind direction", windDirection);
+        hud.updateElement("wind force", this.getGame().getWind().getWindMagnitude().toFixed(2));
+
+        // Display HUD for focused ship
+        hud.updateElement("x", this.getGame().getFocusedEntity().getTickX().toFixed(2));
+        hud.updateElement("x_v", this.getGame().getFocusedEntity().getTickXV().toFixed(2));
+        hud.updateElement("y", this.getGame().getFocusedEntity().getTickY().toFixed(2));
+        hud.updateElement("y_v", this.getGame().getFocusedEntity().getTickYV().toFixed(2));
+        hud.updateElement("orientation", toDegrees(this.getGame().getFocusedEntity().getTickOrientation()).toFixed(2));
+        hud.updateElement("sail strength", this.getGame().getFocusedEntity().getTickSailStrength().toFixed(2));
+        
+
+        // Display HUD
+        hud.display();
+    }
+}

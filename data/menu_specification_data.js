@@ -33,7 +33,8 @@ const MSD = {
             "red": "#a12506",
             "yellow": "#fcf92d",
             "white": "#ffffff",
-            "blue": "#2b27f5"
+            "blue": "#2b27f5",
+            "purple": "#841ea6"
         }
     },
     "my_projects_menu": {

@@ -8,6 +8,10 @@ class IDManager {
         this.data = new NotSamLinkedList();
     }
 
+    reset(){
+        this.data.clear();
+    }
+
     hasID(id){
         return id < this.data.getLength(); 
     }

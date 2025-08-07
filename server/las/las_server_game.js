@@ -1,40 +1,162 @@
 const LasGame = require("../../scripts/las/las_game.js").LasGame;
+const Ship = require("../../scripts/las/ship/ship.js").Ship;
 
 class LasServerGame extends LasGame {
     constructor(gameProperties){
         super(gameProperties);
+        this.running = false;
+        this.clients = new NotSamLinkedList();
+    }
+
+    start(clientList){
+        console.log("Starting")
+        // Set running
+        this.running = true;
+        // Just testing
+        let tempShipJSON = {
+            "starting_x_pos": 0,
+            "starting_y_pos": 0,
+            "starting_x_velocity": 0,
+            "starting_y_velocity": 0,
+            "starting_orientation_rad": toRadians(90),
+            "sail_strength": 1,
+            "ship_model": "generic_ship",
+            "game_instance": this,
+            "id": this.getIDManager().generateNewID()
+        }
+        this.ships.push(new Ship(tempShipJSON));
+
+        let tempShipJSON2 = {
+            "starting_x_pos": 550,
+            "starting_y_pos": 0,
+            "starting_x_velocity": 0,
+            "starting_y_velocity": 0,
+            "starting_orientation_rad": toRadians(90),
+            "sail_strength": 1,
+            "ship_model": "generic_ship",
+            "game_instance": this,
+            "id": this.getIDManager().generateNewID()
+        }
+        this.ships.push(new Ship(tempShipJSON2));
+
+        // Add the clients
+        this.clients.addAllFromLL(clientList);
+
+        // Send opening message
+        this.sendOpeningMessage();
+    }
+
+    sendOpeningMessage(){
+        let openingMessageJSON = {
+            "subject": "game_start",
+            "game_details": "TODO"
+            // TODO
+        }
+        this.sendAll(openingMessageJSON);
+    }
+
+    sendAll(messageJSON){
+        for (let [client, clientIndex] of this.clients){
+            client.sendJSON(messageJSON);
+        }
+    }
+
+    reset(){
+        this.running = false;
+        this.clients.clear();
+        this.gameRecorder.reset();
+        this.idManager.reset();
+        this.randomizer.reset();
+        this.wind.reset();
+        this.ships.clear();
+        this.cannonBalls.clear();
+        this.tickCount = 0;
+    }
+
+    end(){
+        // TODO: Send END result!
+        console.log("Ending")
+        
+        this.reset();
     }
 
     isRunning(){
-        return false; // TODO
+        return this.running;
     }
 
-    tick(){
-        // Maintenace ticks
-        this.tickShips();
+    determineIfContinuingToRun(){
+        // Purge clients
+        this.checkActiveParticipants();
+        // If no clients left, stop running
+        if (this.clients.getLength() === 0){
+            this.end();
+            return;
+        }
 
-        // TODO: Update ship orientations, power based on decisions
-        this.updateShipOrientationAndSailPower();
+        // TODO: Kill ships linked to clients that are gone
 
-        // TODO: Move ships based on orientation and sail power
-        this.moveShips();
+        let shipsAlive = 0;
+        for (let [ship, shipIndex] of this.ships){
+            if (!ship.isDead()){
+                shipsAlive++;
+            }
+        }
 
-        // Allow ships to shoot
-        this.allowShipsToShoot();
+        // If 1 or fewer ships are left, game is over
+        if (shipsAlive <= 1){
+            this.end();
+            return;
+        }
+    }
 
-        // Process cannon shots
-        this.handleCannonShotMovement();
-        this.handleNewCannonShots();
-        this.checkForCannonShotHits();
+    checkActiveParticipants(){
+        let removalFunc = (client) => {
+            return client.connectionIsDead();
+        }
+        this.clients.deleteWithCondition(removalFunc);
+    }
 
-        // Take input from the user
-        this.updateShipDecisions();
+    sendClientsTickData(){
 
-        // Update wind
-        this.wind.tickUpdate();
+    }
 
-        // Up the tick count
-        this.incrementTickCount();
+    async tick(){
+        // TODO: Check if ready for the next tick
+
+        // Check if game still going
+        this.determineIfContinuingToRun();
+
+        // If still running after check
+        if (this.isRunning()){
+            // Maintenace ticks
+            this.tickShips();
+
+            // TODO: Update ship orientations, power based on decisions
+            this.updateShipOrientationAndSailPower();
+
+            // TODO: Move ships based on orientation and sail power
+            this.moveShips();
+
+            // Allow ships to shoot
+            //this.allowShipsToShoot();
+
+            // Process cannon shots
+            //this.handleCannonShotMovement();
+            //this.handleNewCannonShots();
+            //this.checkForCannonShotHits();
+
+            // Take input from the user
+            //this.updateShipDecisions();
+
+            // Update wind
+            this.wind.tickUpdate();
+
+            // Up the tick count
+            this.incrementTickCount();
+
+            // Output to clients
+            this.sendClientsTickData();
+        }
     }
 
     handleCannonShotMovement(){
