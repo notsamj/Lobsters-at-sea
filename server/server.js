@@ -19,7 +19,7 @@ const GP = require("./game_properties.js");
 // Global vars
 
 
-class LASServer{
+class LASServer {
     constructor(serverDataJSON){
         this.SDJ = serverDataJSON;
 

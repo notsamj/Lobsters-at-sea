@@ -28,9 +28,9 @@ class LasLocalGame extends LasGame {
         this.allowShipsToShoot();
 
         // Process cannon shots
-        this.handleCannonShotMovement();
-        this.handleNewCannonShots();
-        this.checkForCannonShotHits();
+        //this.handleCannonShotMovement();
+        //this.handleNewCannonShots();
+        //this.checkForCannonShotHits();
 
         // Take input from the user
         this.updateShipDecisions();

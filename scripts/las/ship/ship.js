@@ -45,6 +45,20 @@ class Ship {
         }
     }
 
+    getPositionJSON(){
+        return {
+            "id": this.id,
+            "x_pos": this.xPos,
+            "y_pos": this.yPos,
+            "x_v": this.xV,
+            "y_v": this.yV,
+            "orientation_rad": this.orientationRAD,
+            "sail_strength": this.shipSailStrength,
+            "established_decisions": this.establishedDecisions,
+            "pending_decisions": this.pendingDecisions
+        }
+    }
+
     isDead(){
         return false; // TODO
     }

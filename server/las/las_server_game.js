@@ -5,13 +5,15 @@ class LasServerGame extends LasGame {
     constructor(gameProperties){
         super(gameProperties);
         this.running = false;
+
+        this.gameStartTime = undefined;
         this.clients = new NotSamLinkedList();
     }
 
     start(clientList){
-        console.log("Starting")
         // Set running
         this.running = true;
+        this.gameStartTime = Date.now();
         // Just testing
         let tempShipJSON = {
             "starting_x_pos": 0,
@@ -49,7 +51,9 @@ class LasServerGame extends LasGame {
     sendOpeningMessage(){
         let openingMessageJSON = {
             "subject": "game_start",
-            "game_details": "TODO"
+            "game_details": {
+                "server_start_time": this.gameStartTime,
+            }
             // TODO
         }
         this.sendAll(openingMessageJSON);
@@ -71,6 +75,7 @@ class LasServerGame extends LasGame {
         this.ships.clear();
         this.cannonBalls.clear();
         this.tickCount = 0;
+        this.gameStartTime = undefined;
     }
 
     end(){
@@ -117,12 +122,32 @@ class LasServerGame extends LasGame {
     }
 
     sendClientsTickData(){
+        let tickDataMessageJSON = {
+            "subject": "tick_data",
+            "server_tick": this.tickCount,
+            "tick_data": {
+                "ship_positions": []
+            }
+        }
 
+        // Add ship positions
+        for (let [ship, shipIndex] of this.ships){
+            tickDataMessageJSON["tick_data"]["ship_positions"].push(ship.getPositionJSON());
+        }
+
+        this.sendAll(tickDataMessageJSON);
+    }
+
+    isReadyToTick(){
+        let expectedTicks = (Date.now() - this.gameStartTime) / ;
     }
 
     async tick(){
-        // TODO: Check if ready for the next tick
-
+        // Tick cooldown
+        if (!this.isReadyToTick()){
+            return;
+        }
+        console.log("Tick")
         // Check if game still going
         this.determineIfContinuingToRun();
 

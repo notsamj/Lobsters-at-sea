@@ -60,16 +60,17 @@ class ServerConnectionMenu extends Menu {
     }
 
     serverMessage(eventJSON){
-        console.log(GC.isInGame(), eventJSON["message_json"]["subject"], eventJSON)
+        //console.log(GC.isInGame(), eventJSON["message_json"]["subject"], eventJSON)
         // Ignore if in game
         if (GC.isInGame()){
             return;
         }
 
         // Expect a game_start message
-        if (eventJSON["message_json"]["subject"] === "game_start"){
+        let messageJSON = eventJSON["message_json"];
+        if (messageJSON["subject"] === "game_start"){
             GC.newGame(Battle);
-            GC.getGamemodeManager().getActiveGamemode().setup(eventJSON["game_details"]);
+            GC.getGamemodeManager().getActiveGamemode().setup(messageJSON["game_details"]);
             GC.getMenuManager().switchTo("game");
         }else{
             throw new Error("Unexpected message from server: " + JSON.stringify(eventJSON));

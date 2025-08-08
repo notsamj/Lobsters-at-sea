@@ -2,6 +2,8 @@ class Battle extends Gamemode {
 
     constructor(){
         super();
+
+        this.serverStartTime = undefined; // Placeholder
     }
 
     end(){
@@ -11,6 +13,8 @@ class Battle extends Gamemode {
     }
 
     setup(gameDetailsJSON){
+        // Set data received
+        this.serverStartTime = gameDetailsJSON["server_start_time"]; 
         console.log("received", gameDetailsJSON);
         return;
         let game = this.getGame();
