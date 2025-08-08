@@ -19,7 +19,7 @@ let gameProperties = {
 }
 
 // Create container
-const GC = new GameContainer(new LasLocalGame(gameProperties), gameProperties);
+const GC = new GameContainer(new LasLocalGame(gameProperties), new LasRemoteGame(), gameProperties);
 const SC = new ServerConnection();
 const DJ = {
     "count": 0,

@@ -1,7 +1,7 @@
 class GameContainer {
 
     /*
-        gamePropertiesExpected: {
+        localGamePropertiesExpected: {
             "tick_rate": [1,80],
             "ms_between_ticks": float,
             "approximate_zoom_peek_time_ms": [0, inf),
@@ -12,18 +12,19 @@ class GameContainer {
             "hud_json": json
         }
     */
-    constructor(gameInstance, gameProperties){
-        this.gameInstance = gameInstance;
-        this.gameProperties = gameProperties;
+    constructor(localGameInstance, remoteGameInstance, localGameProperties){
+        this.localGameInstance = localGameInstance;
+        this.remoteGameInstance = remoteGameInstance;
+        this.localGameProperties = localGameProperties;
 
-        this.FRAME_COUNTER = new FrameRateCounter(gameProperties["frame_rate"]);
-        this.HUD = new HUD(gameProperties["hud_json"]);
-        this.GAME_TICK_SCHEDULER = new TickScheduler(gameProperties["tick_rate"]);
+        this.FRAME_COUNTER = new FrameRateCounter(localGameProperties["frame_rate"]);
+        this.HUD = new HUD(localGameProperties["hud_json"]);
+        this.GAME_TICK_SCHEDULER = new TickScheduler(localGameProperties["tick_rate"]);
         this.GAMEMODE_MANAGER = new GamemodeManager();
         this.GAME_USER_INPUT_MANAGER = new UserInputManager();
         this.MENU_USER_INPUT_MANAGER = new UserInputManager();
-        this.SOUND_MANAGER = new SoundManager(gameProperties["sound_data"]);
-        this.LOADING_SCREEN = new LoadingScreen(gameProperties["loading_screen_data"]);
+        this.SOUND_MANAGER = new SoundManager(localGameProperties["sound_data"]);
+        this.LOADING_SCREEN = new LoadingScreen(localGameProperties["loading_screen_data"]);
         this.GAME_CONTAINER_EVENT_HANDLER = new NSEventHandler();
         this.MENU_MANAGER = new MenuManager();
         this.ZOOM_MONITOR = {"button": null, "start_time_ms": null};
@@ -45,8 +46,8 @@ class GameContainer {
         return this.gMouseY;
     }
 
-    getGameInstance(){
-        return this.gameInstance;
+    getlocalGameInstance(){
+        return this.localGameInstance;
     }
 
     getFrameCounter(){
@@ -57,8 +58,13 @@ class GameContainer {
         return this.HUD;
     }
 
-    newGame(gamemodeType){
-        this.gameInstance.reset();
+    newLocalGame(gamemodeType){
+        this.localGameInstance.reset();
+        this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
+    }
+
+    newRemoteGame(gamemodeType){
+        this.remoteGameInstance.reset();
         this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
     }
 
@@ -85,7 +91,7 @@ class GameContainer {
     }
 
     getGameProperties(){
-        return this.gameProperties;
+        return this.localGameProperties;
     }
 
     getGameUserInputManager(){
@@ -155,7 +161,7 @@ class GameContainer {
         }
 
         // Register all keybinds
-        this.gameInstance.constructor.registerAllKeybinds();
+        this.localGameInstance.constructor.registerAllKeybinds();
 
         // Disable context menu
         document.getElementById("main_area").addEventListener("contextmenu", (event) => {event.preventDefault()});
@@ -174,7 +180,7 @@ class GameContainer {
         requestAnimationFrame(launcherTickHandler);
 
         // Tell the game to load its images
-        await this.gameInstance.constructor.loadImages();
+        await this.localGameInstance.constructor.loadImages();
 
         // Setup menus
         this.MENU_MANAGER.setup();
