@@ -7,6 +7,7 @@ class LasServerGame extends LasGame {
         this.running = false;
 
         this.gameStartTime = undefined;
+        this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
         this.clients = new NotSamLinkedList();
     }
 
@@ -53,6 +54,7 @@ class LasServerGame extends LasGame {
             "subject": "game_start",
             "game_details": {
                 "server_start_time": this.gameStartTime,
+                "game_properties": this.getGameProperties()
             }
             // TODO
         }
@@ -139,7 +141,9 @@ class LasServerGame extends LasGame {
     }
 
     isReadyToTick(){
-        let expectedTicks = (Date.now() - this.gameStartTime) / ;
+        let now = Date.now();
+        let expectedTicks = (now - (this.gameStartTime)) / this.tickGapMS;
+        return expectedTicks > this.getTickCount();
     }
 
     async tick(){
@@ -147,7 +151,7 @@ class LasServerGame extends LasGame {
         if (!this.isReadyToTick()){
             return;
         }
-        console.log("Tick")
+        console.log("Tick", this.getTickCount())
         // Check if game still going
         this.determineIfContinuingToRun();
 

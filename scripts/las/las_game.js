@@ -55,6 +55,10 @@ class LasGame {
         return this.gameProperties;
     }
 
+    setGameProperties(gamePropertiesJSON){
+        this.gameProperties = gamePropertiesJSON;
+    }
+
     getWind(){
         return this.wind;
     }

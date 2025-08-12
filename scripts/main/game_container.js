@@ -46,8 +46,12 @@ class GameContainer {
         return this.gMouseY;
     }
 
-    getlocalGameInstance(){
+    getLocalGameInstance(){
         return this.localGameInstance;
+    }
+
+    getRemoteGameInstance(){
+        return this.remoteGameInstance;
     }
 
     getFrameCounter(){
@@ -90,7 +94,7 @@ class GameContainer {
         return this.IMAGES[imageName];
     }
 
-    getGameProperties(){
+    getLocalGameProperties(){
         return this.localGameProperties;
     }
 
@@ -222,10 +226,6 @@ class GameContainer {
         return this.GAMEMODE_MANAGER;
     }
 
-    getGameTickScheduler(){
-        return this.GAME_TICK_SCHEDULER;
-    }
-
     /*
         Method Name: setGameZoom
         Method Parameters: None
@@ -251,10 +251,10 @@ class GameContainer {
             if (this.ZOOM_MONITOR["button"] == null){ return; }
             let timePassed = Date.now() - this.ZOOM_MONITOR["start_time_ms"];
             // If the button was pressed for a short amount of time then switch gamezoom to recorded
-            if (timePassed < this.getGameProperties()["approximate_zoom_peek_time_ms"]){
-                this.getGameProperties()["game_zoom"] = gameZoom;
+            if (timePassed < this.getLocalGameProperties()["approximate_zoom_peek_time_ms"]){
+                this.getLocalGameProperties()["game_zoom"] = gameZoom;
             }else{ // If not taking the button then reset zoom
-                gameZoom = this.getGameProperties();
+                gameZoom = this.getLocalGameProperties();
             }
             // Reset zoom monitor
             this.ZOOM_MONITOR["button"] = null;
@@ -331,7 +331,7 @@ class GameContainer {
         if (this.setupOngoing){
             this.displayLoading();
             // Don't speed it up too much
-            await sleep(this.getGameProperties()["ms_between_ticks_floor"]);
+            await sleep(this.getLocalGameProperties()["ms_between_ticks_floor"]);
             requestAnimationFrame(launcherTickHandler);
             return;
         }
@@ -355,7 +355,7 @@ class GameContainer {
             // Destroy extra ticks
             if (tickDifference > 1){
                 let ticksToDestroy = tickDifference - 1;
-                this.GAME_TICK_SCHEDULER.addTimeDebt(this.getGameProperties()["ms_between_ticks"] * ticksToDestroy);
+                this.GAME_TICK_SCHEDULER.addTimeDebt(this.getLocalGameProperties()["ms_between_ticks"] * ticksToDestroy);
             }
 
             this.GAME_TICK_SCHEDULER.getTickLock().lock()

@@ -1,6 +1,7 @@
 class LasRemoteGame extends LasGame {
-    constructor(gameProperties){
-        super(gameProperties);
+    constructor(defaultGameProperties){
+        // Pass default for gameProperties
+        super(defaultGameProperties);
         this.seaDisplay = new LASSeaDisplay();
         
         this.focusedShip = null;

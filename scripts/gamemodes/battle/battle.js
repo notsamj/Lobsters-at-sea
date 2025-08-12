@@ -3,21 +3,48 @@ class Battle extends Gamemode {
     constructor(){
         super();
 
-        this.serverStartTime = undefined; // Placeholder
+         // Placeholder
+        this.serverStartTime = undefined;
+        this.tickGapMS = undefined;
+        this.maxDelayMS = undefined;
     }
 
     end(){
-        // When receive end, tlel the Server connection that it's not needed anymore
+        // When receive end, tell the Server connection that it's not needed anymore
         SC.setUserInterest(false);
         SC.terminateConnection();
     }
 
+    calculateExpectedTicks(){
+       return (GC.getGameTickScheduler().getLastTickTime() - (this.serverStartTime)) / this.tickGapMS;
+    }
+
     setup(gameDetailsJSON){
+        let game = this.getGame();
         // Set data received
         this.serverStartTime = gameDetailsJSON["server_start_time"]; 
         console.log("received", gameDetailsJSON);
+
+        // Update game properties
+        game.setGameProperties(gameDetailsJSON["game_properties"]);
+
+        // Run a check on tick rate to make sure it matches
+        let lgp = GC.getLocalGameProperties();
+        let fgp = game.getGameProperties();
+
+        // Check tick rate matches
+        if (fgp["tick_rate"] != lgp["tick_rate"]){
+            throw new Error("Tick rates are not equal: " + game.getGameProperties()["tick_rate"].toString() + ',' + GC.getLocalGameProperties()["tick_rate"].toString());
+        }
+
+        // Update tick game ms
+        this.tickGapMS = 1000 / fgp["tick_rate"]; // float likely
+        this.maxDelayMS = fgp["max_delay_ms"];
+
+        // Check for other relevant incongruencies
+
         return;
-        let game = this.getGame();
+        
 
         let tempShipJSON = {
             "starting_x_pos": 0,
@@ -54,15 +81,48 @@ class Battle extends Gamemode {
         //game.addShip(tempShip2);
     }
 
+    checkIfTickCountIsProper(){
+        let currentTicks = this.getGame().getTickCount();
+        let ticksIfITickNow = currentTicks + 1;
+        let expectedTicks = this.calculateExpectedTicks();
+
+        let delayGapTicks = expectedTicks - ticksIfITickNow;
+        let delayMS = delayGapTicks * this.getTickGapMS();
+
+        // If running too slow, quit
+        if (delayMS > this.maxDelayMS){
+            return false;
+        }
+
+        return true;
+    }
+
+    getTickGapMS(){
+        return this.tickGapMS;
+    }
+
+    handleGameExit(){
+        GC.getMenuManager().switchTo("main_menu");
+        GC.getGamemodeManager().getActiveGamemode().end();
+        GC.getGamemodeManager().deleteActiveGamemode();
+    }
+
     tick(){
-        // Tick the game
-        this.getGame().tick();
+        // Check if the tick count is proper  
+        let tickCountIsProper = this.checkIfTickCountIsProper();
+        if (tickCountIsProper){
+            // Tick the game
+            this.getGame().tick();
+        }else{
+            this.handleGameExit();
+        }
+
     }
 
     getName(){ return "battle"; }
 
     getGame(){
-        return GC.getGameInstance();
+        return GC.getRemoteGameInstance();
     }
 
     display(){

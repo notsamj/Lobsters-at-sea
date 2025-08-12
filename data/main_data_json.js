@@ -9,7 +9,17 @@ const MD = {
         "expected_canvas_height": 927,
         "cursor_enabled": true,
         "frame_rate": 80,
-        "ship_movement_resistance_coefficient": 0.00000525
+        "ship_movement_resistance_coefficient": 0.00000525,
+        "max_delay_ms": 1000 // server can be X ms slow before breaking
+    },
+
+    "default_folder_settings": {
+        "default_folders": [
+            {   
+                "folder_name": "tick_data", 
+                "max_size": 100, // NOTE: Breaks if you change tick_rate
+            }
+        ]
     },
 
     "camera_settings": {

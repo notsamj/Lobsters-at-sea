@@ -1,7 +1,7 @@
 class ServerConnection {
-    constructor(){
+    constructor(defaultFolderSettingsJSON={}){
         this.eventHandler = new NSEventHandler();
-        this.clientMailbox = new ClientMailbox();
+        this.clientMailbox = new ClientMailbox(defaultFolderSettingsJSON);
         this.connectionWS = null;
 
         this.userDesiresServerConnection = false;
@@ -80,6 +80,11 @@ class ServerConnection {
         this.userDesiresServerConnection = value;
     }
 
+    shutdownConnectionIfOn(){
+        this.setUserInterest(false);
+        this.terminateConnection();
+    }
+
     initiateConnection(){
         // If a connection is currently being attempted then ignore
         if (this.isAttemptingConnection()){
@@ -145,7 +150,7 @@ class ServerConnection {
         let dataJSON = JSON.parse(event["data"]);
 
         // Deliver the data
-        this.clientMailbox.deliver(dataJSON);
+        this.clientMailbox.deliver(dataJSON, dataJSON["subject"]);
 
         // Send out an event
         this.eventHandler.emit({

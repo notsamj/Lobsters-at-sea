@@ -33,10 +33,14 @@ class PauseMenu extends Menu {
         // Main Menu
         let mainMenuButtonY = (innerWidth) => {return 600; };
         this.components.push(new RectangleButton("Return to main menu", "#3bc44b", "#e6f5f4", buttonX, mainMenuButtonY, buttonSizeX, buttonSizeY, (instance) => {
-            instance.goToMainMenu();
-            GC.getGamemodeManager().getActiveGamemode().end();
-            GC.getGamemodeManager().deleteActiveGamemode();
+            instance.handleGameExit();
         }));
+    }
+
+    handleGameExit(){
+        GC.getMenuManager().switchTo("main_menu");
+        GC.getGamemodeManager().getActiveGamemode().end();
+        GC.getGamemodeManager().deleteActiveGamemode();
     }
 
     /*
