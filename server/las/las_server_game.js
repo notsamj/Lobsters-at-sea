@@ -54,10 +54,31 @@ class LasServerGame extends LasGame {
             "subject": "game_start",
             "game_details": {
                 "server_start_time": this.gameStartTime,
-                "game_properties": this.getGameProperties()
+                "game_properties": this.getGameProperties(),
+                "ships": []
             }
             // TODO
         }
+
+        // Add ship data
+
+        let shipsList = openingMessageJSON["game_details"]["ships"];
+        for (let [ship, shipIndex] of this.ships){
+            shipsList.push(
+                {
+                    "starting_x_pos": ship.getTickX(),
+                    "starting_y_pos": ship.getTickY(),
+                    "starting_x_velocity": ship.getTickXV(),
+                    "starting_y_velocity": ship.getTickYV(),
+                    "starting_orientation_rad": ship.getTickOrientation(),
+                    "sail_strength": ship.getTickSailStrength(),
+                    "ship_model": ship.getShipModel(),
+                    "id": ship.getID()
+                }
+            );
+        }
+
+        // Send it
         this.sendAll(openingMessageJSON);
     }
 
@@ -81,7 +102,7 @@ class LasServerGame extends LasGame {
     }
 
     end(){
-        // TODO: Send END result!
+        // TODO: Send END result! Note: Can be ended abruptly or something like this
         console.log("Ending")
         
         this.reset();
@@ -114,6 +135,18 @@ class LasServerGame extends LasGame {
             this.end();
             return;
         }
+
+
+        // Check max delay
+        let tickCountIfITickNow = this.getTickCount() + 1;
+        let expectedTicks = this.calculateExpectedTicks();
+        let tickDiff = expectedTicks - tickCountIfITickNow;
+
+        let timeGap = tickDiff * this.tickGapMS;
+        if (timeGap > this.getGameProperties()["max_delay_ms"]){
+            this.end();
+            return;
+        }
     }
 
     checkActiveParticipants(){
@@ -142,8 +175,12 @@ class LasServerGame extends LasGame {
 
     isReadyToTick(){
         let now = Date.now();
-        let expectedTicks = (now - (this.gameStartTime)) / this.tickGapMS;
+        let expectedTicks = this.calculateExpectedTicks();
         return expectedTicks > this.getTickCount();
+    }
+
+    calculateExpectedTicks(){
+        return (Date.now() - (this.gameStartTime)) / this.tickGapMS;
     }
 
     async tick(){

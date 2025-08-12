@@ -19,6 +19,49 @@ class Battle extends Gamemode {
        return (GC.getGameTickScheduler().getLastTickTime() - (this.serverStartTime)) / this.tickGapMS;
     }
 
+    tryToUpdateFromServer(){
+        // Get all the tick messages
+        let tickMessagesFolder = SC.getClientMailbox().getFolder("tick_data");
+        let tickMessages = tickMessagesFolder["list"];
+
+        let game = this.getGame();
+        let previousTick = game.getCurrentTick();
+
+        // Look for message meeting conditions
+        let lastRelevantUpdate = null;
+        let messageCount = tickMessages.getLength();
+        for (let i = messageCount - 1; i >= 0; i--){
+            let tickMSGJSON = tickMessages.get(i);
+            // If we reached a read mesasge, cancel
+            if (tickMSGJSON["read"]){
+                break;
+            }
+            let tickMSGDataJSON = tickMSGJSON["data_json"];
+            let tick = tickMSGDataJSON["server_tick"];
+
+            // Ignore one's above desired tick
+            if (tick > previousTick){
+                continue;
+            }
+        }
+
+        // Look at what was found
+        
+        // No relevant update
+        if (lastRelevantUpdate === null){
+            return;
+        }
+
+
+        // Set read
+        lastRelevantUpdate["read"] = true;
+
+        let relevantDataToUpdateFrom = lastRelevantUpdate["data_json"];
+        // TODO: Update
+        console.log("Worth updating", relevantDataToUpdateFrom);
+
+    }
+
     setup(gameDetailsJSON){
         let game = this.getGame();
         // Set data received
@@ -34,17 +77,23 @@ class Battle extends Gamemode {
 
         // Check tick rate matches
         if (fgp["tick_rate"] != lgp["tick_rate"]){
-            throw new Error("Tick rates are not equal: " + game.getGameProperties()["tick_rate"].toString() + ',' + GC.getLocalGameProperties()["tick_rate"].toString());
+            throw new Error("Tick rates are not equal: " + fgp["tick_rate"].toString() + ',' + lgp["tick_rate"].toString());
         }
 
         // Update tick game ms
         this.tickGapMS = 1000 / fgp["tick_rate"]; // float likely
         this.maxDelayMS = fgp["max_delay_ms"];
 
-        // Check for other relevant incongruencies
+        // TODO: Check for other relevant incongruencies
 
-        return;
-        
+        // Add ships
+        for (let shipJSON of gameDetailsJSON["ships"]){
+            // Add game
+            shipJSON["game"] = game;
+            game.addShip(new Ship(shipJSON));
+        }
+
+        /*
 
         let tempShipJSON = {
             "starting_x_pos": 0,
@@ -78,7 +127,7 @@ class Battle extends Gamemode {
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);
+        //game.addShip(tempShip2);*/
     }
 
     checkIfTickCountIsProper(){
@@ -91,6 +140,25 @@ class Battle extends Gamemode {
 
         // If running too slow, quit
         if (delayMS > this.maxDelayMS){
+            return false;
+        }
+
+        // Check server communication 
+        // Get all the tick messages
+        let tickMessagesFolder = SC.getClientMailbox().getFolder("tick_data");
+        let tickMessages = tickMessagesFolder["list"];
+
+        let lastServerTickUpdate = 0; // Default to start up
+
+        // If we have received tick updates then....
+        if (tickMessages.getLength() > 0){
+            lastServerTickUpdate = tickMessages.get(tickMessages.getLength() - 1)["data_json"]["server_tick"];
+        }
+
+        let serverDelayMS = (expectedTicks - lastServerTickUpdate) * this.getTickGapMS();
+
+        // Server delay issues
+        if (serverDelayMS > this.maxDelayMS){
             return false;
         }
 
@@ -111,6 +179,9 @@ class Battle extends Gamemode {
         // Check if the tick count is proper  
         let tickCountIsProper = this.checkIfTickCountIsProper();
         if (tickCountIsProper){
+            // Try to update from the server
+            this.tryToUpdateFromServer();
+
             // Tick the game
             this.getGame().tick();
         }else{

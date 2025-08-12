@@ -11,6 +11,17 @@ class ClientMailbox {
         }
     }
 
+    getFolder(folderName){
+        // See if you can find it
+        for (let [folderObj, fIndex] of this.folders){
+            if (folderObj["folder_name"] === folderName){
+                return folderObj;
+            }
+        }
+
+        throw new Error("Requested folder: " + folderName + " not found.");
+    }
+
     getCreateFolder(folderName){
         let foundFounderObj = null;
 

@@ -9,6 +9,10 @@ class ServerConnection {
         this.connectionIsActive = false;
     }
 
+    getClientMailbox(){
+        return this.clientMailbox;
+    }
+
     notifyConnectionActive(){
         // Update status
         this.setConnectionActive(true);
