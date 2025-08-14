@@ -38,6 +38,12 @@ class GamemodeManager {
         }
     }
 
+    handlePause(){
+        if (this.hasActiveGamemode()){
+            this.gamemode.handlePause();
+        }
+    }
+
     /*
         Method Name: hasActiveGamemode
         Method Parameters: None

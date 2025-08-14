@@ -35,7 +35,7 @@ class LobbyManager {
     }
 
     transferToGame(){
-        return this.clients.copy();
+        return {"client_data": this.clients.copy(), "client_role": this.playerRole }
     }
 }
 module.exports = { LobbyManager }

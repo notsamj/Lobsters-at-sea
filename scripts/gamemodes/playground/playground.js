@@ -5,6 +5,18 @@ class Playground extends Gamemode {
         this.prepareTestEnvironment();
     }
 
+    handlePause(){
+        if (!GC.getGameTickScheduler().isPaused()){
+                GC.getGameTickScheduler().pause();
+        }
+    }
+
+    handleUnpause(){
+        if (GC.getGameTickScheduler().isPaused()){
+            GC.getGameTickScheduler().unpause();
+        }
+    }
+
     prepareTestEnvironment(){
         let game = this.getGame();
 

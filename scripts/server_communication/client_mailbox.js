@@ -2,6 +2,35 @@ class ClientMailbox {
     constructor(defaultFolderSettingsJSON){
         this.folders = new NotSamLinkedList();
         this.setupDefaults(defaultFolderSettingsJSON);
+        this.accessLock = new Lock();
+    }
+
+    clear(){
+        // Clear all
+        for (let [folder, folderIndex] of this.folders){
+            let oldLength = folder["list"].getLength();
+            folder["list"].clear();
+        }
+    }
+
+    /*
+        Method Name: getAccess
+        Method Parameters: None
+        Method Description: Awaits access to be granted
+        Method Return: Promise (implicit)
+    */
+    async getAccess(){
+        return this.accessLock.awaitUnlock(true);
+    }
+
+    /*
+        Method Name: relinquishAccess
+        Method Parameters: None
+        Method Description: Removes access
+        Method Return: void
+    */
+    relinquishAccess(){
+        this.accessLock.unlock();
     }
 
     setupDefaults(defaultFolderSettingsJSON){

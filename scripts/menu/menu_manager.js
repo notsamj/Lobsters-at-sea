@@ -232,21 +232,24 @@ class MenuManager {
         if (newMenuName === this.mainMenu.getName()){
             this.activeMenu = this.mainMenu;
         }else if (newMenuName === this.pauseMenu.getName()){
-            if (!GC.getGameTickScheduler().isPaused()){
+            /*if (!GC.getGameTickScheduler().isPaused()){
                 GC.getGameTickScheduler().pause();
-            }
+            }*/
+            GC.getGamemodeManager().handlePause();
             this.activeMenu = this.pauseMenu;
         }else if (newMenuName === this.helpMenu.getName()){
-            if (!GC.getGameTickScheduler().isPaused()){
+            /*if (!GC.getGameTickScheduler().isPaused()){
                 GC.getGameTickScheduler().pause();
-            }
+            }*/
+            GC.getGamemodeManager().handlePause();
             this.helpMenu.setOrigin(this.activeMenu);
             this.activeMenu = this.helpMenu;
         }else if (newMenuName === "game"){
-            if (GC.getGameTickScheduler().isPaused()){
+            /*if (GC.getGameTickScheduler().isPaused()){
                 GC.getGameTickScheduler().unpause();
                 GC.getGamemodeManager().handleUnpause();
-            }
+            }*/
+            GC.getGamemodeManager().handleUnpause();
             // Maybe enable the cursor
             enableCursor = MD["game_properties"]["cursor_enabled"];
             this.activeMenu = null;

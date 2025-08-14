@@ -89,7 +89,7 @@ class ServerConnection {
         this.terminateConnection();
     }
 
-    initiateConnection(){
+    async initiateConnection(){
         // If a connection is currently being attempted then ignore
         if (this.isAttemptingConnection()){
             return;
@@ -100,6 +100,15 @@ class ServerConnection {
             "category": "white",
             "text": getPrettyTime() + ' ' + "Attempting to initiate a server connection."
         });
+
+        // Await permission
+        await this.clientMailbox.getAccess();
+
+        // Clear the mailbox
+        this.clientMailbox.clear();
+
+        // Release permission
+        this.clientMailbox.relinquishAccess();
 
         // Create the web socket object
         this.createWSSObject();
@@ -150,11 +159,17 @@ class ServerConnection {
         })
     }
 
-    handleNewMessageFromServer(event){
+    async handleNewMessageFromServer(event){
         let dataJSON = JSON.parse(event["data"]);
+
+        // Get access
+        await this.clientMailbox.getAccess();
 
         // Deliver the data
         this.clientMailbox.deliver(dataJSON, dataJSON["subject"]);
+
+        // Give up access
+        this.clientMailbox.relinquishAccess();
 
         // Send out an event
         this.eventHandler.emit({

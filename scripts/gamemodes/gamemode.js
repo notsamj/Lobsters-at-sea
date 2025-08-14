@@ -38,6 +38,10 @@ class Gamemode {
     */
     handleUnpause(){}
 
+    handlePause(){
+        throw new Error("Expect this to be overwritten.");
+    }
+
     /*
         Method Name: getEventHandler
         Method Parameters: None

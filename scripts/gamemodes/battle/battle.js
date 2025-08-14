@@ -3,6 +3,8 @@ class Battle extends Gamemode {
     constructor(){
         super();
 
+        console.log("new ba")
+
          // Placeholder
         this.serverStartTime = undefined;
         this.tickGapMS = undefined;
@@ -19,36 +21,55 @@ class Battle extends Gamemode {
        return (GC.getGameTickScheduler().getLastTickTime() - (this.serverStartTime)) / this.tickGapMS;
     }
 
-    tryToUpdateFromServer(){
+    async tryToUpdateFromServer(){
         // Get all the tick messages
-        let tickMessagesFolder = SC.getClientMailbox().getFolder("tick_data");
+        let mailBox = SC.getClientMailbox();
+
+        // Await access
+        await mailBox.getAccess();
+
+        let tickMessagesFolder = mailBox.getFolder("tick_data");
         let tickMessages = tickMessagesFolder["list"];
 
         let game = this.getGame();
-        let previousTick = game.getCurrentTick();
+        let previousTick = game.getTickCount();
 
         // Look for message meeting conditions
         let lastRelevantUpdate = null;
         let messageCount = tickMessages.getLength();
         for (let i = messageCount - 1; i >= 0; i--){
             let tickMSGJSON = tickMessages.get(i);
+            //console.log("msg found foreign,local", tickMSGJSON["data_json"]["server_tick"], previousTick)
             // If we reached a read mesasge, cancel
             if (tickMSGJSON["read"]){
+                //console.log("Its read")
                 break;
             }
             let tickMSGDataJSON = tickMSGJSON["data_json"];
             let tick = tickMSGDataJSON["server_tick"];
-
             // Ignore one's above desired tick
             if (tick > previousTick){
+                //console.log("Its over")
                 continue;
             }
+
+            // Else it's a good update
+            lastRelevantUpdate = tickMSGJSON;
+            break;
         }
+
+        // Relinquish access
+        mailBox.relinquishAccess();
 
         // Look at what was found
         
         // No relevant update
         if (lastRelevantUpdate === null){
+            /*console.log("no update", messageCount)
+            if (messageCount > 0){
+                stop();
+            }*/
+            
             return;
         }
 
@@ -58,8 +79,30 @@ class Battle extends Gamemode {
 
         let relevantDataToUpdateFrom = lastRelevantUpdate["data_json"];
         // TODO: Update
-        console.log("Worth updating", relevantDataToUpdateFrom);
+        
+        let ticksAhead = previousTick - lastRelevantUpdate["data_json"]["server_tick"];
+        this.updateShipsPositions(ticksAhead, lastRelevantUpdate["data_json"]["tick_data"]["ship_positions"]);
+    }
 
+    updateShipsPositions(ticksAhead, shipPositions){
+        for (let shipJSON of shipPositions){
+            let ship = this.getShipByID(shipJSON["id"]);
+            // If failed to find ship
+            if (ship === null){
+                throw new Error("Ship not found: " + shipJSON["id"] + ".");
+            }
+            ship.updateFromJSONPosition(ticksAhead, shipJSON);
+        }
+    }
+
+    getShipByID(shipID){
+        let ships = this.getGame().getShips();
+        for (let [ship, shipIndex] of ships){
+            if (ship.getID() === shipID){
+                return ship;
+            }
+        }
+        return null;
     }
 
     setup(gameDetailsJSON){
@@ -89,7 +132,7 @@ class Battle extends Gamemode {
         // Add ships
         for (let shipJSON of gameDetailsJSON["ships"]){
             // Add game
-            shipJSON["game"] = game;
+            shipJSON["game_instance"] = game;
             game.addShip(new Ship(shipJSON));
         }
 
@@ -130,7 +173,7 @@ class Battle extends Gamemode {
         //game.addShip(tempShip2);*/
     }
 
-    checkIfTickCountIsProper(){
+    async checkIfTickCountIsProper(){
         let currentTicks = this.getGame().getTickCount();
         let ticksIfITickNow = currentTicks + 1;
         let expectedTicks = this.calculateExpectedTicks();
@@ -145,7 +188,12 @@ class Battle extends Gamemode {
 
         // Check server communication 
         // Get all the tick messages
-        let tickMessagesFolder = SC.getClientMailbox().getFolder("tick_data");
+        let mailBox = SC.getClientMailbox();
+
+        // Await access
+        await mailBox.getAccess();
+
+        let tickMessagesFolder = mailBox.getFolder("tick_data");
         let tickMessages = tickMessagesFolder["list"];
 
         let lastServerTickUpdate = 0; // Default to start up
@@ -155,6 +203,9 @@ class Battle extends Gamemode {
             lastServerTickUpdate = tickMessages.get(tickMessages.getLength() - 1)["data_json"]["server_tick"];
         }
 
+        // Give up access
+        mailBox.relinquishAccess();
+
         let serverDelayMS = (expectedTicks - lastServerTickUpdate) * this.getTickGapMS();
 
         // Server delay issues
@@ -163,6 +214,10 @@ class Battle extends Gamemode {
         }
 
         return true;
+    }
+
+    handlePause(){
+        // DO NOTHING
     }
 
     getTickGapMS(){
@@ -175,12 +230,12 @@ class Battle extends Gamemode {
         GC.getGamemodeManager().deleteActiveGamemode();
     }
 
-    tick(){
+    async tick(){
         // Check if the tick count is proper  
-        let tickCountIsProper = this.checkIfTickCountIsProper();
+        let tickCountIsProper = await this.checkIfTickCountIsProper();
         if (tickCountIsProper){
             // Try to update from the server
-            this.tryToUpdateFromServer();
+            await this.tryToUpdateFromServer();
 
             // Tick the game
             this.getGame().tick();

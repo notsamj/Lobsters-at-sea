@@ -11,7 +11,9 @@ class LasServerGame extends LasGame {
         this.clients = new NotSamLinkedList();
     }
 
-    start(clientList){
+    start(clientData){
+        let clientList = clientData["client_data"];
+        let clientsArePlayers = clientData["client_role"] === 1;
         // Set running
         this.running = true;
         this.gameStartTime = Date.now();
@@ -55,7 +57,8 @@ class LasServerGame extends LasGame {
             "game_details": {
                 "server_start_time": this.gameStartTime,
                 "game_properties": this.getGameProperties(),
-                "ships": []
+                "clients_are_players": clientsArePlayers,
+                "ships": [],
             }
             // TODO
         }
@@ -217,11 +220,11 @@ class LasServerGame extends LasGame {
             // Update wind
             this.wind.tickUpdate();
 
-            // Up the tick count
-            this.incrementTickCount();
-
             // Output to clients
             this.sendClientsTickData();
+
+            // Up the tick count
+            this.incrementTickCount();
         }
     }
 

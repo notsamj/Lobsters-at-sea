@@ -59,6 +59,37 @@ class Ship {
         }
     }
 
+    updateFromJSONPosition(ticksAhead, shipPositionJSON){
+        let startingX = this.xPos;
+        let startingY = this.yPos;
+
+        this.xPos = shipPositionJSON["x_pos"];
+        this.yPos = shipPositionJSON["y_pos"];
+        this.xV = shipPositionJSON["x_v"];
+        this.yV = shipPositionJSON["y_v"];
+        this.orientationRAD = shipPositionJSON["orientation_rad"];
+        this.shipSailStrength = shipPositionJSON["sail_strength"];
+        this.establishedDecisions = shipPositionJSON["established_decisions"];
+        this.pendingDecisions = shipPositionJSON["pending_decisions"];
+
+        // Move ahead in ticks
+        if (ticksAhead > 0){
+            let timeAheadMS = ticksAhead * this.getGame().getGameProperties()["ms_between_ticks"];
+            let newXInfo = this.getXInfoInMS(timeAheadMS);
+            let newYInfo = this.getYInfoInMS(timeAheadMS);
+
+            this.xV = newXInfo["x_v"];
+            this.yV = newYInfo["y_v"];
+
+            this.xPos = newXInfo["x_pos"];
+            this.yPos = newYInfo["y_pos"];
+
+
+        }
+
+        console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
+    }
+
     isDead(){
         return false; // TODO
     }
@@ -255,8 +286,8 @@ class Ship {
         let oldY = this.yPos;
 
         // Get new positions
-        let newX = xInfo["x"];
-        let newY = yInfo["y"];
+        let newX = xInfo["x_pos"];
+        let newY = yInfo["y_pos"];
 
         let distanceMoved = calculateEuclideanDistance(oldX, oldY, newX, newY);
 
@@ -437,7 +468,7 @@ class Ship {
     }
 
     getXInMS(ms){
-        return this.getXInfoInMS(ms)["x"];
+        return this.getXInfoInMS(ms)["x_pos"];
     }
 
     static calculateWindEffect(shipOrientationRAD, windOrientationRAD){
@@ -469,7 +500,7 @@ class Ship {
         let totalA = windA + shipMovementResistanceA + willPowerA;
         let newXV = this.xV + totalA * msProportionOfASecond;
         let newXP = this.xPos + newXV * msProportionOfASecond;
-        return {"x": newXP, "x_v": newXV}
+        return {"x_pos": newXP, "x_v": newXV}
     }
 
     getYInfoInMS(ms){
@@ -492,11 +523,11 @@ class Ship {
         let totalA = windA + shipMovementResistanceA + willPowerA;
         let newYV = this.yV + totalA * msProportionOfASecond;
         let newYP = this.yPos + newYV * msProportionOfASecond;
-        return {"y": newYP, "y_v": newYV}
+        return {"y_pos": newYP, "y_v": newYV}
     }
 
     getYInMS(ms){
-        return this.getYInfoInMS(ms)["y"];
+        return this.getYInfoInMS(ms)["y_pos"];
     }
 }
 

@@ -64,9 +64,12 @@ class LasGame {
     }
 
     reset(){
-        console.debug("Reset")
+        console.debug("Reset in las_game.js")
         // Resets world data
+        this.randomizer.reset();
+        this.wind.reset();
         this.ships.clear();
+        this.tickCount = 0;
     }
 }
 
