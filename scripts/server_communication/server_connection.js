@@ -9,6 +9,10 @@ class ServerConnection {
         this.connectionIsActive = false;
     }
 
+    sendJSON(jsonObj){
+        this.connectionWS.send(JSON.stringify(jsonObj));
+    }
+
     getClientMailbox(){
         return this.clientMailbox;
     }

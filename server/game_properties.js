@@ -18,5 +18,13 @@ module.exports = {
     "random_seed": 5,
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
-    "cannon_ball_settings": MD["cannon_ball_settings"]
+    "cannon_ball_settings": MD["cannon_ball_settings"],
+    "default_folder_settings": {
+        "default_folders": [
+            {   
+                "folder_name": "pending_decisions", 
+                "max_size": 100,
+            }
+        ]
+    }
 }

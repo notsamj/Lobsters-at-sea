@@ -175,6 +175,7 @@ if (typeof window === "undefined"){
         calculateEuclideanDistance,
         fixRadians,
         rotateCWRAD,
+        rotateCCWRAD,
         toRadians
     }
 }

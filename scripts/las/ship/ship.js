@@ -3,6 +3,8 @@ if (typeof window === "undefined"){
     Cannon = require("./cannon/cannon.js").Cannon;
     angleBetweenCWRAD = require("../../general/math_helper.js").angleBetweenCWRAD;
     calculateEuclideanDistance = require("../../general/math_helper.js").calculateEuclideanDistance;
+    rotateCCWRAD = require("../../general/math_helper.js").rotateCCWRAD;
+    rotateCWRAD = require("../../general/math_helper.js").rotateCWRAD;
 }
 
 class Ship {
@@ -59,6 +61,10 @@ class Ship {
         }
     }
 
+    getPendingDecisions(){
+        return this.pendingDecisions;
+    }
+
     updateFromJSONPosition(ticksAhead, shipPositionJSON){
         let startingX = this.xPos;
         let startingY = this.yPos;
@@ -87,7 +93,7 @@ class Ship {
 
         }
 
-        console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
+        //console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
     }
 
     isDead(){

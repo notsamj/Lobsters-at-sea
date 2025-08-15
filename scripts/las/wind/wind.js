@@ -7,12 +7,30 @@ if (typeof window === "undefined"){
 class Wind {
     constructor(game){
         this.game = game;
+        this.randomizer = new SeededRandomizer(this.game.getGameProperties()["random_seed"]);
+        this.windMagntiude = undefined;
+        this.windDirectionRAD = undefined;
+        this.windMagnitudeChangeAmountPerSecond = undefined;
+        this.windDirectionChangeAmountPerSecondRAD = undefined;
+        this.initialize(); 
+    }
+
+    reset(){
+        this.randomizer.setSeed(this.game.getGameProperties()["random_seed"]);
         this.initialize();   
+    }
+
+    getRandom(){
+        return this.randomizer;
+    }
+
+    getGame(){
+        return this.game;
     }
 
     initialize(){
         let initialWindMagnitude = this.game.getGameProperties()["wind_settings"]["wind_initial_magnitude"];
-        let initialWindDirection = toRadians(this.game.getRandom().getFloatInRange(0, 2*Math.PI));
+        let initialWindDirection = toRadians(this.getRandom().getFloatInRange(0, 2*Math.PI));
 
         this.windMagntiude = initialWindMagnitude;
         this.windDirectionRAD = initialWindDirection;
@@ -20,27 +38,18 @@ class Wind {
         this.windDirectionChangeAmountPerSecondRAD = toRadians(this.game.getGameProperties()["wind_settings"]["wind_direction_change_amount_per_second_deg"]);
     }
 
-    reset(){
-        this.initialize();
-    }
-
-
-    getGame(){
-        return this.game;
-    }
-
     tickUpdate(){
         let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
         let msProportionOfASecond = tickMS / 1000;
 
         let windChangeMagnitude = this.windMagnitudeChangeAmountPerSecond * msProportionOfASecond;
-        let newWindMagntiude = this.windMagntiude + this.getGame().getRandom().getFloatInRange(windChangeMagnitude * -1, windChangeMagnitude);
+        let newWindMagntiude = this.windMagntiude + this.getRandom().getFloatInRange(windChangeMagnitude * -1, windChangeMagnitude);
         
         // Cannot be negative
         this.windMagntiude = Math.max(newWindMagntiude, 0);
 
         let maxDirectionChangeAmount = this.windDirectionChangeAmountPerSecondRAD * msProportionOfASecond;
-        let newWindDirectionRAD = fixRadians(this.windDirectionRAD + this.getGame().getRandom().getFloatInRange(maxDirectionChangeAmount * -1, maxDirectionChangeAmount));
+        let newWindDirectionRAD = fixRadians(this.windDirectionRAD + this.getRandom().getFloatInRange(maxDirectionChangeAmount * -1, maxDirectionChangeAmount));
         this.windDirectionRAD = newWindDirectionRAD;
     }
 

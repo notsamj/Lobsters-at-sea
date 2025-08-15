@@ -22,6 +22,11 @@ class SeededRandomizer {
         this.lastNumber = seed;
     }
 
+    setSeed(seed){
+        this.seed = seed;
+        this.lastNumber = seed;
+    }
+
     /*
         Method Name: getLastNumber
         Method Parameters: None

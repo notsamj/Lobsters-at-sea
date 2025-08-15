@@ -3,7 +3,7 @@ class Battle extends Gamemode {
     constructor(){
         super();
 
-        console.log("new ba")
+        console.log("new battle")
 
          // Placeholder
         this.serverStartTime = undefined;
@@ -86,23 +86,13 @@ class Battle extends Gamemode {
 
     updateShipsPositions(ticksAhead, shipPositions){
         for (let shipJSON of shipPositions){
-            let ship = this.getShipByID(shipJSON["id"]);
+            let ship = this.getGame().getShipByID(shipJSON["id"]);
             // If failed to find ship
             if (ship === null){
                 throw new Error("Ship not found: " + shipJSON["id"] + ".");
             }
             ship.updateFromJSONPosition(ticksAhead, shipJSON);
         }
-    }
-
-    getShipByID(shipID){
-        let ships = this.getGame().getShips();
-        for (let [ship, shipIndex] of ships){
-            if (ship.getID() === shipID){
-                return ship;
-            }
-        }
-        return null;
     }
 
     setup(gameDetailsJSON){
@@ -127,6 +117,9 @@ class Battle extends Gamemode {
         this.tickGapMS = 1000 / fgp["tick_rate"]; // float likely
         this.maxDelayMS = fgp["max_delay_ms"];
 
+        // set up wind to mirror server
+        game.getWind().reset();
+
         // TODO: Check for other relevant incongruencies
 
         // Add ships
@@ -136,41 +129,10 @@ class Battle extends Gamemode {
             game.addShip(new Ship(shipJSON));
         }
 
-        /*
-
-        let tempShipJSON = {
-            "starting_x_pos": 0,
-            "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 1,
-            "ship_model": "generic_ship",
-            "game_instance": game,
-            "id": this.getGame().getIDManager().generateNewID()
+        // Handle client controlled ship
+        if (gameDetailsJSON["clients_are_players"]){
+            game.setFocusedShip(game.getShipByID(gameDetailsJSON["your_ship_id"]));
         }
-        let tempShip = new Ship(tempShipJSON);
-        game.addShip(tempShip);
-
-        // Focus
-        game.setFocusedShip(tempShip);
-        
-
-        // Add test ship
-        let tempShip2JSON = {
-            "starting_x_pos": 500,
-            "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 0,
-            "ship_model": "generic_ship",
-            "game_instance": game,
-            "id": this.getGame().getIDManager().generateNewID()
-        }
-
-        let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);*/
     }
 
     async checkIfTickCountIsProper(){
@@ -239,10 +201,31 @@ class Battle extends Gamemode {
 
             // Tick the game
             this.getGame().tick();
+
+            // Handle sending out my input
+            this.sendMyInput();
         }else{
             this.handleGameExit();
         }
 
+    }
+
+    sendMyInput(){
+        let game = this.getGame();
+        // Ignore if no focused ship
+        if (!game.hasFocusedShip()){ return; }
+
+        // Get the pending decisions
+        let pendingDecisions = game.getFocusedShip().getPendingDecisions();
+
+        // Send them
+        let infoJSON = {
+            "subject": "pending_decisions",
+            "ship_id": game.getFocusedShip().getID(),
+            "pending_decisions": pendingDecisions
+        }
+
+        SC.sendJSON(infoJSON);
     }
 
     getName(){ return "battle"; }

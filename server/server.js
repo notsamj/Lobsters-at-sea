@@ -9,7 +9,7 @@ const LobbyManager = require("./server_tools/lobby_manager.js").LobbyManager;
 const Client = require("./server_tools/client.js").Client;
 const ThreadSafeLinkedList = require("./server_tools/thread_safe_linked_list.js").ThreadSafeLinkedList;
 const LasServerGame = require("./las/las_server_game.js").LasServerGame;
-
+const ServerMailbox = require("./server_mailbox.js").ServerMailbox;
 
 // Data
 const SDJ = require("./server_data.js");
@@ -33,9 +33,27 @@ class LASServer {
 
         this.tickLock = new Lock();
         this.lobbyManager = new LobbyManager(CDJ);
-        this.game = new LasServerGame(GP);
+        this.gameMailBox = new ServerMailbox(GP["default_folder_settings"]);
+        this.game = new LasServerGame(GP, this);
 
         this.setupWSSServer();
+    }
+
+    async deliverClientMessage(client, messageStr){
+        let messageJSON = JSON.parse(messageStr);
+
+        // Get access
+        await this.gameMailBox.getAccess();
+
+        // Send
+        this.gameMailBox.deliver(messageJSON, messageJSON["subject"]);
+        
+        // Give up access
+        this.gameMailBox.relinquishAccess();
+    }
+
+    getGameMailbox(){
+        return this.gameMailBox;
     }
 
     async acceptNewClientsToLobby(availableLobbySlots){
@@ -101,7 +119,7 @@ class LASServer {
     setupWSSServer(){
         // Set up connection handling stuff
         this.WSSServer.on("connection", async (connection) => {
-            let clientOBJ = new Client(connection);
+            let clientOBJ = new Client(connection, this);
             
             // Await access
             await this.newClientQueue.requestAccess();

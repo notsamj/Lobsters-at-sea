@@ -12,11 +12,20 @@ class LasGame {
         this.gameProperties = gameProperties;
         this.gameRecorder = new GameRecorder(gameProperties);
         this.idManager = new IDManager();
-        this.randomizer = new SeededRandomizer(gameProperties["random_seed"]);
         this.wind = new Wind(this);
         this.ships = new NotSamLinkedList();
         this.cannonBalls = new NotSamLinkedList();
         this.tickCount = 0;
+    }
+
+    getShipByID(shipID){
+        let ships = this.getShips();
+        for (let [ship, shipIndex] of ships){
+            if (ship.getID() === shipID){
+                return ship;
+            }
+        }
+        return null;
     }
 
     incrementTickCount(){
@@ -33,10 +42,6 @@ class LasGame {
 
     getIDManager(){
         return this.idManager;
-    }
-
-    getRandom(){
-        return this.randomizer;
     }
 
     getShips(){
@@ -66,7 +71,6 @@ class LasGame {
     reset(){
         console.debug("Reset in las_game.js")
         // Resets world data
-        this.randomizer.reset();
         this.wind.reset();
         this.ships.clear();
         this.tickCount = 0;

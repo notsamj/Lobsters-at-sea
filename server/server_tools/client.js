@@ -1,5 +1,6 @@
 class Client {
-    constructor(clientWS){
+    constructor(clientWS, server){
+        this.server = server;
         this.clientWS = clientWS;
         let myReference = this;
         clientWS.on("message", (message) => {
@@ -20,7 +21,7 @@ class Client {
     }
 
     messageFromClient(message){
-
+        this.server.deliverClientMessage(this, message.toString());
     }
 
     connectionIsDead(){

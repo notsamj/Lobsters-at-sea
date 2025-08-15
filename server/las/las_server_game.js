@@ -1,15 +1,20 @@
 const LasGame = require("../../scripts/las/las_game.js").LasGame;
 const Ship = require("../../scripts/las/ship/ship.js").Ship;
+const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
 
 class LasServerGame extends LasGame {
-    constructor(gameProperties){
+    constructor(gameProperties, server){
         super(gameProperties);
         this.running = false;
+
+        this.server = server;
 
         this.gameStartTime = undefined;
         this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
         this.clients = new NotSamLinkedList();
     }
+
+    getServerGameMailbox(){ return this.server.getGameMailbox(); }
 
     start(clientData){
         let clientList = clientData["client_data"];
@@ -48,10 +53,10 @@ class LasServerGame extends LasGame {
         this.clients.addAllFromLL(clientList);
 
         // Send opening message
-        this.sendOpeningMessage();
+        this.sendOpeningMessage(clientsArePlayers);
     }
 
-    sendOpeningMessage(){
+    sendOpeningMessage(clientsArePlayers){
         let openingMessageJSON = {
             "subject": "game_start",
             "game_details": {
@@ -61,6 +66,29 @@ class LasServerGame extends LasGame {
                 "ships": [],
             }
             // TODO
+        }
+
+        // If clients are playing, make a ship for each
+        let clientShipIDs = {};
+        if (clientsArePlayers){
+            for (let [client, clientIndex] of this.clients){
+                let newShipID = this.getIDManager().generateNewID();
+                let newShipJSON = {
+                    "starting_x_pos": 900,
+                    "starting_y_pos": 0,
+                    "starting_x_velocity": 0,
+                    "starting_y_velocity": 0,
+                    "starting_orientation_rad": toRadians(90),
+                    "sail_strength": 1,
+                    "ship_model": "generic_ship",
+                    "game_instance": this,
+                    "id": newShipID
+                }
+                this.ships.push(new Ship(newShipJSON));
+
+                // Store ID of ship
+                clientShipIDs[clientIndex] = newShipID;
+            }
         }
 
         // Add ship data
@@ -81,8 +109,17 @@ class LasServerGame extends LasGame {
             );
         }
 
-        // Send it
-        this.sendAll(openingMessageJSON);
+        // Send each client a personalized message
+        for (let [client, clientIndex] of this.clients){
+            let personalizedMessage = copyObject(openingMessageJSON);
+
+            // Add their ship id to message
+            if (clientsArePlayers){
+                personalizedMessage["game_details"]["your_ship_id"] = clientShipIDs[clientIndex];
+            }
+
+            client.sendJSON(personalizedMessage);
+        }
     }
 
     sendAll(messageJSON){
@@ -96,12 +133,12 @@ class LasServerGame extends LasGame {
         this.clients.clear();
         this.gameRecorder.reset();
         this.idManager.reset();
-        this.randomizer.reset();
         this.wind.reset();
         this.ships.clear();
         this.cannonBalls.clear();
         this.tickCount = 0;
         this.gameStartTime = undefined;
+        this.getServerGameMailbox().clear();
     }
 
     end(){
@@ -186,17 +223,48 @@ class LasServerGame extends LasGame {
         return (Date.now() - (this.gameStartTime)) / this.tickGapMS;
     }
 
+    async takeUserPendingDecisions(){
+        // Get access
+        let mailBox = this.server.getGameMailbox();
+        await mailBox.getAccess();
+
+        // Read
+        let pendingDecisionsFolder = mailBox.getFolder("pending_decisions");
+        let decisionsMessages = pendingDecisionsFolder["list"];
+        
+        // Update decisions
+        for (let [messageJSONWrapper, messageIndex] of decisionsMessages){
+            let messageJSON = messageJSONWrapper["data_json"];
+            let shipID = messageJSON["ship_id"];
+
+            let ship = this.getShipByID(shipID);
+
+            // Update decisions
+            //console.log("Updated", messageJSON, messageJSON["pending_decisions"])
+            ship.updateFromPilot(messageJSON["pending_decisions"]);
+        }
+
+        // Delete all messages
+        decisionsMessages.clear();
+
+        // Give up access
+        mailBox.relinquishAccess();
+    }
+
     async tick(){
         // Tick cooldown
         if (!this.isReadyToTick()){
             return;
         }
-        console.log("Tick", this.getTickCount())
+        //console.log("Tick", this.getTickCount())
         // Check if game still going
         this.determineIfContinuingToRun();
 
         // If still running after check
         if (this.isRunning()){
+            // Update from received pending decisions
+            await this.takeUserPendingDecisions();
+
             // Maintenace ticks
             this.tickShips();
 
