@@ -10,6 +10,7 @@ const MD = {
         "cursor_enabled": true,
         "frame_rate": 80,
         "ship_movement_resistance_coefficient": 0.00000525,
+        "cannon_ball_air_resistance_coefficient": 0.00001525,
         "max_delay_ms": 1000 // server can be X ms slow before breaking
     },
 
@@ -112,11 +113,17 @@ const MD = {
     "cannon_settings": {
         "reload_ms": 1000, // 1s for now
         "shot_speed": 500,
-        "reload_ticks": null // calculated
+        "reload_ticks": null, // calculated
+        "ms_life_length": 3000,
+        "tick_life_length": null // calculated
     },
 
     "cannon_ball_settings": {
         "ms_until_hit_water": 5000,
+        "image_width": 32,
+        "image_height": 32,
+        "cannon_ball_height": 8,
+        "cannon_ball_width": 8,
     }
 }
 
@@ -125,6 +132,7 @@ MD["game_properties"]["ms_between_ticks"] = 1000 / MD["game_properties"]["tick_r
 MD["game_properties"]["ms_between_ticks_floor"] = Math.floor(MD["game_properties"]["ms_between_ticks"]);
 MD["game_properties"]["ms_between_ticks_ceil"] = Math.ceil(MD["game_properties"]["ms_between_ticks"]);
 MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["cannon_settings"]["tick_life_length"] = MD["cannon_settings"]["ms_life_length"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["default_folder_settings"]["default_folders"][0]["max_size"] = Math.ceil(MD["game_properties"]["max_delay_ms"] / MD["game_properties"]["ms_between_ticks"]);
 
 // If NodeJS -> Exports

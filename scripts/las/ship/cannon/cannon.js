@@ -69,15 +69,17 @@ class Cannon {
     getTickX(){
         let shipCenterX = this.ship.getTickX();
         let shipOrientationRAD = this.ship.getTickOrientation();
+        let adjustedOrientation = rotateCWRAD(shipOrientationRAD, toRadians(90));
 
-        let rotatedX = Math.cos(shipOrientationRAD) * this.xCenterOffset - Math.sin(shipOrientationRAD) * this.yCenterOffset + shipCenterX;
+        let rotatedX = shipCenterX + (Math.cos(adjustedOrientation) * this.xCenterOffset - Math.sin(adjustedOrientation) * this.yCenterOffset);
         return rotatedX;
     }
 
     getTickY(){
-        let shipCenterX = this.ship.getTickY();
+        let shipCenterY = this.ship.getTickY();
         let shipOrientationRAD = this.ship.getTickOrientation();
-        let rotatedY = Math.sin(shipOrientationRAD) * this.xCenterOffset + Math.cos(shipOrientationRAD) * this.yCenterOffset + shipCenterY;
+        let adjustedOrientation = rotateCWRAD(shipOrientationRAD, toRadians(90));
+        let rotatedY = shipCenterY + (Math.sin(adjustedOrientation) * this.xCenterOffset + Math.cos(adjustedOrientation) * this.yCenterOffset);
         return rotatedY;
     }
 

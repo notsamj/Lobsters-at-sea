@@ -21,6 +21,7 @@ class Playground extends Gamemode {
         let game = this.getGame();
 
         let tempShipJSON = {
+            "health": 15,
             "starting_x_pos": 0,
             "starting_y_pos": 0,
             "starting_x_velocity": 0,
@@ -40,6 +41,7 @@ class Playground extends Gamemode {
 
         // Add test ship
         let tempShip2JSON = {
+            "health": 15,
             "starting_x_pos": 500,
             "starting_y_pos": 0,
             "starting_x_velocity": 0,

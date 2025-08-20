@@ -22,21 +22,26 @@ class LasLocalGame extends LasGame {
         this.updateShipOrientationAndSailPower();
 
         // TODO: Move ships based on orientation and sail power
+        this.recordShipPositions();
         this.moveShips();
 
         // Allow ships to shoot
         this.allowShipsToShoot();
 
         // Process cannon shots
-        //this.handleCannonShotMovement();
-        //this.handleNewCannonShots();
-        //this.checkForCannonShotHits();
+        this.recordCannonBallPositions();
+        this.handleCannonShotMovement();
+        this.handleNewCannonShots();
+        this.handleCannonBallCollisionsAndDeaths();
 
         // Take input from the user
         this.updateShipDecisions();
 
         // Update wind
         this.wind.tickUpdate();
+
+        // Process visual effects + sounds from tick
+        // TODO
 
         // Up the tick count
         this.incrementTickCount();
@@ -46,21 +51,6 @@ class LasLocalGame extends LasGame {
         for (let [cannonBall, index] of this.cannonBalls){
             cannonBall.move();
         }
-    }
-
-    handleNewCannonShots(){
-        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
-        let idManager = this.getIDManager();
-        let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
-        for (let [cannonShotObj, index] of newCannonShots){
-            // Add an id
-            cannonShotObj["id"] = idManager.generateNewID();
-            this.cannonBalls.push(new CannonBall(this, cannonShotObj));
-        }
-    }
-
-    processAllCannonShots(){
-        // TODO: Collissions
     }
 
     tickShips(){
@@ -141,6 +131,10 @@ class LasLocalGame extends LasGame {
         super.reset();
     }
 
+    getCannonBalls(){
+        return this.cannonBalls;
+    }
+
     display(){
         // Display the seas
         this.seaDisplay.display(this.getFocusedFrameX(), this.getFocusedFrameY());
@@ -149,6 +143,12 @@ class LasLocalGame extends LasGame {
         for (let [ship, shipIndex] of this.getShips()){
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
+
+        // Display cannon balls
+            for (let [cannonBall, cannonBallIndex] of this.getCannonBalls()){
+            cannonBall.display(this.getFocusedFrameX(), this.getFocusedFrameY());
+        }
+
 
         // Display windsock
         this.getWind().display();
@@ -281,7 +281,10 @@ class LasLocalGame extends LasGame {
         await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();
         await GC.getMenuManager().getMenuByName("help_menu").loadImages();
 
-        // Load boat
+        // Load cannon ball
+        await GC.loadToImages("cannon_ball");
+
+        // Load ship
         await GC.loadToImages("generic_ship_left", "/ships/generic_ship/");
         await GC.loadToImages("generic_ship_down", "/ships/generic_ship/");
         await GC.loadToImages("generic_ship_up", "/ships/generic_ship/");

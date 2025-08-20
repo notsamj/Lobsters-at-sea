@@ -314,7 +314,7 @@ class LasServerGame extends LasGame {
     }
 
     processAllCannonShots(){
-        // TODO: Collissions
+        // TODO: collisions
     }
 
     tickShips(){

@@ -15,7 +15,8 @@ let gameProperties = {
     "random_seed": 5,
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
-    "cannon_ball_settings": MD["cannon_ball_settings"]
+    "cannon_ball_settings": MD["cannon_ball_settings"],
+    "cannon_ball_air_resistance_coefficient": MD["game_properties"]["cannon_ball_air_resistance_coefficient"]
 }
 
 // Create container

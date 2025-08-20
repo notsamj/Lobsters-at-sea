@@ -168,14 +168,167 @@ function displacementToRadians(dX, dY){
     return angleRAD;
 }
 
+function rectangleCollidesWithRectangle(lXr1, rXr1, tYr1, bYr1, lXr2, rXr2, tYr2, bYr2){
+    let cXr1 = (lXr1 + rXr1)/2;
+    let cXr2 = (lXr2 + rXr2)/2;
+    let cYr1 = (bYr1 + tYr1)/2;
+    let cYr2 = (bYr2 + tYr2)/2;
+
+    // If rectangle1's top left corner is within rectangle2
+    if (pointInRectangle(lXr1, tYr1, lXr2, rXr2, tYr2, bYr2)){
+        return true;
+    }
+
+    // If rectangle1's bottom left corner is within rectangle2
+    if (pointInRectangle(lXr1, bYr1, lXr2, rXr2, tYr2, bYr2)){
+        return true;
+    }
+
+    // If rectangle1's top right corner is within rectangle2
+    if (pointInRectangle(rXr1, tYr1, lXr2, rXr2, tYr2, bYr2)){
+        return true;
+    }
+
+    // If rectangle1's bottom right corner is within rectangle2
+    if (pointInRectangle(rXr1, bYr1, lXr2, rXr2, tYr2, bYr2)){
+        return true;
+    }
+
+    // If rectangle1's center is within rectangle2
+    if (pointInRectangle(cXr1, cYr1, lXr2, rXr2, tYr2, bYr2)){
+        return true;
+    }
+
+    // If rectangle2's center is within rectangle1
+    if (pointInRectangle(cXr2, cYr2, lXr1, rXr1, tYr1, bYr1)){
+        return true;
+    }
+
+    // If rectangle2's top left corner is within rectangle1
+    if (pointInRectangle(lXr2, tYr2, lXr1, rXr1, tYr1, bYr1)){
+        return true;
+    }
+
+    // If rectangle2's bottom left corner is within rectangle1
+    if (pointInRectangle(lXr2, bYr2, lXr1, rXr1, tYr1, bYr1)){
+        return true;
+    }
+
+    // If rectangle2's top right corner is within rectangle1
+    if (pointInRectangle(rXr2, tYr2, lXr1, rXr1, tYr1, bYr1)){
+        return true;
+    }
+
+    // If rectangle2's bottom right corner is within rectangle21
+    if (pointInRectangle(rXr2, bYr2, lXr1, rXr1, tYr1, bYr1)){
+        return true;
+    }
+
+    // Else not overlapping
+    return false;
+}
+
+/*
+    Method Name: pointInRectangle
+    Method Parameters:
+        x:
+            x value of a point
+        y:
+            y value of a point
+        lX:
+            lX value of a rectangle
+        rX:
+            rX value of a rectangle
+        tY:
+            tY value of a rectangle
+        bY:
+            bY value of a rectangle
+
+    Method Description: Determine if a point is inside a rectangle
+    Method Return: Boolean, true -> point is inside, false -> not inside
+*/
+function pointInRectangle(x, y, lX, rX, tY, bY){
+    if (x > lX && x < rX && y < tY && y > bY){ return true; }
+    if (x == lX && x < rX && y < tY && y > bY){ return true; }
+    if (x > lX && x == rX && y < tY && y > bY){ return true; }
+    if (x > lX && x < rX && y == tY && y > bY){ return true; }
+    if (x > lX && x < rX && y < tY && y == bY){ return true; }
+    return false;
+}
+
+/*
+    Method Name: safeDivide
+    Method Parameters:
+        numerator:
+            The numerator of a division
+        denominator:
+            The denominator of a division 
+        closeToZeroAmount:
+            Amount between [0,INF], if denominator < closeToZeroAmount then return valueIfCloseToZero
+        valueIfCloseToZero:
+            Value to return if the denominator is close to zero
+    Method Description: Divides two numbers, returning a special result if the denominator is close to zero
+    Method Return: float (or special value)
+*/
+function safeDivide(numerator, denominator, closeToZeroAmount, valueIfCloseToZero){
+    if (Math.abs(denominator) < closeToZeroAmount){ return valueIfCloseToZero; }
+    return numerator / denominator;
+}
+
+/*function getIntervalOverlapDetails(h1, b1, h2, b2){
+    // Check if interval 1 has points within interval 2
+    if (h1 >= b2 && h1 <= h2){
+        return true;
+    }
+    if (b1 >= b2 && b1 <= h2){
+        return true;
+    }
+
+    // Check if interval 1 has points within interval 2
+    if (h2 >= b1 && h2 <= h1){
+        return true;
+    }
+    if (b2 >= b1 && b2 <= h1){
+        return true;
+    }
+
+    // No overlap
+    return {"overlap": false};
+}*/
+
+function getIntervalOverlapDetails(h1, b1, h2, b2){
+    // If 1 inside 2
+    if (h1 >= b2 && h1 <= h2 && b1 >= b2 && b1 <= h2){
+        return {"overlap": true, "overlap_center": (h1+b1)/2}
+    }
+
+    // If 2 inside 1
+    if (h1 >= b1 && h2 <= h1 && b2 >= b1 && b2 <= h1){
+        return {"overlap": true, "overlap_center": (h2+b2)/2}
+    }
+
+    // Partial overlap
+    if (h1 >= b2 && h1 <= h2){
+        return {"overlap": true, "overlap_center": (h1+b2)/2}
+    }else if (h2 >= b1 && h2 <= h1){
+        return {"overlap": true, "overlap_center": (h2+b1)/2}
+    }
+
+    // No overlap
+    return {"overlap": false};
+}
+
 // If NodeJS -> Export
 if (typeof window === "undefined"){
     module.exports = {
         angleBetweenCWRAD,
         calculateEuclideanDistance,
         fixRadians,
+        getIntervalOverlapDetails,
+        rectangleCollidesWithRectangle,
         rotateCWRAD,
         rotateCCWRAD,
+        safeDivide,
         toRadians
     }
 }

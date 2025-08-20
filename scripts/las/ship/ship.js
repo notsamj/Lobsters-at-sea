@@ -11,6 +11,8 @@ class Ship {
     constructor(shipJSON){
         this.id = shipJSON["id"];
 
+        this.health = shipJSON["health"];
+
         this.xPos = shipJSON["starting_x_pos"];
         this.yPos = shipJSON["starting_y_pos"];
 
@@ -96,8 +98,32 @@ class Ship {
         //console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
     }
 
+    hitWithCannonBall(posX, posY){
+        let game = this.getGame();
+
+
+        // Report
+        game.getGameRecorder().addToTimeline(game.getTickCount(), {
+            "event_type": "cannon_hit",
+            "x_pos": posX,
+            "y_pos": posY
+        });
+
+        // Reduce health
+        this.health -= 1;
+
+        // If dead, put out the event
+        if (this.isDead()){
+            game.getGameRecorder().addToTimeline(game.getTickCount(), {
+                "event_type": "ship_sunk",
+                "x_pos": this.xPos,
+                "y_pos": this.yPos
+            });
+        }
+    }
+
     isDead(){
-        return false; // TODO
+        return this.health <= 0;
     }
 
     tick(){
@@ -357,14 +383,22 @@ class Ship {
         return this.orientationRAD;
     }
 
+    getWidth(){
+        return this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_width"];
+    }
+
+    getHeight(){
+        return this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_height"];
+    }
+
     // Note: Local only
     display(centerXOfScreen, centerYOfScreen){
         let myCenterXOffsetFromScreenCenter = this.getFrameX() - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = this.getFrameY() - centerYOfScreen;
 
         // Get ship size
-        let shipWidth = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_width"];
-        let shipHeight = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_height"];
+        let shipWidth = this.getWidth();
+        let shipHeight = this.getHeight();
         let shipImageSizeConstantX = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["image_width"] / shipWidth;
         let shipImageSizeConstantY = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["image_height"] / shipHeight;
 
@@ -473,10 +507,6 @@ class Ship {
         translate(-1 * rotateX, -1 * rotateY);
     }
 
-    getXInMS(ms){
-        return this.getXInfoInMS(ms)["x_pos"];
-    }
-
     static calculateWindEffect(shipOrientationRAD, windOrientationRAD){
         return Math.sin(Math.abs(shipOrientationRAD - windOrientationRAD) + toRadians(90))
     }
@@ -507,6 +537,10 @@ class Ship {
         let newXV = this.xV + totalA * msProportionOfASecond;
         let newXP = this.xPos + newXV * msProportionOfASecond;
         return {"x_pos": newXP, "x_v": newXV}
+    }
+
+    getXInMS(ms){
+        return this.getXInfoInMS(ms)["x_pos"];
     }
 
     getYInfoInMS(ms){

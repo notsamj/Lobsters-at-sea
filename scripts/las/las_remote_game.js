@@ -56,7 +56,7 @@ class LasRemoteGame extends LasGame {
     }
 
     processAllCannonShots(){
-        // TODO: Collissions
+        // TODO: collisions
     }
 
     tickShips(){
