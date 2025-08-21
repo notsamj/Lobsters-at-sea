@@ -239,7 +239,7 @@ class NotSamLinkedList {
     getNode(index){
         // If the index is out of bounds
         if (this.getSize() < index + 1 || index < 0){
-            throw new Error("Issue @ Index: " + index.toString() + "(List Size: " + this.getSize().toString() + ")\n");
+            throw new Error("Issue @ Index: " + index.toString() + " (List Size: " + this.getSize().toString() + ")\n");
             return null;
         }
 

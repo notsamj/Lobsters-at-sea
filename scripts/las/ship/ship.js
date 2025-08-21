@@ -100,11 +100,11 @@ class Ship {
 
     hitWithCannonBall(posX, posY){
         let game = this.getGame();
-
+        //console.log("Cannon hit", posX, posY)
 
         // Report
         game.getGameRecorder().addToTimeline(game.getTickCount(), {
-            "event_type": "cannon_hit",
+            "event_type": "cannon_ball_hit",
             "x_pos": posX,
             "y_pos": posY
         });

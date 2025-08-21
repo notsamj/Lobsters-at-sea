@@ -121,6 +121,10 @@ class SeededRandomizer {
         return this.getRandomFloat() * (end-start) + start;
     }
 
+    pick(list){
+        return list[this.getIntInRangeInclusive(0, list.length-1)];
+    }
+
     /*
         Method Name: getBoolean
         Method Parameters: None

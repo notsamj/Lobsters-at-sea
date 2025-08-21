@@ -20,6 +20,12 @@ class Playground extends Gamemode {
     prepareTestEnvironment(){
         let game = this.getGame();
 
+        // Destroy wind
+        //game.getWind().windMagntiude = 0;
+        game.getWind().windDirectionRAD = toRadians(90);
+        game.getWind().windMagnitudeChangeAmountPerSecond = 0;
+        game.getWind().windDirectionChangeAmountPerSecondRAD = 0;
+
         let tempShipJSON = {
             "health": 15,
             "starting_x_pos": 0,
@@ -41,8 +47,8 @@ class Playground extends Gamemode {
 
         // Add test ship
         let tempShip2JSON = {
-            "health": 15,
-            "starting_x_pos": 500,
+            "health": 500,
+            "starting_x_pos": 250,
             "starting_y_pos": 0,
             "starting_x_velocity": 0,
             "starting_y_velocity": 0,
@@ -54,7 +60,7 @@ class Playground extends Gamemode {
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);
+        game.addShip(tempShip2);
     }
 
     tick(){

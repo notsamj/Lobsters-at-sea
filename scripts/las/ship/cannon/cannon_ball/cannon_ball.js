@@ -7,6 +7,11 @@ class CannonBall {
         this.xPos = cannonBallJSON["x_origin"];
         this.yPos = cannonBallJSON["y_origin"];
         this.gameInstance = cannonBallJSON["game_instance"];
+        this.deathTick = cannonBallJSON["dead_tick"];
+    }
+
+    hasHitWater(tick){
+        return tick >= this.deathTick;
     }
 
     getTickX(){

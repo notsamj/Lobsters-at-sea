@@ -12,6 +12,9 @@ class LasLocalGame extends LasGame {
         this.humanShipController = null;
 
         this.focusedCamera = new SpectatorCamera(this, gameProperties["camera_settings"]);
+
+        this.visualEffects = new NotSamLinkedList();
+        this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
     }
 
     tick(){
@@ -31,8 +34,8 @@ class LasLocalGame extends LasGame {
         // Process cannon shots
         this.recordCannonBallPositions();
         this.handleCannonShotMovement();
-        this.handleNewCannonShots();
         this.handleCannonBallCollisionsAndDeaths();
+        this.handleNewCannonShots();
 
         // Take input from the user
         this.updateShipDecisions();
@@ -41,10 +44,22 @@ class LasLocalGame extends LasGame {
         this.wind.tickUpdate();
 
         // Process visual effects + sounds from tick
-        // TODO
+        this.processVisualEffects();
 
         // Up the tick count
         this.incrementTickCount();
+    }
+
+    processVisualEffects(){
+        let gameRecorder = this.getGameRecorder();
+
+        // Collect cannonball hits
+        let visaulEffectsSettings = this.getGameProperties()["visual_effect_settings"];
+        let cannonBallHits = gameRecorder.getEventsOfTickAndType(this.getTickCount(), "cannon_ball_hit");
+
+        for (let [cBH, cBHIndex] of cannonBallHits){
+            this.visualEffects.push(new CannonBallHit(this.getTickCount(), this.visualEffectRandomGenerator, cBH, visaulEffectsSettings["cannon_ball_hit"]));
+        }
     }
 
     handleCannonShotMovement(){
@@ -135,12 +150,38 @@ class LasLocalGame extends LasGame {
         return this.cannonBalls;
     }
 
+    displayVisualEffects(){
+        let visualEffectsThatExpiredIndices = new NotSamLinkedList();
+
+        let currentTick = this.getTickCount();
+        let msSinceLastTick = GC.getGameTickScheduler().getDisplayMSSinceLastTick();
+
+        // Go through and display / prepare for removal
+        for (let [visualEffect, visualEffectIndex] of this.visualEffects){
+
+            // Record indices of ones that expired for removal
+            if (visualEffect.isExpired(currentTick)){
+                visualEffectsThatExpiredIndices.push(visualEffectIndex);
+            }else{
+                // Else, display
+                visualEffect.display(this.getFocusedFrameX(), this.getFocusedFrameY(), currentTick, this.getGameProperties()["ms_between_ticks"], msSinceLastTick);
+            }
+        }
+
+        // Remove expired visual effects
+        for (let i = visualEffectsThatExpiredIndices.getLength() - 1; i >= 0; i--){
+            let visualEffectIndex = visualEffectsThatExpiredIndices.get(i);
+            this.visualEffects.pop(visualEffectIndex);
+        }
+    }
+
     display(){
         // Display the seas
         this.seaDisplay.display(this.getFocusedFrameX(), this.getFocusedFrameY());
 
         // Display ships
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
 
@@ -149,6 +190,8 @@ class LasLocalGame extends LasGame {
             cannonBall.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
 
+        // Display effects
+        this.displayVisualEffects();
 
         // Display windsock
         this.getWind().display();
