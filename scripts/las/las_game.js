@@ -68,7 +68,7 @@ class LasGame {
                 cannonBallDead = true;
 
                 // Record the watery death of the cannon ball
-                game.getGameRecorder().addToTimeline(game.getTickCount(), {
+                this.getGameRecorder().addToTimeline(this.getTickCount(), {
                     "event_type": "cannon_ball_sunk",
                     "x_pos": cannonBall.getTickX(),
                     "y_pos": cannonBall.getTickY()

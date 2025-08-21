@@ -38,6 +38,8 @@ class Cannon {
             "angle_rad": aimingAngleRAD,
             "x_origin": this.getTickX(),
             "y_origin": this.getTickY(),
+            "launch_wind_magnitude": game.getWind().getWindMagnitude(),
+            "launch_wind_direction_rad": game.getWind().getWindDirectionRAD(),
             "v_i_x": vIX,
             "v_i_y": vIY,
             "ship_origin_id": this.getShip().getID()

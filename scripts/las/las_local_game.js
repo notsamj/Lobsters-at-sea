@@ -44,13 +44,13 @@ class LasLocalGame extends LasGame {
         this.wind.tickUpdate();
 
         // Process visual effects + sounds from tick
-        this.processVisualEffects();
+        this.processNewVisualEffects();
 
         // Up the tick count
         this.incrementTickCount();
     }
 
-    processVisualEffects(){
+    processNewVisualEffects(){
         let gameRecorder = this.getGameRecorder();
 
         // Collect cannonball hits
@@ -59,6 +59,27 @@ class LasLocalGame extends LasGame {
 
         for (let [cBH, cBHIndex] of cannonBallHits){
             this.visualEffects.push(new CannonBallHit(this.getTickCount(), this.visualEffectRandomGenerator, cBH, visaulEffectsSettings["cannon_ball_hit"]));
+        }
+
+        // Collect cannon smoke
+        let cannonBallShots = gameRecorder.getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+
+        for (let [cBS, cBSIndex] of cannonBallShots){
+            this.visualEffects.push(new CannonSmoke(this.getTickCount(), this.visualEffectRandomGenerator, cBS, visaulEffectsSettings["cannon_smoke"]));
+        }
+
+        // Cannon ball sunk
+        let cannonBallSinkings = gameRecorder.getEventsOfTickAndType(this.getTickCount(), "cannon_ball_sunk");
+
+        for (let [cBSi, cBSIIndex] of cannonBallSinkings){
+            this.visualEffects.push(new CannonBallSplash(this.getTickCount(), this.visualEffectRandomGenerator, cBSi, visaulEffectsSettings["cannon_ball_splash"]));
+        }
+
+        // Ship sunk
+        let shipSinkings = gameRecorder.getEventsOfTickAndType(this.getTickCount(), "ship_sunk");
+
+        for (let [sS, sSIndex] of shipSinkings){
+            this.visualEffects.push(new ShipSplash(this.getTickCount(), this.visualEffectRandomGenerator, sS, visaulEffectsSettings["ship_splash"]));
         }
     }
 

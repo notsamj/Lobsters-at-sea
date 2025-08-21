@@ -23,7 +23,7 @@ class VisualEffect {
         let myCenterXOffsetFromScreenCenter = rectangleCenterX - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = rectangleCenterY - centerYOfScreen;
 
-        // Get zoomed ship size
+        // Get zoomed rectangle size
         let zoomedRectangleWidth = rectangleWidth * gameZoom;
         let zoomedRectangleHeight = rectangleHeight * gameZoom;
 
@@ -84,4 +84,64 @@ class VisualEffect {
         scale(1/gameZoom , 1/gameZoom);
         translate(-1 * translateX, -1 * translateY);
     }
+
+    static displayColoredCircle(centerXOfScreen, centerYOfScreen, circleColorCode, circleCenterX, circleCenterY, circleDiameter, opacity=1){
+        let myCenterXOffsetFromScreenCenter = circleCenterX - centerXOfScreen;
+        let myCenterYOffsetFromScreenCenter = circleCenterY - centerYOfScreen;
+
+        // Save current screen width and height
+        let screenWidth = getScreenWidth();
+        let screenHeight = getScreenHeight();
+
+        // 0,0 to screen coordinates (floats)
+        let zeroXScreenCoordFL = screenWidth / 2;
+        let zeroYScreenCoordFL = screenHeight / 2;
+
+        // Adjust based on offsets and zoom
+        let zoomedXOffset = myCenterXOffsetFromScreenCenter * gameZoom;
+        let zoomedYOffset = myCenterYOffsetFromScreenCenter * gameZoom;
+
+        // Determine my center coordinates (float)
+        let myXScreenCoordFL = zeroXScreenCoordFL + zoomedXOffset;
+        let myYScreenCoordFL = zeroYScreenCoordFL - zoomedYOffset; // when doing screen coordinates, y is inversed
+
+        // Convert to integers
+        let myXScreenCoordINT = Math.floor(myXScreenCoordFL); // Left according to screen
+        let myYScreenCoordINT = Math.ceil(myYScreenCoordFL); // Down according to screen
+
+        let myLeftX = myXScreenCoordINT - circleDiameter/2;
+        let myTopY = myYScreenCoordINT - circleDiameter/2;
+        let myRightX = myXScreenCoordINT + circleDiameter/2;
+        let myBottomY = myYScreenCoordINT + circleDiameter/2;
+
+        //console.log(myLeftX, myTopY, myRightX, myBottomY)
+        //debugger;
+        // If not on screen then return
+        if (myRightX < 0){ return; }
+        if (myLeftX >= screenWidth){ return; }
+        if (myBottomY < 0){ return; }
+        if (myTopY >= screenHeight){ return; }
+
+        // So we know at least part of this ship is on the screen
+
+        // Find x and y of image given its rotation
+        let translateX = myXScreenCoordINT;
+        let translateY = myYScreenCoordINT;
+
+        // Prepare the display
+        translate(translateX, translateY);
+
+        // Game zoom
+        scale(gameZoom * 1, gameZoom * 1);
+
+        // Display Circle
+        let color = Colour.fromCode(circleColorCode);
+        color.setAlpha(opacity);
+        noStrokeCircle(color, 0, 0, circleDiameter);
+
+        // Undo game zoom
+        scale(1/gameZoom , 1/gameZoom);
+        translate(-1 * translateX, -1 * translateY);
+    }
+
 }

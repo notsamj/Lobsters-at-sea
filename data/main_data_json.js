@@ -113,9 +113,7 @@ const MD = {
     "cannon_settings": {
         "reload_ms": 1000, // 1s for now
         "shot_speed": 500,
-        "reload_ticks": null, // calculated
-        "ms_until_hit_water": 5000,
-        "ticks_until_hit_water": null // calculated
+        "reload_ticks": null // calculated
     },
 
     "cannon_ball_settings": {
@@ -123,6 +121,8 @@ const MD = {
         "image_height": 32,
         "cannon_ball_height": 8,
         "cannon_ball_width": 8,
+        "ticks_until_hit_water": null, // calculated
+        "ms_until_hit_water": 1500
     },
 
     "visual_effect_settings": {
@@ -137,6 +137,43 @@ const MD = {
             "max_velocity": 10,
             "min_size": 2,
             "max_size": 5
+        },
+        "cannon_smoke": {
+            "life_length_ms": 3000,
+            "life_length_ticks": undefined, // calculated
+            "color_code": "#ccc6c6",
+            "min_smoke_bubbles": 3,
+            "max_smoke_bubbles": 7,
+            "start_offset": 5,
+            "wind_coefficient": 2.51102525,
+            "offset_min_velocity": 1,
+            "offset_max_velocity": 2,
+            "min_size": 4,
+            "max_size": 8
+        },
+        "cannon_ball_splash": {
+            "life_length_ms": 1500,
+            "life_length_ticks": undefined, // calculated
+            "color_code": "#363b75",
+            "min_water_splashes": 5,
+            "max_water_splashes": 10,
+            "start_offset": 4,
+            "min_velocity": 5,
+            "max_velocity": 8,
+            "min_size": 2,
+            "max_size": 4
+        },
+        "ship_splash": {
+            "life_length_ms": 4000,
+            "life_length_ticks": undefined, // calculated
+            "color_code": "#020954",
+            "min_water_splashes": 10,
+            "max_water_splashes": 20,
+            "start_offset": 50,
+            "min_velocity": 15,
+            "max_velocity": 30,
+            "min_size": 20,
+            "max_size": 30
         }
     }
 }
@@ -147,7 +184,12 @@ MD["game_properties"]["ms_between_ticks_floor"] = Math.floor(MD["game_properties
 MD["game_properties"]["ms_between_ticks_ceil"] = Math.ceil(MD["game_properties"]["ms_between_ticks"]);
 MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["cannon_ball_settings"]["ticks_until_hit_water"] = MD["cannon_ball_settings"]["ms_until_hit_water"] / 1000 * MD["game_properties"]["tick_rate"];
+
 MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["visual_effect_settings"]["cannon_smoke"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_smoke"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["visual_effect_settings"]["ship_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["ship_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+
 MD["default_folder_settings"]["default_folders"][0]["max_size"] = Math.ceil(MD["game_properties"]["max_delay_ms"] / MD["game_properties"]["ms_between_ticks"]);
 
 // If NodeJS -> Exports
