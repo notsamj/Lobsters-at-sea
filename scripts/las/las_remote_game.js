@@ -8,6 +8,13 @@ class LasRemoteGame extends LasGame {
         this.humanShipController = null;
 
         this.focusedCamera = new SpectatorCamera(this, gameProperties["camera_settings"]);
+
+        this.visualEffects = new NotSamLinkedList();
+        this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
+    }
+
+    addCannonBall(cannonBall){
+        this.cannonBalls.push(cannonBall);
     }
 
     tick(){
@@ -20,13 +27,8 @@ class LasRemoteGame extends LasGame {
         // TODO: Move ships based on orientation and sail power
         this.moveShips();
 
-        // Allow ships to shoot
-        this.allowShipsToShoot();
-
         // Process cannon shots
-        //this.handleCannonShotMovement();
-        //this.handleNewCannonShots();
-        //this.checkForCannonShotHits();
+        this.handleCannonShotMovement();
 
         // Take input from the user
         this.updateShipDecisions();
@@ -68,12 +70,6 @@ class LasRemoteGame extends LasGame {
     moveShips(){
         for (let [ship, shipIndex] of this.getShips()){
             ship.moveOneTick();
-        }
-    }
-
-    allowShipsToShoot(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.checkShoot();
         }
     }
 
@@ -143,13 +139,47 @@ class LasRemoteGame extends LasGame {
 
         // Display ships
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
+
+        // Display cannon balls
+            for (let [cannonBall, cannonBallIndex] of this.getCannonBalls()){
+            cannonBall.display(this.getFocusedFrameX(), this.getFocusedFrameY());
+        }
+
+        // Display effects
+        this.displayVisualEffects();
 
         // Display windsock
         this.getWind().display();
 
         // Display relevant things when focused
         this.getFocusedEntity().displayWhenFocused();
+    }
+
+    displayVisualEffects(){
+        let visualEffectsThatExpiredIndices = new NotSamLinkedList();
+
+        let currentTick = this.getTickCount();
+        let msSinceLastTick = GC.getGameTickScheduler().getDisplayMSSinceLastTick();
+
+        // Go through and display / prepare for removal
+        for (let [visualEffect, visualEffectIndex] of this.visualEffects){
+
+            // Record indices of ones that expired for removal
+            if (visualEffect.isExpired(currentTick)){
+                visualEffectsThatExpiredIndices.push(visualEffectIndex);
+            }else{
+                // Else, display
+                visualEffect.display(this.getFocusedFrameX(), this.getFocusedFrameY(), currentTick, this.getGameProperties()["ms_between_ticks"], msSinceLastTick);
+            }
+        }
+
+        // Remove expired visual effects
+        for (let i = visualEffectsThatExpiredIndices.getLength() - 1; i >= 0; i--){
+            let visualEffectIndex = visualEffectsThatExpiredIndices.get(i);
+            this.visualEffects.pop(visualEffectIndex);
+        }
     }
 }

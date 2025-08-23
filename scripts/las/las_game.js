@@ -1,10 +1,15 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
+    CannonBall = require("./ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
     GameRecorder = require("./game_recorder.js").GameRecorder;
     IDManager = require("../general/id_manager.js").IDManager;
     SeededRandomizer = require("../general/seeded_randomizer.js").SeededRandomizer;
     Wind = require("./wind/wind.js").Wind;
     NotSamLinkedList = require("../general/notsam_linked_list.js").NotSamLinkedList;
+    copyObject = require("../general/helper_functions.js").copyObject;
+    rectangleCollidesWithRectangle = require("../general/math_helper.js").rectangleCollidesWithRectangle;
+    safeDivide = require("../general/math_helper.js").safeDivide;
+    getIntervalOverlapDetails = require("../general/math_helper.js").getIntervalOverlapDetails;
 }
 
 class LasGame {
@@ -19,6 +24,10 @@ class LasGame {
 
         this.cannonBallPositions = new NotSamLinkedList(); // Temporary data
         this.shipPositions = new NotSamLinkedList(); // Temporary data
+    }
+
+    getCannonBalls(){
+        return this.cannonBalls;
     }
 
     recordCannonBallPositions(){
@@ -59,7 +68,7 @@ class LasGame {
                 // Hit
                 if (collisionDetails["collision"]){
                     cannonBallDead = true;
-                    ship.hitWithCannonBall(collisionDetails["x_pos"], collisionDetails["y_pos"]);
+                    ship.hitWithCannonBall(collisionDetails["x_pos"], collisionDetails["y_pos"], cannonBall.getID());
                     break;
                 }
             }
@@ -71,7 +80,8 @@ class LasGame {
                 this.getGameRecorder().addToTimeline(this.getTickCount(), {
                     "event_type": "cannon_ball_sunk",
                     "x_pos": cannonBall.getTickX(),
-                    "y_pos": cannonBall.getTickY()
+                    "y_pos": cannonBall.getTickY(),
+                    "cannon_ball_id": cannonBall.getID()
                 });
             }
 
@@ -89,14 +99,12 @@ class LasGame {
 
     handleNewCannonShots(){
         let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
-        let idManager = this.getIDManager();
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
         for (let [cannonShotObj, index] of newCannonShots){
-            // Add an id
-            cannonShotObj["id"] = idManager.generateNewID();
-            cannonShotObj["game_instance"] = this;
-            cannonShotObj["death_tick"] = this.getTickCount() + cannonBallSettings["ticks_until_hit_water"];
-            this.cannonBalls.push(new CannonBall(cannonShotObj));
+            let objCopy = copyObject(cannonShotObj);
+            objCopy["game_instance"] = this;
+            objCopy["death_tick"] = this.getTickCount() + cannonBallSettings["ticks_until_hit_water"];
+            this.cannonBalls.push(new CannonBall(objCopy));
         }
     }
 

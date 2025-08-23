@@ -36,6 +36,14 @@ class NotSamLinkedList {
         }
     }
 
+    toList(){
+        let newList = [];
+        for (let [value, index] of this){
+            newList.push(value);
+        }
+        return newList;
+    }
+
     /*
         Method Name: updateFromList
         Method Parameters: 

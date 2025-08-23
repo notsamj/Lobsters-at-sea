@@ -10,14 +10,22 @@ const MD = {
         "cursor_enabled": true,
         "frame_rate": 80,
         "ship_movement_resistance_coefficient": 0.00000525,
-        "cannon_ball_air_resistance_coefficient": 0.00001525,
-        "max_delay_ms": 1000 // server can be X ms slow before breaking
+        "cannon_ball_air_resistance_coefficient": 0.00001525
+    },
+
+    "remote_data_settings": {
+        "max_delay_ms": 1000, // server can be X ms slow before breaking
+        "max_delay_ticks": undefined // calculated
     },
 
     "default_folder_settings": {
         "default_folders": [
             {   
                 "folder_name": "tick_data", 
+                "max_size": undefined, // calculated
+            },
+            {   
+                "folder_name": "position_data", 
                 "max_size": undefined, // calculated
             }
         ]
@@ -185,12 +193,17 @@ MD["game_properties"]["ms_between_ticks_ceil"] = Math.ceil(MD["game_properties"]
 MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["cannon_ball_settings"]["ticks_until_hit_water"] = MD["cannon_ball_settings"]["ms_until_hit_water"] / 1000 * MD["game_properties"]["tick_rate"];
 
+MD["remote_data_settings"]["max_delay_ticks"] = Math.ceil(MD["remote_data_settings"]["max_delay_ms"] / MD["game_properties"]["ms_between_ticks"]);
+
 MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_smoke"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_smoke"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["ship_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["ship_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 
-MD["default_folder_settings"]["default_folders"][0]["max_size"] = Math.ceil(MD["game_properties"]["max_delay_ms"] / MD["game_properties"]["ms_between_ticks"]);
+// Set tick data storage size
+MD["default_folder_settings"]["default_folders"][0]["max_size"] = MD["remote_data_settings"]["max_delay_ticks"];
+// Set position launch data storage size
+MD["default_folder_settings"]["default_folders"][1]["max_size"] = MD["remote_data_settings"]["max_delay_ticks"];
 
 // If NodeJS -> Exports
 if (typeof window === "undefined"){

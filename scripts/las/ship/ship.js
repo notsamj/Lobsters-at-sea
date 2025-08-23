@@ -5,6 +5,7 @@ if (typeof window === "undefined"){
     calculateEuclideanDistance = require("../../general/math_helper.js").calculateEuclideanDistance;
     rotateCCWRAD = require("../../general/math_helper.js").rotateCCWRAD;
     rotateCWRAD = require("../../general/math_helper.js").rotateCWRAD;
+    displacementToRadians = require("../../general/math_helper.js").displacementToRadians;
 }
 
 class Ship {
@@ -98,13 +99,14 @@ class Ship {
         //console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
     }
 
-    hitWithCannonBall(posX, posY){
+    hitWithCannonBall(posX, posY, cannonBallID){
         let game = this.getGame();
         //console.log("Cannon hit", posX, posY)
 
         // Report
         game.getGameRecorder().addToTimeline(game.getTickCount(), {
             "event_type": "cannon_ball_hit",
+            "cannon_ball_id": cannonBallID,
             "x_pos": posX,
             "y_pos": posY
         });
@@ -116,6 +118,7 @@ class Ship {
         if (this.isDead()){
             game.getGameRecorder().addToTimeline(game.getTickCount(), {
                 "event_type": "ship_sunk",
+                "ship": this.getID(),
                 "x_pos": this.xPos,
                 "y_pos": this.yPos
             });
@@ -185,9 +188,14 @@ class Ship {
 
     checkShoot(){
         // If not bothing aiming and firing then you can't shoot
+        /*if (this.getID() === 3){
+                console.log(this.establishedDecisions["aiming_cannons"])
+        }*/
+        
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
+        console.log("Firing")
 
         let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
         let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
@@ -304,7 +312,7 @@ class Ship {
 
 
         // Reset the pending decisions
-        this.resetPendingDecisions();
+        //this.resetPendingDecisions();
     }
 
     moveOneTick(){

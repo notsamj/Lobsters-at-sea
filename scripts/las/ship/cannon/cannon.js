@@ -13,8 +13,13 @@ class Cannon {
         this.rangeCWR = rotateCWRAD(toRadians(cannonJSON["range_cw"][1]), toRadians(90)); // JSON values expected for ship facing @90DEG so prepare them for @0DEG
         this.xCenterOffset = undefined;
         this.yCenterOffset = undefined;
+        this.cannonIndex = cannonJSON["cannon_index"];
 
         this.calculateRealOffsets(cannonJSON);
+    }
+
+    getCannonIndex(){
+        return this.cannonIndex;
     }
 
     isLoaded(){
@@ -42,7 +47,9 @@ class Cannon {
             "launch_wind_direction_rad": game.getWind().getWindDirectionRAD(),
             "v_i_x": vIX,
             "v_i_y": vIY,
-            "ship_origin_id": this.getShip().getID()
+            "ship_origin_id": this.getShip().getID(),
+            "cannon_index": this.getCannonIndex(),
+            "cannon_ball_id": game.getIDManager().generateNewID()
         });
     }
 

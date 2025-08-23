@@ -167,10 +167,6 @@ class LasLocalGame extends LasGame {
         super.reset();
     }
 
-    getCannonBalls(){
-        return this.cannonBalls;
-    }
-
     displayVisualEffects(){
         let visualEffectsThatExpiredIndices = new NotSamLinkedList();
 

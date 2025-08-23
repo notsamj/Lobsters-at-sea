@@ -1,6 +1,7 @@
 const LasGame = require("../../scripts/las/las_game.js").LasGame;
 const Ship = require("../../scripts/las/ship/ship.js").Ship;
 const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
+const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
 
 class LasServerGame extends LasGame {
     constructor(gameProperties, server){
@@ -196,20 +197,34 @@ class LasServerGame extends LasGame {
         this.clients.deleteWithCondition(removalFunc);
     }
 
-    sendClientsTickData(){
+    sendClientsTickAndPositionData(){
+        let cannonBallSinkings = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_ball_sunk");
+        let cannonBallHits = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_ball_hit");
+        let shipSinkings = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "ship_sunk");
+        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+        let positionDataMessageJSON = {
+            "subject": "position_data",
+            "server_tick": this.tickCount,
+            "ship_positions": []
+        }
+
         let tickDataMessageJSON = {
             "subject": "tick_data",
             "server_tick": this.tickCount,
-            "tick_data": {
-                "ship_positions": []
-            }
+            "cannon_ball_hits": cannonBallHits.toList(),
+            "cannon_ball_sinkings": cannonBallSinkings.toList(),
+            "ship_sinkings": shipSinkings.toList(),
+            "new_cannon_shots": newCannonShots.toList()
         }
+
+        // TODO: Add ship deaths and cannon_shots (for )
 
         // Add ship positions
         for (let [ship, shipIndex] of this.ships){
             tickDataMessageJSON["tick_data"]["ship_positions"].push(ship.getPositionJSON());
         }
-
+        // Must be two messages because tick data is read EACH TIME and only most recent position data received is read
+        this.sendAll(positionDataMessageJSON);
         this.sendAll(tickDataMessageJSON);
     }
 
@@ -241,6 +256,7 @@ class LasServerGame extends LasGame {
 
             // Update decisions
             //console.log("Updated", messageJSON, messageJSON["pending_decisions"])
+            //console.log("Got messagE", messageJSON["pending_decisions"]["aiming_cannons"]);
             ship.updateFromPilot(messageJSON["pending_decisions"]);
         }
 
@@ -272,15 +288,17 @@ class LasServerGame extends LasGame {
             this.updateShipOrientationAndSailPower();
 
             // TODO: Move ships based on orientation and sail power
+            this.recordShipPositions();
             this.moveShips();
 
             // Allow ships to shoot
-            //this.allowShipsToShoot();
+            this.allowShipsToShoot();
 
             // Process cannon shots
-            //this.handleCannonShotMovement();
-            //this.handleNewCannonShots();
-            //this.checkForCannonShotHits();
+            this.recordCannonBallPositions();
+            this.handleCannonShotMovement();
+            this.handleCannonBallCollisionsAndDeaths();
+            this.handleNewCannonShots();
 
             // Take input from the user
             //this.updateShipDecisions();
@@ -289,7 +307,7 @@ class LasServerGame extends LasGame {
             this.wind.tickUpdate();
 
             // Output to clients
-            this.sendClientsTickData();
+            this.sendClientsTickAndPositionData();
 
             // Up the tick count
             this.incrementTickCount();
@@ -299,17 +317,6 @@ class LasServerGame extends LasGame {
     handleCannonShotMovement(){
         for (let [cannonBall, index] of this.cannonBalls){
             cannonBall.move();
-        }
-    }
-
-    handleNewCannonShots(){
-        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
-        let idManager = this.getIDManager();
-        let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
-        for (let [cannonShotObj, index] of newCannonShots){
-            // Add an id
-            cannonShotObj["id"] = idManager.generateNewID();
-            this.cannonBalls.push(new CannonBall(this, cannonShotObj));
         }
     }
 

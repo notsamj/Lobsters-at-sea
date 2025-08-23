@@ -1,6 +1,10 @@
+// If run in NodeJS
+if (typeof window === "undefined"){
+    displacementToRadians = require("../../../../general/math_helper.js").displacementToRadians;
+}
 class CannonBall {
     constructor(cannonBallJSON){
-        this.id = cannonBallJSON["id"];
+        this.cannonBallID = cannonBallJSON["cannon_ball_id"];
         this.shooterID = cannonBallJSON["ship_origin_id"];
         this.xV = cannonBallJSON["v_i_x"];
         this.yV = cannonBallJSON["v_i_y"];
@@ -35,7 +39,34 @@ class CannonBall {
     }
 
     getID(){
-        return this.id;
+        return this.cannonBallID;
+    }
+
+    updateMovementOneTickWithWind(windDataJSON){
+        let xA = Math.cos(windDataJSON["wind_direction_rad"]) * windDataJSON["wind_magntiude"];
+        let yA = Math.sin(windDataJSON["wind_direction_rad"]) * windDataJSON["wind_magntiude"];
+
+        let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
+
+        let xInfo = this.getXInfoInMSWithXA(tickMS, xA);
+        let yInfo = this.getYInfoInMSWithYA(tickMS, yA);
+
+        // Get old positions
+        let oldX = this.xPos;
+        let oldY = this.yPos;
+
+        // Get new positions
+        let newX = xInfo["x_pos"];
+        let newY = yInfo["y_pos"];
+
+        // Update x,y
+        this.xPos = newX;
+        this.yPos = newY;
+
+        // Update xv, yv
+        this.xV = xInfo["x_v"];
+        this.yV = yInfo["y_v"];
+                debugger;
     }
 
     move(){
@@ -52,8 +83,6 @@ class CannonBall {
         let newX = xInfo["x_pos"];
         let newY = yInfo["y_pos"];
 
-        let distanceMoved = calculateEuclideanDistance(oldX, oldY, newX, newY);
-
         // Update x,y
         this.xPos = newX;
         this.yPos = newY;
@@ -61,6 +90,10 @@ class CannonBall {
         // Update xv, yv
         this.xV = xInfo["x_v"];
         this.yV = yInfo["y_v"];
+        if (isNaN(this.xV)){
+            debugger;
+            this.getXInfoInMS(tickMS);
+        }
     }
 
     getTickOrientation(){
@@ -70,19 +103,23 @@ class CannonBall {
     getXInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
+        let windXA = windObJ.getXA();
+
+        return this.getXInfoInMSWithXA(ms, windXA);
+    }
+
+    getXInfoInMSWithXA(ms, windXA){
+        let game = this.getGame();
+        let windObJ = this.getGame().getWind();
         let msProportionOfASecond = ms / 1000;
-        let windA = windObJ.getXA();
-
-        // Modify based on wind direction and ship orientation
-        windA *= Math.abs(Ship.calculateWindEffectMagnitude(this.getTickOrientation(), windObJ.getWindDirectionRAD()));
-
-        let cannonBallMovementResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
-        let totalA = windA + cannonBallMovementResistanceA;
-        let newXV = this.xV + totalA * msProportionOfASecond;
-        let newXP = this.xPos + newXV * msProportionOfASecond;
-        if (isNaN(newXP)){
+        if (isNaN(this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"])){
             debugger;
         }
+        let cannonBallMovementResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
+        let totalA = windXA + cannonBallMovementResistanceA;
+        let newXV = this.xV + totalA * msProportionOfASecond;
+        let newXP = this.xPos + newXV * msProportionOfASecond;
+
         return {"x_pos": newXP, "x_v": newXV}
     }
 
@@ -93,15 +130,17 @@ class CannonBall {
     getYInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
-        let msProportionOfASecond = ms / 1000;
-        let windA = windObJ.getYA();
+        let windYA = windObJ.getYA();
+        return this.getYInfoInMSWithYA(ms, windYA);
+    }
 
-        // Modify based on wind direction and ship orientation
-        windA *= Ship.calculateWindEffectMagnitude(this.getTickOrientation(), windObJ.getWindDirectionRAD());
+    getYInfoInMSWithYA(ms, windYA){
+        let game = this.getGame();
+        let msProportionOfASecond = ms / 1000;
 
         let airResistanceCoefficient = this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
         let cannonBallMovementResistanceA = 1/2 * -1 * this.yV * Math.abs(this.yV) * airResistanceCoefficient;
-        let totalA = windA + cannonBallMovementResistanceA;
+        let totalA = windYA + cannonBallMovementResistanceA;
         let newYV = this.yV + totalA * msProportionOfASecond;
         let newYP = this.yPos + newYV * msProportionOfASecond;
         return {"y_pos": newYP, "y_v": newYV}
@@ -207,4 +246,9 @@ class CannonBall {
         // Temp
         //stop();
     }
+}
+
+// If run in NodeJS
+if (typeof window === "undefined"){
+    module.exports = { CannonBall }
 }

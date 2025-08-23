@@ -323,6 +323,7 @@ if (typeof window === "undefined"){
     module.exports = {
         angleBetweenCWRAD,
         calculateEuclideanDistance,
+        displacementToRadians,
         fixRadians,
         getIntervalOverlapDetails,
         rectangleCollidesWithRectangle,

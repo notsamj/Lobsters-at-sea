@@ -19,6 +19,8 @@ module.exports = {
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
     "cannon_ball_settings": MD["cannon_ball_settings"],
+    "max_delay_ms": MD["remote_data_settings"]["max_delay_ms"],
+    "cannon_ball_air_resistance_coefficient": MD["game_properties"]["cannon_ball_air_resistance_coefficient"],
     "default_folder_settings": {
         "default_folders": [
             {   

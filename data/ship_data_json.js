@@ -6,7 +6,7 @@ const SD = {
         "image_height": 512,
         "size_metric": 1000, // used for ship movement resistance calculations. No unit
         "turning_radius_degrees": 90, // degrees per thousand pixels moved
-        "will_power_acceleration": 12, // how much acceleration the ship can muster in it's desired direction in pixels/second
+        "will_power_acceleration": 15, // how much acceleration the ship can muster in it's desired direction in pixels/second
         /*"cannons": [
             // right side
             {
@@ -122,6 +122,14 @@ const SD = {
                 "range_cw": [315, 225]
             }
         ]
+    }
+}
+
+// Set up cannon indices
+for (let shipName of Object.keys(SD)){
+    let index = 0;
+    for (let cannon of SD[shipName]["cannons"]){
+        cannon["cannon_index"] = index++;
     }
 }
 
