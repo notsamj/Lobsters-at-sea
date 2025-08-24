@@ -18,6 +18,10 @@ class Cannon {
         this.calculateRealOffsets(cannonJSON);
     }
 
+    getReloadLock(){
+        return this.reloadLock;
+    }
+
     getCannonIndex(){
         return this.cannonIndex;
     }

@@ -13,6 +13,14 @@ class LasRemoteGame extends LasGame {
         this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
     }
 
+    getVisualEffectRandomGenerator(){
+        return this.visualEffectRandomGenerator;
+    }
+
+    addVisualEffect(visualEffect){
+        this.visualEffects.push(visualEffect);
+    }
+
     addCannonBall(cannonBall){
         this.cannonBalls.push(cannonBall);
     }
@@ -139,7 +147,7 @@ class LasRemoteGame extends LasGame {
 
         // Display ships
         for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
+            if (ship.isDead()){ console.log("Dead"); continue; }
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
 

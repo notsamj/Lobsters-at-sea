@@ -1,6 +1,11 @@
 class HumanShipController {
     constructor(ship){
         this.ship = ship;
+        this.radar = new Radar(ship, MD["radar_settings"]);
+    }
+
+    tick(){
+        this.radar.tick();
     }
 
     getShip(){
@@ -48,5 +53,10 @@ class HumanShipController {
 
 
         return {"orientation_direction_change": lrV, "sail_strength_change": pV, "aiming_cannons": aimingCannons, "aiming_cannons_position_x": cannonX, "aiming_cannons_position_y": cannonY, "fire_cannons": firingCannons}
+    }
+
+    display(){
+        let ship = this.getShip();
+        this.radar.display();
     }
 }

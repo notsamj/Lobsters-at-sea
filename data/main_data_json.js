@@ -31,6 +31,25 @@ const MD = {
         ]
     },
 
+    "radar_settings": {
+        "size": 37,
+        "blip_size": 5,
+        "border_width": 2,
+        "distance_multiplier_a": 250,
+        "b": 1.15,
+        "text_colour": "#32c70c",
+        "text_colour": "#ff6700",
+        "text_size": 18,
+        "text_box_height": 20,
+        "text_box_width": 120,
+        "ms_lock_length": 1000, // wait 1000ms to display again
+        "tick_lock_length": undefined, // calculated
+        "min_distance_to_display": 3500,
+        "radar_outline_width": 189, // width of radar_outline.png
+        "radar_outline_height": 189, // height of radar_outline.png
+        "right_x_offset": 256 // wind_sock_width
+    },
+
     "camera_settings": {
         "left_right_cooldown_ms": 250,
         "move_speed_px_sec": 500
@@ -194,6 +213,8 @@ MD["cannon_settings"]["reload_ticks"] = MD["cannon_settings"]["reload_ms"] / 100
 MD["cannon_ball_settings"]["ticks_until_hit_water"] = MD["cannon_ball_settings"]["ms_until_hit_water"] / 1000 * MD["game_properties"]["tick_rate"];
 
 MD["remote_data_settings"]["max_delay_ticks"] = Math.ceil(MD["remote_data_settings"]["max_delay_ms"] / MD["game_properties"]["ms_between_ticks"]);
+
+MD["radar_settings"]["tick_lock_length"] = MD["radar_settings"]["ms_lock_length"] / 1000 * MD["game_properties"]["tick_rate"];
 
 MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_smoke"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_smoke"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];

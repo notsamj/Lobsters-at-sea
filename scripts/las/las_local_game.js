@@ -17,9 +17,28 @@ class LasLocalGame extends LasGame {
         this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
     }
 
+    tickHumanController(){
+        if (this.hasFocusedShip()){
+            this.humanShipController.tick();
+        }else{
+            this.focusedCamera.tick();
+        }
+    }
+
+    displayHumanController(){
+        if (this.hasFocusedShip()){
+            this.humanShipController.display();
+        }else{
+            this.focusedCamera.display();
+        }
+    }
+
     tick(){
         // Maintenace ticks
         this.tickShips();
+
+        // Tick human controller
+        this.tickHumanController();
 
         // TODO: Update ship orientations, power based on decisions
         this.updateShipOrientationAndSailPower();
@@ -108,16 +127,15 @@ class LasLocalGame extends LasGame {
     }
 
     updateShipDecisions(){
-        // For ship
+        // For human ship
         if (this.hasFocusedShip()){
             let controllerOutputJSON = this.humanShipController.getDecisionJSON();
 
             this.focusedShip.updateFromPilot(controllerOutputJSON);
         }
-        // For camera
-        else{
-            this.focusedCamera.tick();
-        }
+
+        // Bot ship controllers
+        // TODO
     }
 
     updateShipOrientationAndSailPower(){
@@ -212,6 +230,9 @@ class LasLocalGame extends LasGame {
 
         // Display windsock
         this.getWind().display();
+
+        // Display human controller things
+        this.displayHumanController();
 
         // Display relevant things when focused
         this.getFocusedEntity().displayWhenFocused();
@@ -334,12 +355,11 @@ class LasLocalGame extends LasGame {
         // Load windsock
         await GC.loadToImages("wind_sock");
 
+        // Load radar outline
+        await GC.loadToImages("radar_outline");
+
         // Load crosshair
         await GC.loadToImages("crosshair");
-
-        // Load project images
-        await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();
-        await GC.getMenuManager().getMenuByName("help_menu").loadImages();
 
         // Load cannon ball
         await GC.loadToImages("cannon_ball");
@@ -348,6 +368,12 @@ class LasLocalGame extends LasGame {
         await GC.loadToImages("generic_ship_left", "/ships/generic_ship/");
         await GC.loadToImages("generic_ship_down", "/ships/generic_ship/");
         await GC.loadToImages("generic_ship_up", "/ships/generic_ship/");
+
+        // Load project images
+        await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();
+
+        // Load help menu images
+        await GC.getMenuManager().getMenuByName("help_menu").loadImages();
 
         console.log("Finished loading game images.")
     }

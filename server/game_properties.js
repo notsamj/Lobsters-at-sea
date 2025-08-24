@@ -21,6 +21,7 @@ module.exports = {
     "cannon_ball_settings": MD["cannon_ball_settings"],
     "max_delay_ms": MD["remote_data_settings"]["max_delay_ms"],
     "cannon_ball_air_resistance_coefficient": MD["game_properties"]["cannon_ball_air_resistance_coefficient"],
+    "visual_effect_settings": MD["visual_effect_settings"], // Needed because this is received by the client
     "default_folder_settings": {
         "default_folders": [
             {   

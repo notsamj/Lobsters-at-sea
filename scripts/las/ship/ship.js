@@ -50,6 +50,10 @@ class Ship {
         }
     }
 
+    getCannons(){
+        return this.cannons;
+    }
+
     getPositionJSON(){
         return {
             "id": this.id,
@@ -118,15 +122,23 @@ class Ship {
         if (this.isDead()){
             game.getGameRecorder().addToTimeline(game.getTickCount(), {
                 "event_type": "ship_sunk",
-                "ship": this.getID(),
+                "ship_id": this.getID(),
                 "x_pos": this.xPos,
                 "y_pos": this.yPos
             });
         }
     }
 
+    kill(){
+        this.health = 0;
+    }
+
     isDead(){
-        return this.health <= 0;
+        return this.getHealth() <= 0;
+    }
+
+    getHealth(){
+        return this.health;
     }
 
     tick(){
@@ -195,7 +207,7 @@ class Ship {
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
-        console.log("Firing")
+        //console.log("Firing")
 
         let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
         let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];

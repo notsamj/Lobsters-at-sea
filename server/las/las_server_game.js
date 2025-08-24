@@ -33,7 +33,8 @@ class LasServerGame extends LasGame {
             "sail_strength": 1,
             "ship_model": "generic_ship",
             "game_instance": this,
-            "id": this.getIDManager().generateNewID()
+            "id": this.getIDManager().generateNewID(),
+            "health": 10
         }
         this.ships.push(new Ship(tempShipJSON));
 
@@ -46,7 +47,8 @@ class LasServerGame extends LasGame {
             "sail_strength": 1,
             "ship_model": "generic_ship",
             "game_instance": this,
-            "id": this.getIDManager().generateNewID()
+            "id": this.getIDManager().generateNewID(),
+            "health": 10
         }
         this.ships.push(new Ship(tempShipJSON2));
 
@@ -83,7 +85,8 @@ class LasServerGame extends LasGame {
                     "sail_strength": 1,
                     "ship_model": "generic_ship",
                     "game_instance": this,
-                    "id": newShipID
+                    "id": newShipID,
+                    "health": 10
                 }
                 this.ships.push(new Ship(newShipJSON));
 
@@ -105,7 +108,8 @@ class LasServerGame extends LasGame {
                     "starting_orientation_rad": ship.getTickOrientation(),
                     "sail_strength": ship.getTickSailStrength(),
                     "ship_model": ship.getShipModel(),
-                    "id": ship.getID()
+                    "id": ship.getID(),
+                    "health": ship.getHealth()
                 }
             );
         }
@@ -221,7 +225,7 @@ class LasServerGame extends LasGame {
 
         // Add ship positions
         for (let [ship, shipIndex] of this.ships){
-            tickDataMessageJSON["tick_data"]["ship_positions"].push(ship.getPositionJSON());
+            positionDataMessageJSON["ship_positions"].push(ship.getPositionJSON());
         }
         // Must be two messages because tick data is read EACH TIME and only most recent position data received is read
         this.sendAll(positionDataMessageJSON);

@@ -39,7 +39,7 @@ class Battle extends Gamemode {
 
         let game = this.getGame();
         let previousTick = game.getTickCount();
-        console.log("cb -2", cannonShots.getLength());
+        //console.log("cb -2", cannonShots.getLength());
 
         // Look for message meeting conditions
         let lastRelevantUpdate = null;
@@ -96,6 +96,7 @@ class Battle extends Gamemode {
 
         // Expect this won't happen
         if (windIndex === -1){
+            debugger;
             throw new Error("Failed to find wind for given tick.");
         }
 
@@ -107,11 +108,8 @@ class Battle extends Gamemode {
     }
 
     readTickData(tickDataJSON, serverTick, currentTick){
-        
-
-
         // Process new cannon shots
-        this.processCannonBallLaunches(tickDataJSON["new_cannon_shots"]);
+        this.processCannonBallLaunches(tickDataJSON["new_cannon_shots"], serverTick, currentTick);
 
         // Process cannon balls hitting ships
         this.processCannonBallHits(tickDataJSON["cannon_ball_hits"]);
@@ -133,9 +131,14 @@ class Battle extends Gamemode {
             
             // Catch up cannon ball, past -> now
             //debugger;
+
+            // Lock the cannon 
+            this.lockShipCannon(cannonShotJSON["ship_origin_id"], cannonShotJSON["cannon_index"], currentTick - serverTickOfLaunches);
+            
+            // Set up the cannon ball
             this.catchUpCannonBallMovement(newCannonBall, serverTickOfLaunches, currentTick-1);
             
-            console.log("new cannon ball", newCannonBall);
+            //console.log("new cannon ball", newCannonBall);
             if (isNaN(newCannonBall.xV)){
                 debugger;
             }
@@ -143,14 +146,70 @@ class Battle extends Gamemode {
         }
     }
 
-    processCannonBallHits(){
-        // TODO
+    lockShipCannon(shipID, cannonIndex, ticksSinceLock){
+        let cannon = this.getGame().getShipByID(shipID).getCannons()[cannonIndex];
+        let reloadLock = cannon.getReloadLock();
+        // Lock it
+        reloadLock.lock();
+        for (let i = 0; i < ticksSinceLock; i++){
+            reloadLock.tick();
+        }
     }
-    processCannonBallSinkings(){
-        // TODO
+
+    processCannonBallHits(cannonBallHits){
+        let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
+        //debugger;
+        for (let cBH of cannonBallHits){
+            // Delete cannon ball
+            this.deleteCannonBall(cBH["cannon_ball_id"]);
+            // Add the visual effect
+            this.getGame().addVisualEffect(new CannonBallHit(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), cBH, visaulEffectsSettings["cannon_ball_hit"]));
+        }
     }
-    processShipSinkings(){
-        // TODO
+
+    deleteCannonBall(id){
+        let index = -1;
+        let cannonBalls = this.getGame().getCannonBalls();
+        for (let [cannonBall, cannonBallIndex] of cannonBalls){
+            if (cannonBall.getID() === id){
+                index = cannonBallIndex;
+                break;
+            }
+        }
+
+        // If found, remove
+        if (index != -1){
+            cannonBalls.pop(index);
+        }
+    }
+
+    processCannonBallSinkings(cannonBallSinkings){
+        let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
+        for (let cBSi of cannonBallSinkings){
+            // Delete cannon ball
+            this.deleteCannonBall(cBSi["cannon_ball_id"]);
+            // Add the visual effect
+            this.getGame().addVisualEffect(new CannonBallSplash(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), cBSi, visaulEffectsSettings["cannon_ball_splash"]));
+        }
+    }
+    processShipSinkings(shipSinkings){
+        let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
+        for (let sS of shipSinkings){
+            // Kill ship
+            this.killShip(sS["ship_id"]);
+            // Add the visual effect
+            this.getGame().addVisualEffect(new ShipSplash(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), sS, visaulEffectsSettings["ship_splash"]));
+        }
+    }
+
+    killShip(shipID){
+        for (let [ship, shipIndex] of this.getGame().getShips()){
+            if (ship.getID() === shipID){
+                ship.kill();
+                return;
+            }
+        }
+        throw new Error("Error finding ship: " + shipID);
     }
 
     async recordWind(){
@@ -220,7 +279,7 @@ class Battle extends Gamemode {
         let relevantDataToUpdateFrom = lastRelevantUpdate["data_json"];
         
         let ticksAhead = previousTick - lastRelevantUpdate["data_json"]["server_tick"];
-        this.updateShipsPositions(ticksAhead, lastRelevantUpdate["data_json"]["tick_data"]["ship_positions"]);
+        this.updateShipsPositions(ticksAhead, lastRelevantUpdate["data_json"]["ship_positions"]);
     }
 
     updateShipsPositions(ticksAhead, shipPositions){
