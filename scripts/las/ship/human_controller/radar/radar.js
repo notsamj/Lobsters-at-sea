@@ -225,7 +225,6 @@ class Radar {
             let sY = ship.getTickY();
             let distance = calculateEuclideanDistance(myX, myY, sX, sY);
             // Check if we can find a ship far enough to justify the radar
-            console.log(distance)
             if (distance >= this.radarSettingsJSON["min_distance_to_display"]){
                 shipFoundFarEnough = true;
             }

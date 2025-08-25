@@ -30,8 +30,7 @@ class Playground extends Gamemode {
             "health": 15,
             "starting_x_pos": 0,
             "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
+            "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
@@ -50,8 +49,7 @@ class Playground extends Gamemode {
             "health": 20,
             "starting_x_pos": 250,
             "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
+            "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 0,
             "ship_model": "generic_ship",
@@ -60,7 +58,7 @@ class Playground extends Gamemode {
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        game.addShip(tempShip2);
+        //game.addShip(tempShip2);
     }
 
     tick(){
@@ -94,6 +92,7 @@ class Playground extends Gamemode {
         hud.updateElement("x_v", this.getGame().getFocusedEntity().getTickXV().toFixed(2));
         hud.updateElement("y", this.getGame().getFocusedEntity().getTickY().toFixed(2));
         hud.updateElement("y_v", this.getGame().getFocusedEntity().getTickYV().toFixed(2));
+        hud.updateElement("speed", this.getGame().getFocusedEntity().getSpeed().toFixed(2));
         hud.updateElement("orientation", toDegrees(this.getGame().getFocusedEntity().getTickOrientation()).toFixed(2));
         hud.updateElement("sail strength", this.getGame().getFocusedEntity().getTickSailStrength().toFixed(2));
         

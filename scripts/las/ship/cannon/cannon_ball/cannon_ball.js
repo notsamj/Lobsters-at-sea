@@ -112,9 +112,6 @@ class CannonBall {
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
         let msProportionOfASecond = ms / 1000;
-        if (isNaN(this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"])){
-            debugger;
-        }
         let cannonBallMovementResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
         let totalA = windXA + cannonBallMovementResistanceA;
         let newXV = this.xV + totalA * msProportionOfASecond;

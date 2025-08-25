@@ -9,8 +9,9 @@ const MD = {
         "expected_canvas_height": 927,
         "cursor_enabled": true,
         "frame_rate": 80,
-        "ship_movement_resistance_coefficient": 0.00000525,
-        "cannon_ball_air_resistance_coefficient": 0.00001525
+        "ship_air_resistance_coefficient": 1,
+        "cannon_ball_air_resistance_coefficient": 0.00011525,
+        "will_reduction_on_account_of_sail_strength_multiplier": 0.25 // if your sail_strength = 0 then your willpower will be reduced by 1 * multiplier * 100 percent, sail_strength = 0.5 then reduced by 0.5 * multiplier * 100 percent
     },
 
     "remote_data_settings": {

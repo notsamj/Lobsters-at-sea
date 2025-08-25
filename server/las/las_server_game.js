@@ -27,8 +27,7 @@ class LasServerGame extends LasGame {
         let tempShipJSON = {
             "starting_x_pos": 0,
             "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
+            "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
@@ -41,8 +40,7 @@ class LasServerGame extends LasGame {
         let tempShipJSON2 = {
             "starting_x_pos": 550,
             "starting_y_pos": 0,
-            "starting_x_velocity": 0,
-            "starting_y_velocity": 0,
+            "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
@@ -79,8 +77,7 @@ class LasServerGame extends LasGame {
                 let newShipJSON = {
                     "starting_x_pos": 900,
                     "starting_y_pos": 0,
-                    "starting_x_velocity": 0,
-                    "starting_y_velocity": 0,
+                    "starting_speed": 0,
                     "starting_orientation_rad": toRadians(90),
                     "sail_strength": 1,
                     "ship_model": "generic_ship",
@@ -103,8 +100,7 @@ class LasServerGame extends LasGame {
                 {
                     "starting_x_pos": ship.getTickX(),
                     "starting_y_pos": ship.getTickY(),
-                    "starting_x_velocity": ship.getTickXV(),
-                    "starting_y_velocity": ship.getTickYV(),
+                    "starting_speed": ship.getSpeed(),
                     "starting_orientation_rad": ship.getTickOrientation(),
                     "sail_strength": ship.getTickSailStrength(),
                     "ship_model": ship.getShipModel(),

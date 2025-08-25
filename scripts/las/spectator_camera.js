@@ -171,6 +171,13 @@ class SpectatorCamera {
         return 0;
     }
 
+    getSpeed(){
+        if (this.isFollowingAShip()){
+            return this.followedShip.getSpeed();
+        }
+        return 0;
+    }
+
     /*
         Method Name: getFrameX
         Method Parameters: None
