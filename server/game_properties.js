@@ -19,16 +19,22 @@ module.exports = {
     "cannon_settings": MD["cannon_settings"],
     "cannon_ball_settings": MD["cannon_ball_settings"],
     "max_delay_ms": MD["remote_data_settings"]["max_delay_ms"],
-    "cannon_ball_air_resistance_coefficient": MD["game_properties"]["cannon_ball_air_resistance_coefficient"],
+    "cannon_ball_wind_effect_coefficient": MD["game_properties"]["cannon_ball_wind_effect_coefficient"],
     "visual_effect_settings": MD["visual_effect_settings"], // Needed because this is received by the client
     "will_reduction_on_account_of_sail_strength_multiplier": MD["game_properties"]["will_reduction_on_account_of_sail_strength_multiplier"],
-    "ship_air_resistance_coefficient": MD["game_properties"]["ship_air_resistance_coefficient"]
+    "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
+    "winning_screen_settings": MD["winning_screen_settings"],
+    "ship_colours": MD["ship_colours"],
     "default_folder_settings": {
         "default_folders": [
             {   
                 "folder_name": "pending_decisions", 
-                "max_size": 100,
-            }
+                "max_size": 1,
+            },
+            {   
+                "folder_name": "lobby_join", 
+                "max_size": 1,
+            },
         ]
     }
 }

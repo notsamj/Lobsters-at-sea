@@ -1,7 +1,7 @@
-const Lock = require("../scripts/general/lock.js").Lock;
-const NotSamLinkedList = require("../scripts/general/notsam_linked_list.js").NotSamLinkedList;
+const Lock = require("../../scripts/general/lock.js").Lock;
+const NotSamLinkedList = require("../../scripts/general/notsam_linked_list.js").NotSamLinkedList;
 
-class ServerMailbox {
+class ServerMailBox {
     constructor(defaultFolderSettingsJSON){
         this.folders = new NotSamLinkedList();
         this.setupDefaults(defaultFolderSettingsJSON);
@@ -17,12 +17,12 @@ class ServerMailbox {
     }
 
     /*
-        Method Name: getAccess
+        Method Name: requestAccess
         Method Parameters: None
         Method Description: Awaits access to be granted
         Method Return: Promise (implicit)
     */
-    async getAccess(){
+    async requestAccess(){
         return this.accessLock.awaitUnlock(true);
     }
 
@@ -76,7 +76,6 @@ class ServerMailbox {
     }
 
     deliver(dataJSON, folderName="general"){
-        //console.log("Delvering", JSON.stringify(dataJSON))
         let folderObj = this.getCreateFolder(folderName);
         folderObj["list"].push({"read": false, "data_json": dataJSON});
 
@@ -89,4 +88,4 @@ class ServerMailbox {
 
 }
 
-module.exports = { ServerMailbox }
+module.exports = { ServerMailBox }

@@ -14,12 +14,12 @@ class ClientMailbox {
     }
 
     /*
-        Method Name: getAccess
+        Method Name: requestAccess
         Method Parameters: None
         Method Description: Awaits access to be granted
         Method Return: Promise (implicit)
     */
-    async getAccess(){
+    async requestAccess(){
         return this.accessLock.awaitUnlock(true);
     }
 

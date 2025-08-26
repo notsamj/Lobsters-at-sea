@@ -28,6 +28,8 @@ class Ship {
 
         this.shipModel = shipJSON["ship_model"];
 
+        this.shipColour = shipJSON["ship_colour"];
+
         this.gameInstance = shipJSON["game_instance"];
 
         this.propulsionConstant = Math.sqrt(this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["max_self_propulsion_speed"]);
@@ -52,6 +54,10 @@ class Ship {
             "aiming_cannons_position_x": null, // null or a float
             "aiming_cannons_position_y": null // null or a float
         }
+    }
+
+    getColour(){
+        return this.shipColour;
     }
 
     getSpeed(){
@@ -87,9 +93,10 @@ class Ship {
 
         this.xPos = shipPositionJSON["x_pos"];
         this.yPos = shipPositionJSON["y_pos"];
-        this.speed = newXInfo["speed"];
+        this.speed = shipPositionJSON["speed"];
         this.xV = shipPositionJSON["x_v"];
         this.yV = shipPositionJSON["y_v"];
+        this.speed = shipPositionJSON["speed"];
         this.orientationRAD = shipPositionJSON["orientation_rad"];
         this.shipSailStrength = shipPositionJSON["sail_strength"];
         this.establishedDecisions = shipPositionJSON["established_decisions"];
@@ -98,16 +105,15 @@ class Ship {
         // Move ahead in ticks
         if (ticksAhead > 0){
             let timeAheadMS = ticksAhead * this.getGame().getGameProperties()["ms_between_ticks"];
-            let newXInfo = this.getXInfoInMS(timeAheadMS);
-            let newYInfo = this.getYInfoInMS(timeAheadMS);
+            let positionInfo = this.getPositionInfoInMS(timeAheadMS);
 
-            this.speed = newXInfo["speed"];
+            this.speed = positionInfo["speed"];
 
-            this.xV = newXInfo["x_v"];
-            this.yV = newYInfo["y_v"];
+            this.xV = positionInfo["x_v"];
+            this.yV = positionInfo["y_v"];
 
-            this.xPos = newXInfo["x_pos"];
-            this.yPos = newYInfo["y_pos"];
+            this.xPos = positionInfo["x_pos"];
+            this.yPos = positionInfo["y_pos"];
 
 
         }
@@ -147,6 +153,10 @@ class Ship {
 
     isDead(){
         return this.getHealth() <= 0;
+    }
+
+    isAlive(){
+        return !this.isDead();
     }
 
     getHealth(){
@@ -224,12 +234,10 @@ class Ship {
         let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
         let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
 
-        let aimingAngleRAD = displacementToRadians(aimingCannonsPositionX - this.getTickX(), aimingCannonsPositionY - this.getTickY());
-
         // Fire elligible cannons
         for (let cannon of this.cannons){
-            if (cannon.canAimAt(aimingAngleRAD) && cannon.isLoaded()){
-                cannon.fire(aimingAngleRAD);
+            if (cannon.canAimAt(aimingCannonsPositionX, aimingCannonsPositionY) && cannon.isLoaded()){
+                cannon.fire(aimingCannonsPositionX, aimingCannonsPositionY);
             }
         }
     }
@@ -245,13 +253,11 @@ class Ship {
         let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
         let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
 
-        let aimingAngleRAD = displacementToRadians(aimingCannonsPositionX - this.getTickX(), aimingCannonsPositionY - this.getTickY());
-
         let cannonCount = 0;
     
         // Count the number of cannons that can aim at the current position
         for (let cannon of this.cannons){
-            if (cannon.canAimAt(aimingAngleRAD) && cannon.isLoaded()){
+            if (cannon.canAimAt(aimingCannonsPositionX, aimingCannonsPositionY) && cannon.isLoaded()){
                 cannonCount++;
             }
         }
@@ -398,17 +404,17 @@ class Ship {
 
     // Note: Local only
     getFrameX(){
-        return this.getXInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
+        return this.getXInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
     // Note: Local only
     getFrameY(){
-        return this.getYInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
+        return this.getYInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
     // Note: Local only
     getFrameOrientation(){
-        return this.getOrientationInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
+        return this.getOrientationInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
     getOrientationInMS(ms){
@@ -524,8 +530,7 @@ class Ship {
         scale(gameZoom * 1 / shipImageSizeConstantX, gameZoom * 1 / shipImageSizeConstantY);
 
         // Display Ship
-        // TEMP
-        displayImage(GC.getImage("generic_ship_" + imageToUse), 0 - (shipWidth-1) / 2 * shipImageSizeConstantX, 0 - (shipHeight-1) / 2 * shipImageSizeConstantY); 
+        displayImage(GC.getImage(this.getShipModel() + "_" + imageToUse + "_" + this.getColour()), 0 - (shipWidth-1) / 2 * shipImageSizeConstantX, 0 - (shipHeight-1) / 2 * shipImageSizeConstantY); 
 
         // Undo game zoom
         scale(1/gameZoom * shipImageSizeConstantX, 1/gameZoom * shipImageSizeConstantY);
@@ -567,7 +572,7 @@ class Ship {
         let windEffectMagnitude = Ship.calculateWindEffectMagnitude(this.getTickOrientation(), windObJ.getWindDirectionRAD());
 
         // Modify by regular wind resistence
-        windEffectMagnitude *= game.getGameProperties()["ship_air_resistance_coefficient"];
+        windEffectMagnitude *= game.getGameProperties()["ship_air_affectedness_coefficient"];
         
         windXA *= Math.abs(windEffectMagnitude);
         windYA *= Math.abs(windEffectMagnitude);

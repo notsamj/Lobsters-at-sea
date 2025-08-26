@@ -1,18 +1,30 @@
 const MD = {
     "game_properties": {
         "tick_rate": 40, // ticks per secnd
-        "ms_between_ticks_floor": 0, // calculated
-        "ms_between_ticks_ceil": 0, // calculated
-        "ms_between_ticks": 0, // calculated
+        "ms_between_ticks_floor": undefined, // calculated
+        "ms_between_ticks_ceil": undefined, // calculated
+        "ms_between_ticks": undefined, // calculated
         "approximate_zoom_peek_time_ms": 500, // ms
         "expected_canvas_width": 1920,
         "expected_canvas_height": 927,
         "cursor_enabled": true,
         "frame_rate": 80,
-        "ship_air_resistance_coefficient": 1,
-        "cannon_ball_air_resistance_coefficient": 0.00011525,
-        "will_reduction_on_account_of_sail_strength_multiplier": 0.25 // if your sail_strength = 0 then your willpower will be reduced by 1 * multiplier * 100 percent, sail_strength = 0.5 then reduced by 0.5 * multiplier * 100 percent
+        "ship_air_affectedness_coefficient": 2,
+        "cannon_ball_wind_effect_coefficient": 16,
+        "will_reduction_on_account_of_sail_strength_multiplier": 0.075, // if your sail_strength = 0 then your willpower will be reduced by 1 * multiplier * 100 percent, sail_strength = 0.5 then reduced by 0.5 * multiplier * 100 percent
+        "max_ships": undefined // calculated
     },
+
+    "ship_colours": [
+        "white",
+        "red",
+        "orange",
+        "green",
+        "blue",
+        "grey",
+        "black",
+        "purple"
+    ],
 
     "remote_data_settings": {
         "max_delay_ms": 1000, // server can be X ms slow before breaking
@@ -28,9 +40,25 @@ const MD = {
             {   
                 "folder_name": "position_data", 
                 "max_size": undefined, // calculated
+            },
+            {   
+                "folder_name": "end_data", 
+                "max_size": 1,
             }
         ]
     },
+
+    "winning_screen_settings": {
+        "winning_colour_code": "#49eb34",
+        "winning_text": "You win!",
+        "neutral_colour": "#6528bf",
+        "neutral_text": "A ship has won!",
+        "losing_colour_code": "#ed1527",
+        "losing_text": "An enemy ship has won!",
+        "error_colour_code": "#5e0008",
+        "error_text": "The game has ended unexpectedly."
+    },
+
 
     "radar_settings": {
         "size": 37,
@@ -57,9 +85,16 @@ const MD = {
     },
 
     "wind_settings": {
-        "wind_initial_magnitude": 20,
-        "wind_magnitude_change_amount_per_second": 8,
-        "wind_direction_change_amount_per_second_deg": 40 
+        "wind_min_magnitude": 3,
+        "wind_max_magnitude": 40,
+        "wind_min_direction_movement_ms": 20000, // 20s
+        "wind_max_direction_movement_ms": 80000, // 80s
+        "wind_min_magnitude_movement_ms": 15000, // 15s
+        "wind_max_magnitude_movement_ms": 40000, // 40s
+        "wind_min_direction_movement_ticks": undefined, // caculated
+        "wind_max_direction_movement_ticks": undefined, // caculated
+        "wind_min_magnitude_movement_ticks": undefined, // caculated
+        "wind_max_magnitude_movement_ticks": undefined // caculated
     },
 
     "sound_data": {
@@ -217,6 +252,11 @@ MD["remote_data_settings"]["max_delay_ticks"] = Math.ceil(MD["remote_data_settin
 
 MD["radar_settings"]["tick_lock_length"] = MD["radar_settings"]["ms_lock_length"] / 1000 * MD["game_properties"]["tick_rate"];
 
+MD["wind_settings"]["wind_min_direction_movement_ticks"] = MD["wind_settings"]["wind_min_direction_movement_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["wind_settings"]["wind_max_direction_movement_ticks"] = MD["wind_settings"]["wind_max_direction_movement_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["wind_settings"]["wind_min_magnitude_movement_ticks"] = MD["wind_settings"]["wind_min_magnitude_movement_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+MD["wind_settings"]["wind_max_magnitude_movement_ticks"] = MD["wind_settings"]["wind_max_magnitude_movement_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+
 MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_smoke"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_smoke"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
@@ -226,6 +266,9 @@ MD["visual_effect_settings"]["ship_splash"]["life_length_ticks"] = MD["visual_ef
 MD["default_folder_settings"]["default_folders"][0]["max_size"] = MD["remote_data_settings"]["max_delay_ticks"];
 // Set position launch data storage size
 MD["default_folder_settings"]["default_folders"][1]["max_size"] = MD["remote_data_settings"]["max_delay_ticks"];
+
+// Ship colours
+MD["game_properties"]["max_ships"] = MD["ship_colours"].length;
 
 // If NodeJS -> Exports
 if (typeof window === "undefined"){

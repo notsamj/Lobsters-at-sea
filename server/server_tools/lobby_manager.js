@@ -10,6 +10,15 @@ class LobbyManager {
         this.clients = new NotSamLinkedList();
     }
 
+    hasClient(clientID){
+        for (let [client, clientID] of this.clients){
+            if (clientID === client.getID()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     addClient(client){
         let old = this.clients.getLength();
         this.clients.push(client);
@@ -35,7 +44,9 @@ class LobbyManager {
     }
 
     transferToGame(){
-        return {"client_data": this.clients.copy(), "client_role": this.playerRole }
+        let data = {"client_data": this.clients.copy(), "client_role": this.playerRole }
+        this.clients.clear();
+        return data;
     }
 }
 module.exports = { LobbyManager }

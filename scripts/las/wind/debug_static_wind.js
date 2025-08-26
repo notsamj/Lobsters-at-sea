@@ -7,19 +7,17 @@ if (typeof window === "undefined"){
     TickLock = require("../../general/tick_lock.js").TickLock;
 }
 
-class Wind {
+class DebugStaticWind {
     constructor(game){
         this.game = game;
-        this.randomizer = new SeededRandomizer(this.game.getGameProperties()["random_seed"]);
-        this.windMagntiude = undefined;
-        this.windDirectionRAD = undefined;
+        this.windMagntiude = 10;
+        this.windDirectionRAD = toRadians(270);
 
         this.windMagnitudeChangePerTick = undefined;
         this.windDirectionChangePerTickRAD = undefined;
 
         this.windMagnitudeChangeLock = new TickLock(1);
         this.windDirectionChangeLock = new TickLock(1);
-        this.initialize(); 
     }
 
     print(){
@@ -84,28 +82,6 @@ class Wind {
     }
 
     tickUpdate(){
-        let windSettings = this.game.getGameProperties()["wind_settings"];
-        
-        // Update targets if needed
-        if (this.windMagnitudeChangeLock.isUnlocked()){
-            this.updateMagnitudeTarget();
-        }
-
-        if (this.windDirectionChangeLock.isUnlocked()){
-            this.updateDirectionTarget();
-        }
-
-        // Update
-        let newWindMagntiude = this.windMagntiude + this.windMagnitudeChangePerTick;
-
-        this.windMagntiude = Math.min(windSettings["wind_max_magnitude"], Math.max(newWindMagntiude, windSettings["wind_min_magnitude"]));
-       
-        let b4 = this.windDirectionRAD;
-        this.windDirectionRAD = fixRadians(this.windDirectionRAD + this.windDirectionChangePerTickRAD);
-        //console.log("New, oold, chang", this.windDirectionRAD, b4, this.windDirectionChangePerTickRAD);
-        // Tick locks
-        this.windMagnitudeChangeLock.tick();
-        this.windDirectionChangeLock.tick();
     }
 
     getXA(){
@@ -151,5 +127,5 @@ class Wind {
 
 // If using Node JS Export the class
 if (typeof window === "undefined"){
-    module.exports = { Wind } ;
+    module.exports = { DebugStaticWind } ;
 }

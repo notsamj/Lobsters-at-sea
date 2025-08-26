@@ -106,7 +106,7 @@ class ServerConnection {
         });
 
         // Await permission
-        await this.clientMailbox.getAccess();
+        await this.clientMailbox.requestAccess();
 
         // Clear the mailbox
         this.clientMailbox.clear();
@@ -137,13 +137,17 @@ class ServerConnection {
 
         // Connection on listener
         this.connectionWS.addEventListener("open", (event) => {
+            thisReference.notifyConnectionActive();
+
             thisReference.getEventHandler().emit({
                 "name": "status_update",
                 "category": "green",
                 "text": getPrettyTime() + ' ' + "Connected to: " + fullAddrString + "!"
             })
 
-            thisReference.notifyConnectionActive();
+            thisReference.getEventHandler().emit({
+                "name": "connection_initiated"
+            });
         });
 
         // Connection failed listener
@@ -167,7 +171,7 @@ class ServerConnection {
         let dataJSON = JSON.parse(event["data"]);
 
         // Get access
-        await this.clientMailbox.getAccess();
+        await this.clientMailbox.requestAccess();
 
         // Deliver the data
         this.clientMailbox.deliver(dataJSON, dataJSON["subject"]);

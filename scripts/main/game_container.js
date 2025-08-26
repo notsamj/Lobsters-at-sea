@@ -115,11 +115,17 @@ class GameContainer {
                 The folder prefix in images
             type:
                 The type of file
+            extraData:
+                JSON of extra data to submit when needed
         Function Description: Loads an image to the image JSON
         Function Return: Promise (implicit)
     */
-    async loadToImages(imageName, folderPrefix="", type=".png"){
-        this.IMAGES[imageName] = await loadLocalImage("images/" + folderPrefix + imageName + type);
+    async loadToImages(imageName, folderPrefix="", type=".png", extraData={}){
+        let imageFileName = imageName + type;
+        if (objectHasKey(extraData, "custom_name")){
+            imageName = extraData["custom_name"];
+        }
+        this.IMAGES[imageName] = await loadLocalImage("images/" + folderPrefix + imageFileName);
     }
 
     hasImage(imageName){

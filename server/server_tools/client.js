@@ -1,11 +1,18 @@
+const ServerMailBox = require("./server_mailbox.js").ServerMailBox;
 class Client {
-    constructor(clientWS, server){
+    constructor(clientWS, id, server, defaultFolderSettings){
         this.server = server;
+        this.id = id;
         this.clientWS = clientWS;
+        this.mailBox = new ServerMailBox(defaultFolderSettings);
         let myReference = this;
         clientWS.on("message", (message) => {
             myReference.messageFromClient(message);
         });
+    }
+
+    getID(){
+        return this.id;
     }
 
     sendJSON(messageJSON){
@@ -20,8 +27,17 @@ class Client {
         this.clientWS.send(message);
     }
 
-    messageFromClient(message){
-        this.server.deliverClientMessage(this, message.toString());
+    async messageFromClient(message){
+        let messageJSON = JSON.parse(message.toString());
+        // Get access
+        await this.mailBox.requestAccess();
+        this.mailBox.deliver(messageJSON, messageJSON["subject"]);
+        // Give up access
+        this.mailBox.relinquishAccess();
+    }
+
+    getMailBox(){
+        return this.mailBox;
     }
 
     connectionIsDead(){

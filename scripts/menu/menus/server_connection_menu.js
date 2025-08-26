@@ -54,9 +54,26 @@ class ServerConnectionMenu extends Menu {
             selfReference.serverMessage(eventJSON);
         }
 
+        let lobbyJoinFunc = (eventJSON) => {
+            selfReference.lobbyJoinFunc(eventJSON);
+        }
+
+        SC.getEventHandler().addHandler("connection_initiated", lobbyJoinFunc);
+
         SC.getEventHandler().addHandler("status_update", statusUpdateHandlerFunction);
 
         SC.getEventHandler().addHandler("server_message", serverMessageHandlerFunction);
+    }
+
+    lobbyJoinFunc(){
+        if (!this.isActiveMenu()){ return; }
+
+        // This is the active menu
+        let lobbbyJoinRequest = {
+            "subject": "lobby_join"
+        }
+
+        SC.sendJSON(lobbbyJoinRequest);
     }
 
     serverMessage(eventJSON){

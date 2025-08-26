@@ -15,6 +15,20 @@ class LasLocalGame extends LasGame {
 
         this.visualEffects = new NotSamLinkedList();
         this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
+
+        this.updatingFramePositions = true;
+        this.lastUpdatedFrameMS = 0;
+    }
+
+    setUpdatingFramePositions(value){
+        this.updatingFramePositions = value;
+    }
+
+    getDisplayMSSinceLastTick(){
+        if (this.updatingFramePositions){
+            this.lastUpdatedFrameMS = GC.getGameTickScheduler().getDisplayMSSinceLastTick();    
+        }
+        return this.lastUpdatedFrameMS;
     }
 
     tickHumanController(){
@@ -183,13 +197,14 @@ class LasLocalGame extends LasGame {
 
     reset(){
         super.reset();
+        this.visualEffects.clear();
     }
 
     displayVisualEffects(){
         let visualEffectsThatExpiredIndices = new NotSamLinkedList();
 
         let currentTick = this.getTickCount();
-        let msSinceLastTick = GC.getGameTickScheduler().getDisplayMSSinceLastTick();
+        let msSinceLastTick = this.getDisplayMSSinceLastTick();
 
         // Go through and display / prepare for removal
         for (let [visualEffect, visualEffectIndex] of this.visualEffects){
@@ -364,10 +379,13 @@ class LasLocalGame extends LasGame {
         // Load cannon ball
         await GC.loadToImages("cannon_ball");
 
-        // Load ship
-        await GC.loadToImages("generic_ship_left", "/ships/generic_ship/");
-        await GC.loadToImages("generic_ship_down", "/ships/generic_ship/");
-        await GC.loadToImages("generic_ship_up", "/ships/generic_ship/");
+        // Load ships
+        let shipPathPrefix = "/ships/generic_ship/";
+        for (let colour of MD["ship_colours"]){
+            await GC.loadToImages("generic_ship_left", shipPathPrefix + colour + "/", ".png", {"custom_name": "generic_ship_left_" + colour});
+            await GC.loadToImages("generic_ship_down", shipPathPrefix + colour + "/", ".png", {"custom_name": "generic_ship_down_" + colour});
+            await GC.loadToImages("generic_ship_up", shipPathPrefix + colour + "/", ".png", {"custom_name": "generic_ship_up_" + colour});
+        }
 
         // Load project images
         await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();

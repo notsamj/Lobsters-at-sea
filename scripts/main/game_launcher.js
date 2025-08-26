@@ -15,12 +15,14 @@ let gameProperties = {
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
     "cannon_ball_settings": MD["cannon_ball_settings"],
-    "cannon_ball_air_resistance_coefficient": MD["game_properties"]["cannon_ball_air_resistance_coefficient"],
+    "cannon_ball_wind_effect_coefficient": MD["game_properties"]["cannon_ball_wind_effect_coefficient"],
     "visual_effect_settings": MD["visual_effect_settings"],
     "max_delay_ms": MD["remote_data_settings"]["max_delay_ms"],
     "max_delay_ticks": MD["remote_data_settings"]["max_delay_ticks"],
     "will_reduction_on_account_of_sail_strength_multiplier": MD["game_properties"]["will_reduction_on_account_of_sail_strength_multiplier"],
-    "ship_air_resistance_coefficient": MD["game_properties"]["ship_air_resistance_coefficient"]
+    "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
+    "winning_screen_settings": MD["winning_screen_settings"],
+    "ship_colours": MD["ship_colours"]
 }
 
 // Create container

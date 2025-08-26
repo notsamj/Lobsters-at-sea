@@ -21,10 +21,9 @@ class Playground extends Gamemode {
         let game = this.getGame();
 
         // Destroy wind
+        game.wind = new DebugStaticWind(this);
         //game.getWind().windMagntiude = 0;
-        game.getWind().windDirectionRAD = toRadians(90);
-        game.getWind().windMagnitudeChangeAmountPerSecond = 0;
-        game.getWind().windDirectionChangeAmountPerSecondRAD = 0;
+        //game.getWind().windDirectionRAD = toRadians(0);
 
         let tempShipJSON = {
             "health": 15,
@@ -34,6 +33,7 @@ class Playground extends Gamemode {
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
+            "ship_colour": this.getGame().pickShipColour(),
             "game_instance": game,
             "id": this.getGame().getIDManager().generateNewID()
         }
@@ -51,14 +51,15 @@ class Playground extends Gamemode {
             "starting_y_pos": 0,
             "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
-            "sail_strength": 0,
+            "sail_strength": 1,
             "ship_model": "generic_ship",
+            "ship_colour": this.getGame().pickShipColour(),
             "game_instance": game,
             "id": this.getGame().getIDManager().generateNewID()
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);
+        game.addShip(tempShip2);
     }
 
     tick(){

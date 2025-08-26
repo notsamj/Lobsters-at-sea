@@ -11,6 +11,20 @@ class LasRemoteGame extends LasGame {
 
         this.visualEffects = new NotSamLinkedList();
         this.visualEffectRandomGenerator = new SeededRandomizer(gameProperties["random_seed"]);
+
+        this.updatingFramePositions = true;
+        this.lastUpdatedFrameMS = 0;
+    }
+
+    setUpdatingFramePositions(value){
+        this.updatingFramePositions = value;
+    }
+
+    getDisplayMSSinceLastTick(){
+        if (this.updatingFramePositions){
+            this.lastUpdatedFrameMS = GC.getGameTickScheduler().getDisplayMSSinceLastTick();    
+        }
+        return this.lastUpdatedFrameMS;
     }
 
     getVisualEffectRandomGenerator(){
@@ -65,10 +79,6 @@ class LasRemoteGame extends LasGame {
         }
     }
 
-    processAllCannonShots(){
-        // TODO: collisions
-    }
-
     tickShips(){
         for (let [ship, shipIndex] of this.getShips()){
             ship.tick();
@@ -95,7 +105,6 @@ class LasRemoteGame extends LasGame {
     }
 
     updateShipOrientationAndSailPower(){
-        
         for (let [ship, shipIndex] of this.getShips()){
             ship.updateShipOrientationAndSailPower();
         }
@@ -139,6 +148,7 @@ class LasRemoteGame extends LasGame {
 
     reset(){
         super.reset();
+        this.visualEffects.clear();
     }
 
     display(){
@@ -147,7 +157,7 @@ class LasRemoteGame extends LasGame {
 
         // Display ships
         for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ console.log("Dead"); continue; }
+            if (ship.isDead()){ continue; }
             ship.display(this.getFocusedFrameX(), this.getFocusedFrameY());
         }
 
@@ -170,7 +180,7 @@ class LasRemoteGame extends LasGame {
         let visualEffectsThatExpiredIndices = new NotSamLinkedList();
 
         let currentTick = this.getTickCount();
-        let msSinceLastTick = GC.getGameTickScheduler().getDisplayMSSinceLastTick();
+        let msSinceLastTick = this.getDisplayMSSinceLastTick();
 
         // Go through and display / prepare for removal
         for (let [visualEffect, visualEffectIndex] of this.visualEffects){

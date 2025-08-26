@@ -9,7 +9,7 @@ const LobbyManager = require("./server_tools/lobby_manager.js").LobbyManager;
 const Client = require("./server_tools/client.js").Client;
 const ThreadSafeLinkedList = require("./server_tools/thread_safe_linked_list.js").ThreadSafeLinkedList;
 const LasServerGame = require("./las/las_server_game.js").LasServerGame;
-const ServerMailbox = require("./server_mailbox.js").ServerMailbox;
+const IDManager = require("../scripts/general/id_manager.js").IDManager;
 
 // Data
 const SDJ = require("./server_data.js");
@@ -29,45 +29,75 @@ class LASServer {
         });
         this.WSSServer = new WebSocketServer( { "server": this.httpsServer } );
 
-        this.newClientQueue = new ThreadSafeLinkedList();
+        this.clients = new ThreadSafeLinkedList();
 
         this.tickLock = new Lock();
         this.lobbyManager = new LobbyManager(CDJ);
-        this.gameMailBox = new ServerMailbox(GP["default_folder_settings"]);
         this.game = new LasServerGame(GP, this);
+
+        this.clientIDManager = new IDManager();
 
         this.setupWSSServer();
     }
 
-    async deliverClientMessage(client, messageStr){
-        let messageJSON = JSON.parse(messageStr);
-
-        // Get access
-        await this.gameMailBox.getAccess();
-
-        // Send
-        this.gameMailBox.deliver(messageJSON, messageJSON["subject"]);
-        
-        // Give up access
-        this.gameMailBox.relinquishAccess();
-    }
-
-    getGameMailbox(){
-        return this.gameMailBox;
-    }
-
     async acceptNewClientsToLobby(availableLobbySlots){
-        // Wait for access
-        await this.newClientQueue.requestAccess();
+        // Get access to clients
+        this.clients.requestAccess();
+        // Check which clients want to join
+        for (let [client, clientIndex] of this.clients){
 
-        let clientsToAdd = Math.min(this.newClientQueue.getLength(), availableLobbySlots);
-        // Add clients
-        for (let i = 0; i < clientsToAdd; i++){
-            this.lobbyManager.addClient(this.newClientQueue.pop(0));
+            // If zero slots left
+            if (availableLobbySlots === 0){
+                break;
+            }
+            // Are they already in the lobby? -> skip
+            if (this.lobbyManager.hasClient(client.getID())){
+                continue;
+            }
+
+            let mailBox = client.getMailBox();
+
+            // Lock mailbox
+            await mailBox.requestAccess();
+            let folder = mailBox.getFolder("lobby_join");
+            let messages = folder["list"];
+
+            if (messages.getLength() > 0){
+                let message = messages.get(0);
+                // If message isn't read
+                if (message["read"] === false){
+                    // Add them
+                    this.lobbyManager.addClient(client);
+
+                    // Mark message as read
+                    message["read"] = true;
+
+                    // Subtract slot
+                    availableLobbySlots -= 1;
+                }
+            }
+            // Unlock mailbox
+            mailBox.relinquishAccess();
+        }
+        // Give up access
+        this.clients.relinquishAccess();
+    }
+
+    async purgeInactiveClients(){
+        // Await access
+        await this.clients.requestAccess();
+
+        let clientListLength = this.clients.getLength();
+        for (let i = clientListLength - 1; i >= 0; i--){
+            let client = this.clients.get(i);
+            // Remove dead client
+            if (client.connectionIsDead()){
+                this.clients.pop(i);
+            }
         }
 
         // Relinquish access
-        this.newClientQueue.relinquishAccess();
+        this.clients.relinquishAccess();
     }
 
     async tick(){
@@ -77,6 +107,9 @@ class LASServer {
         }
         // Not actually awaiting, this just locks it
         this.tickLock.awaitUnlock(true);
+
+        // Purge inactive clients
+        await this.purgeInactiveClients();
 
         // If the game is running
         if (this.game.isRunning()){
@@ -94,7 +127,7 @@ class LASServer {
 
             // If the lobby is full, start game
             if (this.lobbyManager.isFull()){
-                this.game.start(this.lobbyManager.transferToGame());
+                await this.game.start(this.lobbyManager.transferToGame());
             }
         }
         // TODO
@@ -119,15 +152,15 @@ class LASServer {
     setupWSSServer(){
         // Set up connection handling stuff
         this.WSSServer.on("connection", async (connection) => {
-            let clientOBJ = new Client(connection, this);
-            
             // Await access
-            await this.newClientQueue.requestAccess();
+            await this.clients.requestAccess();
 
-            this.newClientQueue.add(clientOBJ);
+            // Create
+            let clientOBJ = new Client(connection, this.clientIDManager.generateNewID(), this, GP["default_folder_settings"]);
+            this.clients.add(clientOBJ);
 
             // Relinquish access
-            this.newClientQueue.relinquishAccess();
+            this.clients.relinquishAccess();
         });
 
         this.httpsServer.listen(this.SDJ["port"], () => {

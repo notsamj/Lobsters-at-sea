@@ -211,6 +211,7 @@ function getPrettyTime(){
 // If using NodeJS then do an export
 if (typeof window === "undefined"){
     module.exports = {
-        copyObject,
+        copyArray,
+        copyObject
     }
 }

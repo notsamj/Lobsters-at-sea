@@ -34,7 +34,9 @@ class Cannon {
         return this.shotSpeed;
     }
 
-    fire(aimingAngleRAD){
+    fire(locX, locY){
+        let aimingAngleRAD = displacementToRadians(locX - this.getTickX(), locY - this.getTickY());
+
         // Lock reload lock
         this.reloadLock.lock();
 
@@ -96,11 +98,12 @@ class Cannon {
         return rotatedY;
     }
 
-    canAimAt(angleRAD){
+    canAimAt(locX, locY){
+        let aimingAngleRAD = displacementToRadians(locX - this.getTickX(), locY - this.getTickY());
         let shipOrientationRAD = this.ship.getTickOrientation();
         let currentRangeCWL = rotateCCWRAD(this.rangeCWL, shipOrientationRAD);
         let currentRangeCWR = rotateCCWRAD(this.rangeCWR, shipOrientationRAD);
-        return angleBetweenCWRAD(angleRAD, currentRangeCWL, currentRangeCWR);
+        return angleBetweenCWRAD(aimingAngleRAD, currentRangeCWL, currentRangeCWR);
     }
 
     tick(){

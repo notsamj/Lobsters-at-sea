@@ -17,6 +17,10 @@ class Menu {
         this.components = [];
     }
 
+    isActiveMenu(){
+        return GC.getMenuManager().getActiveMenuName() === this.getName();
+    }
+
     /*
         Method Name: getName
         Method Parameters: None

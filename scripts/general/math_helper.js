@@ -318,10 +318,48 @@ function getIntervalOverlapDetails(h1, b1, h2, b2){
     return {"overlap": false};
 }
 
+/*
+    Method Name: calculateAngleDiffCWRAD
+    Method Parameters:
+        angle1:
+            An angle in radians
+        angle2:
+            An angle in radians
+    Method Description: Calculate the distance in radians from angle1 to angle2
+    Method Return: Float
+*/
+function calculateAngleDiffCWRAD(angle1, angle2){
+    if (angle2 > angle1){
+        angle2 -= 2 * Math.PI;
+    }
+    let difference = (angle2 - angle1) / -1;
+    return difference;
+}
+
+/*
+    Method Name: calculateAngleDiffCCWRAD
+    Method Parameters:
+        angle1:
+            An angle in radians
+        angle2:
+            An angle in radians
+    Method Description: Calculate the distance in radians from angle1 to angle2
+    Method Return: Float
+*/
+function calculateAngleDiffCCWRAD(angle1, angle2){
+    if (angle2 < angle1){
+        angle2 += 2 * Math.PI;
+    }
+    let difference = angle2 - angle1;
+    return difference;
+}
+
 // If NodeJS -> Export
 if (typeof window === "undefined"){
     module.exports = {
         angleBetweenCWRAD,
+        calculateAngleDiffCWRAD,
+        calculateAngleDiffCCWRAD,
         calculateEuclideanDistance,
         displacementToRadians,
         fixRadians,

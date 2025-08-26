@@ -66,7 +66,6 @@ class CannonBall {
         // Update xv, yv
         this.xV = xInfo["x_v"];
         this.yV = yInfo["y_v"];
-                debugger;
     }
 
     move(){
@@ -90,10 +89,6 @@ class CannonBall {
         // Update xv, yv
         this.xV = xInfo["x_v"];
         this.yV = yInfo["y_v"];
-        if (isNaN(this.xV)){
-            debugger;
-            this.getXInfoInMS(tickMS);
-        }
     }
 
     getTickOrientation(){
@@ -110,10 +105,10 @@ class CannonBall {
 
     getXInfoInMSWithXA(ms, windXA){
         let game = this.getGame();
-        let windObJ = this.getGame().getWind();
         let msProportionOfASecond = ms / 1000;
-        let cannonBallMovementResistanceA = 1/2 * -1 * this.xV * Math.abs(this.xV) * this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
-        let totalA = windXA + cannonBallMovementResistanceA;
+
+        let airResistanceCoefficient = this.getGame().getGameProperties()["cannon_ball_wind_effect_coefficient"];
+        let totalA = windXA * airResistanceCoefficient;
         let newXV = this.xV + totalA * msProportionOfASecond;
         let newXP = this.xPos + newXV * msProportionOfASecond;
 
@@ -135,9 +130,8 @@ class CannonBall {
         let game = this.getGame();
         let msProportionOfASecond = ms / 1000;
 
-        let airResistanceCoefficient = this.getGame().getGameProperties()["cannon_ball_air_resistance_coefficient"];
-        let cannonBallMovementResistanceA = 1/2 * -1 * this.yV * Math.abs(this.yV) * airResistanceCoefficient;
-        let totalA = windYA + cannonBallMovementResistanceA;
+        let airResistanceCoefficient = this.getGame().getGameProperties()["cannon_ball_wind_effect_coefficient"];
+        let totalA = windYA * airResistanceCoefficient;
         let newYV = this.yV + totalA * msProportionOfASecond;
         let newYP = this.yPos + newYV * msProportionOfASecond;
         return {"y_pos": newYP, "y_v": newYV}
@@ -149,12 +143,12 @@ class CannonBall {
 
     // Note: Local only
     getFrameX(){
-        return this.getXInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
+        return this.getXInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
     // Note: Local only
     getFrameY(){
-        return this.getYInMS(GC.getGameTickScheduler().getDisplayMSSinceLastTick());
+        return this.getYInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
     getFrameOrientation(){

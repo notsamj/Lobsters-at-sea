@@ -3,14 +3,18 @@ class Battle extends Gamemode {
     constructor(){
         super();
 
-        console.log("new battle")
-
         this.windData = new NotSamLinkedList();
+
+        this.winningScreen = new WinningScreen();
 
          // Placeholder
         this.serverStartTime = undefined;
         this.tickGapMS = undefined;
         this.maxDelayMS = undefined;
+    }
+
+    hasGameEnded(){
+        return this.winningScreen.isActive();
     }
 
     end(){
@@ -32,7 +36,7 @@ class Battle extends Gamemode {
         let mailBox = SC.getClientMailbox();
 
         // Await access
-        await mailBox.getAccess();
+        await mailBox.requestAccess();
 
         let cannonShotFolder = mailBox.getFolder("tick_data");
         let cannonShots = cannonShotFolder["list"];
@@ -112,13 +116,13 @@ class Battle extends Gamemode {
         this.processCannonBallLaunches(tickDataJSON["new_cannon_shots"], serverTick, currentTick);
 
         // Process cannon balls hitting ships
-        this.processCannonBallHits(tickDataJSON["cannon_ball_hits"]);
+        this.processCannonBallHits(tickDataJSON["cannon_ball_hits"], serverTick);
 
         // Process cannon balls hitting water
-        this.processCannonBallSinkings(tickDataJSON["cannon_ball_sinkings"]);
+        this.processCannonBallSinkings(tickDataJSON["cannon_ball_sinkings"], serverTick);
 
         // Process cannon balls hitting water
-        this.processShipSinkings(tickDataJSON["ship_sinkings"]);
+        this.processShipSinkings(tickDataJSON["ship_sinkings"], serverTick);
     }
 
     processCannonBallLaunches(cannonBallShots, serverTickOfLaunches, currentTick){
@@ -137,11 +141,11 @@ class Battle extends Gamemode {
             
             // Set up the cannon ball
             this.catchUpCannonBallMovement(newCannonBall, serverTickOfLaunches, currentTick-1);
+
+            // Set up the cannon smoke
+            this.createCannonSmoke(cannonShotJSON, serverTickOfLaunches);
             
             //console.log("new cannon ball", newCannonBall);
-            if (isNaN(newCannonBall.xV)){
-                debugger;
-            }
             this.getGame().addCannonBall(newCannonBall);
         }
     }
@@ -156,14 +160,20 @@ class Battle extends Gamemode {
         }
     }
 
-    processCannonBallHits(cannonBallHits){
+    createCannonSmoke(cBS, serverTickOfLaunches){
+        let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
+        // Add the visual effect
+        this.getGame().addVisualEffect(new CannonSmoke(serverTickOfLaunches, this.getGame().getVisualEffectRandomGenerator(), cBS, visaulEffectsSettings["cannon_smoke"]));
+    }
+
+    processCannonBallHits(cannonBallHits, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         //debugger;
         for (let cBH of cannonBallHits){
             // Delete cannon ball
             this.deleteCannonBall(cBH["cannon_ball_id"]);
             // Add the visual effect
-            this.getGame().addVisualEffect(new CannonBallHit(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), cBH, visaulEffectsSettings["cannon_ball_hit"]));
+            this.getGame().addVisualEffect(new CannonBallHit(serverTick, this.getGame().getVisualEffectRandomGenerator(), cBH, visaulEffectsSettings["cannon_ball_hit"]));
         }
     }
 
@@ -179,26 +189,32 @@ class Battle extends Gamemode {
 
         // If found, remove
         if (index != -1){
+            let cannonBall = cannonBalls.get(index);
+            //console.log(this.getGame().getWind().print());
+            //console.log("Cannon ball sunk", cannonBall.getTickX(), cannonBall)
             cannonBalls.pop(index);
         }
     }
 
-    processCannonBallSinkings(cannonBallSinkings){
+    processCannonBallSinkings(cannonBallSinkings, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         for (let cBSi of cannonBallSinkings){
             // Delete cannon ball
             this.deleteCannonBall(cBSi["cannon_ball_id"]);
             // Add the visual effect
-            this.getGame().addVisualEffect(new CannonBallSplash(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), cBSi, visaulEffectsSettings["cannon_ball_splash"]));
+            //console.log("Added", cBSi["x_pos"], serverTick - this.getGame().getTickCount())
+            //debugger;
+            this.getGame().addVisualEffect(new CannonBallSplash(serverTick, this.getGame().getVisualEffectRandomGenerator(), cBSi, visaulEffectsSettings["cannon_ball_splash"]));
         }
     }
-    processShipSinkings(shipSinkings){
+    processShipSinkings(shipSinkings, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         for (let sS of shipSinkings){
+            //console.log("Found one")
             // Kill ship
             this.killShip(sS["ship_id"]);
             // Add the visual effect
-            this.getGame().addVisualEffect(new ShipSplash(this.getGame().getTickCount(), this.getGame().getVisualEffectRandomGenerator(), sS, visaulEffectsSettings["ship_splash"]));
+            this.getGame().addVisualEffect(new ShipSplash(serverTick, this.getGame().getVisualEffectRandomGenerator(), sS, visaulEffectsSettings["ship_splash"]));
         }
     }
 
@@ -234,7 +250,7 @@ class Battle extends Gamemode {
         let mailBox = SC.getClientMailbox();
 
         // Await access
-        await mailBox.getAccess();
+        await mailBox.requestAccess();
 
         let tickMessagesFolder = mailBox.getFolder("position_data");
         let tickMessages = tickMessagesFolder["list"];
@@ -338,6 +354,31 @@ class Battle extends Gamemode {
         }
     }
 
+    async checkEndGame(){
+        let mailBox = SC.getClientMailbox();
+
+        let winner = null;
+
+        // Await access
+        await mailBox.requestAccess();
+
+        let endMessagesFolder = mailBox.getFolder("end_data");
+        let endMessages = endMessagesFolder["list"];
+
+        // If there's a message to read
+        if (endMessages.getLength() > 0){
+            let message = endMessages.get(0);
+            if (message["read"] === false){
+                winner = message["data_json"]["winner_id"];
+            }
+        }
+
+        // Give up access
+        mailBox.relinquishAccess();
+
+        return winner;
+    }
+
     async checkIfTickCountIsProper(){
         let currentTicks = this.getGame().getTickCount();
         let ticksIfITickNow = currentTicks + 1;
@@ -356,7 +397,7 @@ class Battle extends Gamemode {
         let mailBox = SC.getClientMailbox();
 
         // Await access
-        await mailBox.getAccess();
+        await mailBox.requestAccess();
 
         let tickMessagesFolder = mailBox.getFolder("tick_data");
         let tickMessages = tickMessagesFolder["list"];
@@ -381,21 +422,18 @@ class Battle extends Gamemode {
         return true;
     }
 
-    handlePause(){
-        // DO NOTHING
-    }
+    handlePause(){ /* DO NOTHING */ }
 
     getTickGapMS(){
         return this.tickGapMS;
     }
 
-    handleGameExit(){
-        GC.getMenuManager().switchTo("main_menu");
-        GC.getGamemodeManager().getActiveGamemode().end();
-        GC.getGamemodeManager().deleteActiveGamemode();
-    }
-
     async tick(){
+        // Nothing to do when over
+        if (this.hasGameEnded()){
+            return;
+        }
+
         // Check if the tick count is proper  
         let tickCountIsProper = await this.checkIfTickCountIsProper();
         if (tickCountIsProper){
@@ -408,15 +446,66 @@ class Battle extends Gamemode {
             // Try to update from the server
             await this.updateShipPositionsFromServer();
 
-            // Tick the game
-            this.getGame().tick();
+            let winner = await this.checkEndGame();
+            let hasWinner = winner != null;
 
-            // Handle sending out my input
-            this.sendMyInput();
+            // If over and we have a winner
+            if (hasWinner){
+                console.log("Normal")
+                this.handleGameOver(winner, hasWinner);
+            }else{
+                // Else continue the game
+
+                // Tick the game
+                //this.getGame().getWind().print();
+                this.getGame().tick();
+
+                // Handle sending out my input
+                this.sendMyInput();
+            }
+
         }else{
-            this.handleGameExit();
+            // Error exit
+            this.handleGameOver(null, false);
         }
 
+    }
+
+    handleGameOver(winner, hasWinner){
+        // Disconnect from server
+        this.end();
+
+        let game = this.getGame();
+
+        // Stop updating entity frame positions
+        game.setUpdatingFramePositions(false);
+
+        let endProperly = hasWinner;
+        let winningScreenSettings = game.getGameProperties()["winning_screen_settings"];
+        let colourCode = winningScreenSettings["neutral_colour"];
+        let winningText = winningScreenSettings["neutral_text"];
+
+        // Determine how end is displayed
+        if (endProperly){
+            if (game.hasFocusedShip()){
+                let myShipID = game.getFocusedShip().getID();
+                if (winner === winner){
+                    colourCode = winningScreenSettings["winning_colour_code"];
+                    winningText = winningScreenSettings["winning_text"];
+                }else{
+                    colourCode = winningScreenSettings["losing_colour_code"];
+                    winningText = winningScreenSettings["losing_text"];
+                }
+            }
+        }
+        // Else, it ended with an error
+        else{
+            colourCode = winningScreenSettings["error_colour_code"];
+            winningText = winningScreenSettings["error_text"];
+        }
+
+        // Set up display
+        this.winningScreen.setUp(winningText, colourCode);
     }
 
     sendMyInput(){
@@ -447,6 +536,17 @@ class Battle extends Gamemode {
         // Display game
         this.getGame().display();
 
+        // Display winning screen if active
+        if (this.winningScreen.isActive()){
+            this.winningScreen.display();
+            return;
+        }
+
+        // Else display hud
+        this.displayHUD();
+    }
+
+    displayHUD(){
         let hud = GC.getHUD();
 
         // Display FPS

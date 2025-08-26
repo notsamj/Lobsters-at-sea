@@ -7,6 +7,7 @@ if (typeof window === "undefined"){
     Wind = require("./wind/wind.js").Wind;
     NotSamLinkedList = require("../general/notsam_linked_list.js").NotSamLinkedList;
     copyObject = require("../general/helper_functions.js").copyObject;
+    copyArray = require("../general/helper_functions.js").copyArray;
     rectangleCollidesWithRectangle = require("../general/math_helper.js").rectangleCollidesWithRectangle;
     safeDivide = require("../general/math_helper.js").safeDivide;
     getIntervalOverlapDetails = require("../general/math_helper.js").getIntervalOverlapDetails;
@@ -21,9 +22,26 @@ class LasGame {
         this.ships = new NotSamLinkedList();
         this.cannonBalls = new NotSamLinkedList();
         this.tickCount = 0;
+        this.colours = copyArray(gameProperties["ship_colours"]);
 
         this.cannonBallPositions = new NotSamLinkedList(); // Temporary data
         this.shipPositions = new NotSamLinkedList(); // Temporary data
+    }
+
+    resetColours(){
+        // Remove colours
+        while (this.colours.length > 0){
+            this.colours.pop();
+        }
+        // Add colours
+        for (let colour of this.getGameProperties()["ship_colours"]){
+            this.colours.push(colour);
+        }
+    }
+
+    pickShipColour(){
+        if (this.colours.length === 0){ throw new Error("No colors remaining.")}
+        return this.colours.shift();
     }
 
     getCannonBalls(){
@@ -75,7 +93,8 @@ class LasGame {
             // Check for hitting water
             if (!cannonBallDead && cannonBall.hasHitWater(this.getTickCount())){
                 cannonBallDead = true;
-
+                //console.log("Cannon ball sunk", cannonBall.getTickX(), cannonBall)
+                //console.log(this.getGame().getWind().print());
                 // Record the watery death of the cannon ball
                 this.getGameRecorder().addToTimeline(this.getTickCount(), {
                     "event_type": "cannon_ball_sunk",
@@ -278,8 +297,11 @@ class LasGame {
         console.debug("Reset in las_game.js")
         // Resets world data
         this.wind.reset();
+        this.idManager.reset();
         this.ships.clear();
+        this.cannonBalls.clear();
         this.tickCount = 0;
+        this.resetColours();
     }
 }
 

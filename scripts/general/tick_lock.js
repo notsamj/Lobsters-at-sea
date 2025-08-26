@@ -27,6 +27,16 @@ class TickLock extends Lock {
         }
     }
 
+    replace(newNumTicks, ready=true){
+        this.ready = ready;
+        this.startingReady = ready;
+        this.numTicks = newNumTicks;
+        this.ticksLeft = 0;
+        if (!ready){
+            this.lock();
+        }
+    }
+
     /*
         Method Name: restoreDefault
         Method Parameters: None

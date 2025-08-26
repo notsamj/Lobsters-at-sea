@@ -4,3 +4,4 @@
 *.pem
 /server/node_modules
 server/run_server.bat
+/temporary_backup_code

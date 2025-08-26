@@ -100,7 +100,7 @@ class SpectatorCamera {
         Method Return: float
     */
     getFreeCamFrameX(){
-        return this.x + this.xVelocity * (GC.getGameTickScheduler().getDisplayMSSinceLastTick()) / 1000;
+        return this.x + this.xVelocity * (this.getGame().getDisplayMSSinceLastTick()) / 1000;
     }
 
     /*
@@ -110,7 +110,7 @@ class SpectatorCamera {
         Method Return: float
     */
     getFreeCamFrameY(){
-        return this.y + this.yVelocity * (GC.getGameTickScheduler().getDisplayMSSinceLastTick()) / 1000;
+        return this.y + this.yVelocity * (this.getGame().getDisplayMSSinceLastTick()) / 1000;
     }
 
     getFreeCamTickX(){
