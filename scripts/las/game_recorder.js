@@ -45,6 +45,11 @@ class GameRecorder {
         }
         return outputList;
     }
+
+    getReplayString(){
+        let replayObject = {};
+        replayObject["opening_message"] = copyObject()
+    }
 }
 
 // If using NodeJS then do export

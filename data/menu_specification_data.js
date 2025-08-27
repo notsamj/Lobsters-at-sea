@@ -105,5 +105,42 @@ const MSD = {
             "y_offset": 0,
             "text_colour_code": "#e6f5f4"
         }
+    },
+    "replay_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main menu",
+            "y_offset": 27,
+            "x": 25,
+            "x_size": 100,
+            "y_size": 50
+        },
+        "scrollable_display": {
+            "scroll_bar": {
+                "x_offset": 150,
+                "y_offset": 150,
+                "width": 40,
+                "min_height": 400,
+                "slider_height": 40,
+                "background_colour_code": "#ffffff",
+                "slider_colour_code": "#ff00ff",
+                "wheel_multiplier": 0.25
+            },
+            "entry": {
+                "y_size": 250,
+                "y_offset": 150,
+                "x_offset": 150,
+                "x_size": 900,
+                "display_name_x_size": 400,
+                "display_name_y_size": 150,
+                "display_name_text_colour_code": "#ffffff",
+                "go_to_menu_button_text": "View",
+                "go_to_menu_button_x_size": 400,
+                "go_to_menu_button_y_size": 100,
+                "go_to_menu_button_background_colour_code": "#3bc44b",
+                "go_to_menu_button_text_colour_code": "#ffffff"
+            }
+        }
     }
 }

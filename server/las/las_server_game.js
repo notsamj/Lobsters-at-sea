@@ -115,6 +115,13 @@ class LasServerGame extends LasGame {
             );
         }
 
+        let openingMessageForRecordingEvent = copyObject(openingMessageJSON);
+
+        openingMessageForRecordingEvent["event_type"] = "opening_game_representation";
+
+        // Set the opening message
+        this.gameRecorder.addToTimeline(0, openingMessageForRecording);
+
         // Send each client a personalized message
         for (let [client, clientIndex] of this.clients){
             let personalizedMessage = copyObject(openingMessageJSON);
@@ -330,6 +337,10 @@ class LasServerGame extends LasGame {
         if (this.isRunning()){
             // Update from received pending decisions
             await this.takeAllUserPendingDecisions();
+
+            // Record
+            this.recordShipDecisions();
+
             //this.getWind().print();
             // Maintenace ticks
             this.tickShips();
@@ -350,9 +361,6 @@ class LasServerGame extends LasGame {
             this.handleCannonBallCollisionsAndDeaths();
             this.handleNewCannonShots();
 
-            // Take input from the user
-            //this.updateShipDecisions();
-
             // Update wind
             this.wind.tickUpdate();
 
@@ -362,6 +370,21 @@ class LasServerGame extends LasGame {
             // Up the tick count
             this.incrementTickCount();
         }
+    }
+
+    recordShipDecisions(){
+        let shipDecisionsJSON = {
+            "event_type": "ship_decisions_recording",
+            "ship_decisions": []
+        }
+        for (let [ship, shipIndex] of this.getShips()){
+            shipDecisionsJSON["ship_decisions"].push({
+                "ship_id": ship.getID(),
+                "established_decisions": copyObject(ship.getEstablishedDecisions())
+            });
+        }
+
+        this.gameRecorder.addToTimeline(this.getTickCount(), shipDecisionsJSON);
     }
 
     handleCannonShotMovement(){

@@ -56,6 +56,10 @@ class Ship {
         }
     }
 
+    getEstablishedDecisions(){
+        return this.establishedDecisions;
+    }
+
     getColour(){
         return this.shipColour;
     }

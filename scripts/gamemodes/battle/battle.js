@@ -11,8 +11,6 @@ class Battle extends Gamemode {
         this.serverStartTime = undefined;
         this.tickGapMS = undefined;
         this.maxDelayMS = undefined;
-
-        this.lastTime = Date.now();
     }
 
     hasGameEnded(){
@@ -435,11 +433,6 @@ class Battle extends Gamemode {
             return;
         }
 
-        // TEMP
-        console.log(Date.now() - this.lastTime);
-        this.lastTime = Date.now();
-        //console.log(this.calculateExpectedTicks() - this.getGame().getTickCount());
-
         // Check if the tick count is proper  
         let tickCountIsProper = await this.checkIfTickCountIsProper();
         if (tickCountIsProper){
@@ -472,8 +465,19 @@ class Battle extends Gamemode {
         }else{
             // Error exit
             this.handleGameOver(null, false);
-        }
+        } 
 
+        // Address lag
+        //this.experimentalAddressLag();
+    }
+
+    experimentalAddressLag(){
+        let ticksBehind = this.calculateExpectedTicks() - this.getGame().getTickCount();
+        if (ticksBehind > 2){
+            let timeDebtToRemove = ticksBehind * this.getGame().getGameProperties()["ms_between_ticks_floor"];
+            // Remove the tick debt
+            GC.getGameTickScheduler().addTimeDebt(-1 * timeDebtToRemove);
+        }
     }
 
     handleGameOver(winner, hasWinner){

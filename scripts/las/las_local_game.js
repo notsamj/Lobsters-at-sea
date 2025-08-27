@@ -310,6 +310,11 @@ class LasLocalGame extends LasGame {
         menuInputManager.register("message_feed_up", "keydown", (event) => { return event.keyCode===keyCodeScrollUp; }, true, {"ticked": true, "ticked_activation": false});
         menuInputManager.register("message_feed_down", "keydown", (event) => { return event.keyCode===keyCodeScrollDown; }, true, {"ticked": true, "ticked_activation": false});
 
+        menuInputManager.register("scroll_bar_grab", "mousedown", (event) => { return event.which===keyCodeLeftClick; });
+        menuInputManager.register("scroll_bar_grab", "mouseup", (event) => { return event.which===keyCodeLeftClick; }, false);
+
+        menuInputManager.registerSpecialType(new TickedValueNode("scroll_in_dir", "wheel", (event) => { return event.deltaY; }, 0));
+
         // Register
         let gameInputManager = GC.getGameUserInputManager();
 

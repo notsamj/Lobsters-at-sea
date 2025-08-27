@@ -55,7 +55,7 @@ class MainMenu extends Menu {
         let replayButtonY = (innerHeight) => { return battleButtonY(innerHeight) - buttonSizeY - gapSize; }
         this.components.push(new RectangleButton("Replays", buttonColorCode, buttonTextColorCode, buttonX, replayButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
             // TODO: Go to Replays menu
-            GC.getMenuManager().switchTo("replays");
+            GC.getMenuManager().switchTo("replay_menu");
         }));
 
         // Other Projects
