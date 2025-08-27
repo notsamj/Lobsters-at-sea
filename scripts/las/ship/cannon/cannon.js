@@ -44,7 +44,7 @@ class Cannon {
         let vIX = this.getShip().getTickXV() + Math.cos(aimingAngleRAD) * this.getShotSpeed();
         let vIY = this.getShip().getTickYV() + Math.sin(aimingAngleRAD) * this.getShotSpeed();
         let game = this.getShip().getGame();
-        game.getGameRecorder().addToTimeline(game.getTickCount(), {
+        game.getTickTimeline().addToTimeline({
             "event_type": "cannon_shot",
             "angle_rad": aimingAngleRAD,
             "x_origin": this.getTickX(),

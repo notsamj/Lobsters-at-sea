@@ -1,7 +1,7 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
     CannonBall = require("./ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
-    GameRecorder = require("./game_recorder.js").GameRecorder;
+    TickTimeline = require("./tick_timeline.js").TickTimeline;
     IDManager = require("../general/id_manager.js").IDManager;
     SeededRandomizer = require("../general/seeded_randomizer.js").SeededRandomizer;
     Wind = require("./wind/wind.js").Wind;
@@ -16,7 +16,7 @@ if (typeof window === "undefined"){
 class LasGame {
     constructor(gameProperties){
         this.gameProperties = gameProperties;
-        this.gameRecorder = new GameRecorder(gameProperties);
+        this.tickTimeline = new TickTimeline();
         this.idManager = new IDManager();
         this.wind = new Wind(this);
         this.ships = new NotSamLinkedList();
@@ -96,7 +96,7 @@ class LasGame {
                 //console.log("Cannon ball sunk", cannonBall.getTickX(), cannonBall)
                 //console.log(this.getGame().getWind().print());
                 // Record the watery death of the cannon ball
-                this.getGameRecorder().addToTimeline(this.getTickCount(), {
+                this.getTickTimeline().addToTimeline({
                     "event_type": "cannon_ball_sunk",
                     "x_pos": cannonBall.getTickX(),
                     "y_pos": cannonBall.getTickY(),
@@ -117,7 +117,7 @@ class LasGame {
     }
 
     handleNewCannonShots(){
-        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+        let newCannonShots = this.getTickTimeline().getEventsOfType("cannon_shot");
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
         for (let [cannonShotObj, index] of newCannonShots){
             let objCopy = copyObject(cannonShotObj);
@@ -261,8 +261,8 @@ class LasGame {
         return this.tickCount;
     }
 
-    getGameRecorder(){
-        return this.gameRecorder;
+    getTickTimeline(){
+        return this.tickTimeline;
     }
 
     getIDManager(){

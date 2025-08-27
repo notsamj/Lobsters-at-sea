@@ -2,6 +2,7 @@ const LasGame = require("../../scripts/las/las_game.js").LasGame;
 const Ship = require("../../scripts/las/ship/ship.js").Ship;
 const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
 const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
+const GameRecorder = require("./game_recorder.js").GameRecorder;
 
 class LasServerGame extends LasGame {
     constructor(gameProperties, server){
@@ -9,6 +10,8 @@ class LasServerGame extends LasGame {
         this.running = false;
 
         this.server = server;
+
+        this.gameRecorder = new GameRecorder();
 
         this.gameStartTime = undefined;
         this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
@@ -120,7 +123,7 @@ class LasServerGame extends LasGame {
         openingMessageForRecordingEvent["event_type"] = "opening_game_representation";
 
         // Set the opening message
-        this.gameRecorder.addToTimeline(0, openingMessageForRecordingEvent);
+        this.gameRecorder.setOpeningMessage(openingMessageForRecordingEvent);
 
         // Send each client a personalized message
         for (let [client, clientIndex] of this.clients){
@@ -144,6 +147,7 @@ class LasServerGame extends LasGame {
     reset(){
         this.running = false;
         this.clients.clear();
+        this.tickTimeline.reset();
         this.gameRecorder.reset();
         this.idManager.reset();
         this.wind.reset();
@@ -173,7 +177,7 @@ class LasServerGame extends LasGame {
         
         // If game successfully completed then get replay string
         if (gameCompleted){
-            console.log(this.gameRecorder.getReplayString());
+            //console.log(this.tickTimeline.getReplayString());
         }
 
         let endMessageJSON = {
@@ -234,10 +238,10 @@ class LasServerGame extends LasGame {
     }
 
     sendClientsTickAndPositionData(){
-        let cannonBallSinkings = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_ball_sunk");
-        let cannonBallHits = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_ball_hit");
-        let shipSinkings = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "ship_sunk");
-        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+        let cannonBallSinkings = this.getTickTimeline().getEventsOfType("cannon_ball_sunk");
+        let cannonBallHits = this.getTickTimeline().getEventsOfType("cannon_ball_hit");
+        let shipSinkings = this.getTickTimeline().getEventsOfType("ship_sunk");
+        let newCannonShots = this.getTickTimeline().getEventsOfType("cannon_shot");
         let positionDataMessageJSON = {
             "subject": "position_data",
             "server_tick": this.tickCount,
@@ -374,6 +378,9 @@ class LasServerGame extends LasGame {
             // Output to clients
             this.sendClientsTickAndPositionData();
 
+            // Clean tick timeline
+            this.tickTimeline.reset();
+
             // Up the tick count
             this.incrementTickCount();
         }
@@ -391,7 +398,7 @@ class LasServerGame extends LasGame {
             });
         }
 
-        this.gameRecorder.addToTimeline(this.getTickCount(), shipDecisionsJSON);
+        this.gameRecorder.addDecisions(this.getTickCount(), shipDecisionsJSON);
     }
 
     handleCannonShotMovement(){

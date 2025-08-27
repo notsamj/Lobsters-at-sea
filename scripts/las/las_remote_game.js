@@ -69,7 +69,7 @@ class LasRemoteGame extends LasGame {
     }
 
     handleNewCannonShots(){
-        let newCannonShots = this.getGameRecorder().getEventsOfTickAndType(this.getTickCount(), "cannon_shot");
+        let newCannonShots = this.getTickTimeline().getEventsOfType("cannon_shot");
         let idManager = this.getIDManager();
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
         for (let [cannonShotObj, index] of newCannonShots){

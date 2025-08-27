@@ -127,7 +127,7 @@ class Ship {
         //console.log("Cannon hit", posX, posY)
 
         // Report
-        game.getGameRecorder().addToTimeline(game.getTickCount(), {
+        game.getTickTimeline().addToTimeline({
             "event_type": "cannon_ball_hit",
             "cannon_ball_id": cannonBallID,
             "x_pos": posX,
@@ -139,7 +139,7 @@ class Ship {
 
         // If dead, put out the event
         if (this.isDead()){
-            game.getGameRecorder().addToTimeline(game.getTickCount(), {
+            game.getTickTimeline().addToTimeline({
                 "event_type": "ship_sunk",
                 "ship_id": this.getID(),
                 "x_pos": this.xPos,
