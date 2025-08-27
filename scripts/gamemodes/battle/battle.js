@@ -11,6 +11,8 @@ class Battle extends Gamemode {
         this.serverStartTime = undefined;
         this.tickGapMS = undefined;
         this.maxDelayMS = undefined;
+
+        this.lastTime = Date.now();
     }
 
     hasGameEnded(){
@@ -313,7 +315,6 @@ class Battle extends Gamemode {
         let game = this.getGame();
         // Set data received
         this.serverStartTime = gameDetailsJSON["server_start_time"]; 
-        console.log("received", gameDetailsJSON);
 
         // Update game properties
         game.setGameProperties(gameDetailsJSON["game_properties"]);
@@ -434,6 +435,11 @@ class Battle extends Gamemode {
             return;
         }
 
+        // TEMP
+        console.log(Date.now() - this.lastTime);
+        this.lastTime = Date.now();
+        //console.log(this.calculateExpectedTicks() - this.getGame().getTickCount());
+
         // Check if the tick count is proper  
         let tickCountIsProper = await this.checkIfTickCountIsProper();
         if (tickCountIsProper){
@@ -451,7 +457,6 @@ class Battle extends Gamemode {
 
             // If over and we have a winner
             if (hasWinner){
-                console.log("Normal")
                 this.handleGameOver(winner, hasWinner);
             }else{
                 // Else continue the game

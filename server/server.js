@@ -1,4 +1,8 @@
-// Libraries
+// MongoDB
+const { MongoMemoryServer } = require("mongodb-memory-server");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+
+// Other Libraries
 const WebSocketServer = require("ws").WebSocketServer;
 const fs = require("fs");
 const https = require("https");
@@ -23,11 +27,8 @@ class LASServer {
     constructor(serverDataJSON){
         this.SDJ = serverDataJSON;
 
-        this.httpsServer = https.createServer({
-            "cert": fs.readFileSync("./cert.pem"),
-            "key": fs.readFileSync("./key.pem")
-        });
-        this.WSSServer = new WebSocketServer( { "server": this.httpsServer } );
+        this.httpsServer = undefined; // placeholder
+        this.WSSServer = undefined; // placeholder
 
         this.clients = new ThreadSafeLinkedList();
 
@@ -37,7 +38,88 @@ class LASServer {
 
         this.clientIDManager = new IDManager();
 
+        this.mongoDBServer = undefined; // placeholder
+        this.mongoDBClient = undefined; // placeholder
+
+        this.setupServer();
+    }
+
+    async setupServer(){
+        // Set up mongo db first
+        await this.setupMongoDB();
+
+        // Set up the WSS Server
         this.setupWSSServer();
+    }
+
+    async setupMongoDB(){
+        console.log("Attempting MongoDB startup");
+        this.mongoDBServer = await MongoMemoryServer.create();
+        console.log("MongoDB Server created!");
+        this.mongoDBClient = new MongoClient(this.mongoDBServer.getUri(),  {
+            serverApi: {
+                version: ServerApiVersion.v1,
+                strict: true,
+                deprecationErrors: true,
+            }
+        });
+        // Connect the client
+        await this.mongoDBClient.connect();
+        console.log("MongoDB connected!");
+    }
+
+    async kickWSSClients(){
+        let awaitLock = new Lock();
+        for (let clientWS of this.WSSServer.clients){
+            // If closed, skip
+            if (clientWS.readyState === 3){
+                continue;
+            }
+            // Lock the await lock
+            awaitLock.lock();
+            
+            // Set up close handler
+            clientWS.once("close", () => { awaitLock.unlock(); })
+            
+            // Tell healthy clients to close
+            if (clientWS.readyState === 1){
+                clientWS.close();
+            }
+
+            // Wait for the close
+            await awaitLock.awaitUnlock();
+        }
+    }
+
+    async shutDown(){
+        console.log("Shutting down HTTPS Server...");
+        let httpAwaitLock = new Lock();
+        httpAwaitLock.lock();
+        this.httpsServer.close(() => {httpAwaitLock.unlock()});
+        // Note: Don't await HTTP here
+
+        console.log("Kicking out WSS Clients...");
+        // Kick out clients
+        await this.kickWSSClients();
+
+        console.log("Shutting down WSS Server...");
+        let WSSAwaitLock = new Lock();
+
+        // Wait here for HTTPS Server shut down...
+        await httpAwaitLock.awaitUnlock();
+        console.log("HTTPS + WSS Shut down!");
+
+        WSSAwaitLock.lock();
+        this.WSSServer.close(() => {WSSAwaitLock.unlock()});
+        await WSSAwaitLock.awaitUnlock();
+
+        console.log("Shutting down MongoDB Client...");
+        await this.mongoDBClient.close(); 
+
+        console.log("Shutting down MongoDB Server...");
+        await this.mongoDBServer.stop();
+
+        console.log("Shut down MongoDB!");
     }
 
     async acceptNewClientsToLobby(availableLobbySlots){
@@ -150,6 +232,12 @@ class LASServer {
     }
 
     setupWSSServer(){
+        this.httpsServer = https.createServer({
+            "cert": fs.readFileSync("./cert.pem"),
+            "key": fs.readFileSync("./key.pem")
+        });
+        this.WSSServer = new WebSocketServer( { "server": this.httpsServer } );
+
         // Set up connection handling stuff
         this.WSSServer.on("connection", async (connection) => {
             // Await access
@@ -184,3 +272,12 @@ function launchTickSystem(){
 async function tick(){
     SERVER.tick();
 }
+
+// Shut down
+async function shutDown(){
+    await SERVER.shutDown();
+    process.exit(0);
+}
+
+// Set up CTRL + C handler
+process.on("SIGINT", shutDown);

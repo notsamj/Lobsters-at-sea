@@ -21,7 +21,7 @@ class Playground extends Gamemode {
         let game = this.getGame();
 
         // Destroy wind
-        game.wind = new DebugStaticWind(this);
+        //game.wind = new DebugStaticWind(this);
         //game.getWind().windMagntiude = 0;
         //game.getWind().windDirectionRAD = toRadians(0);
 
