@@ -37,16 +37,13 @@ class Ship {
         this.cannons = [];
         this.setupCannons();
 
-        this.establishedDecisions = {
-            "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "sail_strength_change": 0, // is either < 0, === 0, > 0
-            "aiming_cannons": false, // false or true
-            "fire_cannons": false, // false or true
-            "aiming_cannons_position_x": null, // null or a float
-            "aiming_cannons_position_y": null // null or a float
-        }
+        this.establishedDecisions = Ship.getDefaultDecisions();
 
-        this.pendingDecisions = {
+        this.pendingDecisions = Ship.getDefaultDecisions();
+    }
+
+    static getDefaultDecisions(){
+        return {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
             "sail_strength_change": 0, // is either < 0, === 0, > 0
             "aiming_cannons": false, // false or true

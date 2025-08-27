@@ -538,7 +538,7 @@ class Battle extends Gamemode {
     getName(){ return "battle"; }
 
     getGame(){
-        return GC.getRemoteGameInstance();
+        return GC.getGameInstance();
     }
 
     display(){

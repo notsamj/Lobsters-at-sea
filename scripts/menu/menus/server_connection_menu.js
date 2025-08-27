@@ -86,7 +86,7 @@ class ServerConnectionMenu extends Menu {
         // Expect a game_start message
         let messageJSON = eventJSON["message_json"];
         if (messageJSON["subject"] === "game_start"){
-            GC.newRemoteGame(Battle);
+            GC.newGame(LasRemoteGame, Battle);
             GC.getGamemodeManager().getActiveGamemode().setup(messageJSON["game_details"]);
             GC.getMenuManager().switchTo("game");
         }else{

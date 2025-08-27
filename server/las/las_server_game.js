@@ -120,7 +120,7 @@ class LasServerGame extends LasGame {
         openingMessageForRecordingEvent["event_type"] = "opening_game_representation";
 
         // Set the opening message
-        this.gameRecorder.addToTimeline(0, openingMessageForRecording);
+        this.gameRecorder.addToTimeline(0, openingMessageForRecordingEvent);
 
         // Send each client a personalized message
         for (let [client, clientIndex] of this.clients){
@@ -167,6 +167,13 @@ class LasServerGame extends LasGame {
                 }
                 winnerShipID = ship.getID();
             }
+        }
+
+        let gameCompleted = winnerShipID != null;
+        
+        // If game successfully completed then get replay string
+        if (gameCompleted){
+            console.log(this.gameRecorder.getReplayString());
         }
 
         let endMessageJSON = {

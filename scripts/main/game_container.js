@@ -12,10 +12,10 @@ class GameContainer {
             "hud_json": json
         }
     */
-    constructor(localGameInstance, remoteGameInstance, localGameProperties){
-        this.localGameInstance = localGameInstance;
-        this.remoteGameInstance = remoteGameInstance;
+    constructor(gameType, localGameProperties){
+        this.gameType = gameType;
         this.localGameProperties = localGameProperties;
+        this.activeGameInstance = undefined;
 
         this.FRAME_COUNTER = new FrameRateCounter(localGameProperties["frame_rate"]);
         this.HUD = new HUD(localGameProperties["hud_json"]);
@@ -46,14 +46,6 @@ class GameContainer {
         return this.gMouseY;
     }
 
-    getLocalGameInstance(){
-        return this.localGameInstance;
-    }
-
-    getRemoteGameInstance(){
-        return this.remoteGameInstance;
-    }
-
     getFrameCounter(){
         return this.FRAME_COUNTER;
     }
@@ -62,14 +54,13 @@ class GameContainer {
         return this.HUD;
     }
 
-    newLocalGame(gamemodeType){
-        this.localGameInstance.reset();
+    newGame(gameType, gamemodeType){
+        this.activeGameInstance = new gameType(this.localGameProperties);
         this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
     }
 
-    newRemoteGame(gamemodeType){
-        this.remoteGameInstance.reset();
-        this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
+    getGameInstance(){
+        return this.activeGameInstance;
     }
 
     isInGame(){
@@ -171,7 +162,7 @@ class GameContainer {
         }
 
         // Register all keybinds
-        this.localGameInstance.constructor.registerAllKeybinds();
+        this.gameType.registerAllKeybinds();
 
         // Disable context menu
         document.getElementById("main_area").addEventListener("contextmenu", (event) => {event.preventDefault()});
@@ -190,7 +181,7 @@ class GameContainer {
         requestAnimationFrame(launcherTickHandler);
 
         // Tell the game to load its images
-        await this.localGameInstance.constructor.loadImages();
+        await this.gameType.loadImages();
 
         // Setup menus
         this.MENU_MANAGER.setup();

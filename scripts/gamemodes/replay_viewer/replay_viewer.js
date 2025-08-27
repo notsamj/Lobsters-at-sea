@@ -72,7 +72,7 @@ class ReplayViewer extends Gamemode {
     getName(){ return "replay_viewer"; }
 
     getGame(){
-        return GC.getLocalGameInstance();
+        return GC.getGameInstance();
     }
 
     display(){

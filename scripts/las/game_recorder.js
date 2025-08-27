@@ -1,6 +1,7 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
     copyObject = require("../general/helper_functions.js").copyObject;
+    Ship = require("./ship/ship.js").Ship;
 }
 class GameRecorder {
     constructor(gameProperties){
@@ -46,9 +47,75 @@ class GameRecorder {
         return outputList;
     }
 
-    getReplayString(){
+    getReplayString(game){
         let replayObject = {};
-        replayObject["opening_message"] = copyObject()
+
+        // Grab the opening message
+        replayObject["opening_message"] = copyObject(this.timeline.get(0)["list"].get(0));
+
+        // Prepare the timeline
+        replayObject["timeline"] = [];
+
+        // Create the decision object
+        let dynamicShipDecisions = {};
+
+        let defaultShipDecisions = Ship.getDefaultDecisions();
+        let decisionNames = Object.keys(defaultShipDecisions);
+
+        // Set a baseline of decisions for these ships
+        for (let ship of replayObject["opening_message"]["game_details"]["ships"]){
+            dynamicShipDecisions[ship["id"]] = copyObject(defaultShipDecisions);
+        }
+
+        // Go through each tick
+        for (let [tickObj, tickObjIndex] of this.timeline){
+            let tickNumber = tickObj["tick"];
+            let tickListOfEvents = tickObj["list"];
+            let updatesThisTick = [];
+
+            // Go through all events
+            for (let [eventObj, eventObjIndex] of tickListOfEvents){
+                // Skip events that aren't being looked for
+                if (eventObj["event_type"] != "ship_decisions_recording"){
+                    continue;
+                }
+
+                // Loop through each ship decision recording
+                for (let shipDecisionRecording of eventObj["ship_decisions"]){
+                    let shipID = shipDecisionRecording["ship_id"];
+                    let shipEstablishedDecisions = shipDecisionRecording["established_decisions"];
+                    //console.log(shipDecisionRecording)
+                    let updatedDecisions = {}
+                    let decisionUpdateCount = 0;
+
+                    // Search each decision
+                    for (let decisionName of decisionNames){
+                        // If it doesn't line up with the current value
+                        if (shipEstablishedDecisions[decisionName] != dynamicShipDecisions[shipID][decisionName]){
+                            // Update stored value
+                            dynamicShipDecisions[shipID][decisionName] = shipEstablishedDecisions[decisionName];
+
+                            // Save as update
+                            updatedDecisions[decisionName] = shipEstablishedDecisions[decisionName];
+                            decisionUpdateCount++;
+                        }
+                    }
+
+                    // If there was an update
+                    if (decisionUpdateCount > 0){
+                        updatesThisTick.push({"ship_id": shipID, "decisions_updated": updatedDecisions});
+                    }
+                }
+            }
+
+            // If we have updates this tick
+            if (updatesThisTick.length > 0){
+                replayObject["timeline"].push({"tick": tickNumber, "update_list": updatesThisTick});
+            }
+        }
+
+        // Turn into a string
+        return JSON.stringify(replayObject);
     }
 }
 

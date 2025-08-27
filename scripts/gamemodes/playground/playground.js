@@ -70,7 +70,7 @@ class Playground extends Gamemode {
     getName(){ return "playground"; }
 
     getGame(){
-        return GC.getLocalGameInstance();
+        return GC.getGameInstance();
     }
 
     display(){

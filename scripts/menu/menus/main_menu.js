@@ -41,7 +41,7 @@ class MainMenu extends Menu {
         // Playground
         let playgroundButtonY = (innerHeight) => { return innerHeight - gapSize; };
         this.components.push(new RectangleButton("Playground", buttonColorCode, buttonTextColorCode, buttonX, playgroundButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
-            GC.newLocalGame(Playground);
+            GC.newGame(LasLocalGame, Playground);
             GC.getMenuManager().switchTo("game");
         }));
 
