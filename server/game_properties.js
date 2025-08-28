@@ -1,6 +1,14 @@
 const MD = require("../data/main_data_json.js").MD;
 const SD = require("../data/ship_data_json.js").SD;
 
+let gameRecordingSettings = {
+    "ms_crosshair_display_around_shooting_ms": 500,
+    "ms_crosshair_display_around_shooting_ticks": undefined // calculated
+}
+
+// Calculate
+gameRecordingSettings["ms_crosshair_display_around_shooting_ticks"] = gameRecordingSettings["ms_crosshair_display_around_shooting_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+
 module.exports = {
     "tick_rate": MD["game_properties"]["tick_rate"],
     "ms_between_ticks": MD["game_properties"]["ms_between_ticks"],
@@ -25,6 +33,7 @@ module.exports = {
     "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
     "winning_screen_settings": MD["winning_screen_settings"],
     "ship_colours": MD["ship_colours"],
+    "game_recorder_settings": gameRecordingSettings,
     "default_folder_settings": {
         "default_folders": [
             {   

@@ -53,6 +53,10 @@ class Ship {
         }
     }
 
+    getPendingDecisions(){
+        return this.pendingDecisions;
+    }
+
     getEstablishedDecisions(){
         return this.establishedDecisions;
     }
@@ -205,6 +209,14 @@ class Ship {
         return this.shipModel;
     }
 
+    getAdjustedCannonAimingX(){
+        return this.getTickX() + this.pendingDecisions["aiming_cannons_position_x"];
+    }
+
+    getAdjustedCannonAimingY(){
+        return this.getTickY() + this.pendingDecisions["aiming_cannons_position_y"];
+    }
+
     updateFromPilot(updateJSON){
         this.pendingDecisions["sail_strength_change"] = updateJSON["sail_strength_change"];
         this.pendingDecisions["orientation_direction_change"] = updateJSON["orientation_direction_change"];
@@ -232,8 +244,9 @@ class Ship {
         }
         //console.log("Firing")
 
-        let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
-        let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
+        let aimingCannonsPositionX = this.getAdjustedCannonAimingX();
+        let aimingCannonsPositionY = this.getAdjustedCannonAimingY();
+
 
         // Fire elligible cannons
         for (let cannon of this.cannons){
@@ -251,8 +264,8 @@ class Ship {
         }
 
         // Check with cannons can be aimed at the position
-        let aimingCannonsPositionX = this.establishedDecisions["aiming_cannons_position_x"];
-        let aimingCannonsPositionY = this.establishedDecisions["aiming_cannons_position_y"];
+        let aimingCannonsPositionX = this.getAdjustedCannonAimingX();
+        let aimingCannonsPositionY = this.getAdjustedCannonAimingY();
 
         let cannonCount = 0;
     

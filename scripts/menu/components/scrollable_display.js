@@ -136,8 +136,13 @@ class ScrollableDisplay extends Component {
 
         // TEMP
         // Add default ones
+        let handler = () => {
+            GC.newGame(LasLocalGame, ReplayViewer);
+            GC.getMenuManager().switchTo("game");
+        }
+
         for (let localReplay of LOCAL_REPLAYS){
-            this.displayItems.push({"display_name": localReplay["name"], "handler": () => {console.log("Test")}});
+            this.displayItems.push({"display_name": localReplay["name"], "handler": handler});
         }
 
         this.scrollBar.increaseNumEntries(this.displayItems.getLength());

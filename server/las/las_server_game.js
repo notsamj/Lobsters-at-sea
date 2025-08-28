@@ -11,7 +11,7 @@ class LasServerGame extends LasGame {
 
         this.server = server;
 
-        this.gameRecorder = new GameRecorder();
+        this.gameRecorder = new GameRecorder(gameProperties["game_recorder_settings"]);
 
         this.gameStartTime = undefined;
         this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
@@ -177,7 +177,7 @@ class LasServerGame extends LasGame {
         
         // If game successfully completed then get replay string
         if (gameCompleted){
-            //console.log(this.tickTimeline.getReplayString());
+            this.server.addReplay(this.gameRecorder.getReplayString());
         }
 
         let endMessageJSON = {

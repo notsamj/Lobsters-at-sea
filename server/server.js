@@ -40,8 +40,37 @@ class LASServer {
 
         this.mongoDBServer = undefined; // placeholder
         this.mongoDBClient = undefined; // placeholder
+        this.mongoDBRefOfDB = undefined; // placeholder
+
+        this.savedReplayCount = 0;
 
         this.setupServer();
+    }
+
+    backupReplayToFile(replayString){
+        // Modify to add \ infront of all " so that I can drag into the .js later
+        let modifiedString = replayString.replace("\"", "\\");
+ 
+        modifiedString = "const LOCAL_REPLAYS = [{\"name\": \"local_replay_1\", \"data\": \"" + modifiedString + "\"}]"
+
+        // Backup
+        fs.writeFileSync("replay_backup.replay", modifiedString);
+    }
+
+    async addReplay(replayString){
+        // Save to file
+        this.backupReplayToFile(replayString);
+
+        // Replay name
+        let replayName = "server_replay_" + (this.savedReplayCount++).toString();
+        try {
+            await this.mongoDBRefOfDB.collection("replays").insertOne({
+                "replay_name": replayName,
+                "replay_string": replayString
+            });
+        }catch (error){
+            console.error(error);
+        }
     }
 
     async setupServer(){
@@ -66,6 +95,12 @@ class LASServer {
         // Connect the client
         await this.mongoDBClient.connect();
         console.log("MongoDB connected!");
+
+        // Add the db
+        this.mongoDBRefOfDB = this.mongoDBClient.db("replay_db");
+
+        // Add replay collection
+        await this.mongoDBRefOfDB.createCollection("replays");
     }
 
     async kickWSSClients(){
