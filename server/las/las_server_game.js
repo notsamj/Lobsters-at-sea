@@ -16,6 +16,7 @@ class LasServerGame extends LasGame {
         this.gameStartTime = undefined;
         this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
         this.clients = new NotSamLinkedList();
+        this.clientIDToShipID = {};
     }
 
     async start(clientData){
@@ -132,6 +133,9 @@ class LasServerGame extends LasGame {
             // Add their ship id to message
             if (clientsArePlayers){
                 personalizedMessage["game_details"]["your_ship_id"] = clientShipIDs[clientIndex];
+
+                // Store ship idea of each client
+                this.clientIDToShipID[client.getID()] = clientShipIDs[clientIndex];
             }
 
             client.sendJSON(personalizedMessage);
@@ -156,6 +160,7 @@ class LasServerGame extends LasGame {
         this.resetColours();
         this.tickCount = 0;
         this.gameStartTime = undefined;
+        this.clientIDToShipID = {};
     }
 
     end(){
@@ -177,6 +182,8 @@ class LasServerGame extends LasGame {
         
         // If game successfully completed then get replay string
         if (gameCompleted){
+            //this.server.test(this.gameRecorder);
+
             this.server.addReplay(this.gameRecorder.getReplayString());
         }
 
@@ -193,16 +200,20 @@ class LasServerGame extends LasGame {
         return this.running;
     }
 
-    determineIfContinuingToRun(){
+    async determineIfContinuingToRun(){
         // Purge clients
-        this.checkActiveParticipants();
+        let shipsIDsToKill = await this.checkActiveParticipants();
+
+        // Kill these ships of disconnected players
+        for (let shipID of shipsIDsToKill){
+            this.getShipByID(shipID).kill();
+        }
+
         // If no clients left, stop running
         if (this.clients.getLength() === 0){
             this.end();
             return;
         }
-
-        // TODO: Kill ships linked to clients that are gone
 
         let shipsAlive = 0;
         for (let [ship, shipIndex] of this.ships){
@@ -230,11 +241,28 @@ class LasServerGame extends LasGame {
         }
     }
 
-    checkActiveParticipants(){
-        let removalFunc = (client) => {
-            return client.connectionIsDead();
+    async checkActiveParticipants(){
+        let removalFunc = async (client) => {
+            return client.connectionIsDead() || (!(await client.checkForStatus("desire_to_play_battle")));
         }
-        this.clients.deleteWithCondition(removalFunc);
+
+        let shipIDsToDelete = [];
+
+        // Remove clients meeting removal function criteria
+        for (let [client, clientIndex] of this.clients){
+            // If client needs to be removed
+            if (await removalFunc(client)){
+
+                // Save ship id if applicable
+                if (objectHasKey(this.clientIDToShipID, client.getID())){
+                    shipIDsToDelete.push(this.clientIDToShipID[client.getID()]);
+                }
+
+                this.clients.pop(clientIndex);
+            }
+        }
+
+        return shipIDsToDelete;
     }
 
     sendClientsTickAndPositionData(){
@@ -342,7 +370,7 @@ class LasServerGame extends LasGame {
 
 
         // Check if game still going
-        this.determineIfContinuingToRun();
+        await this.determineIfContinuingToRun();
 
         // If still running after check
         if (this.isRunning()){

@@ -212,6 +212,7 @@ function getPrettyTime(){
 if (typeof window === "undefined"){
     module.exports = {
         copyArray,
-        copyObject
+        copyObject,
+        objectHasKey
     }
 }

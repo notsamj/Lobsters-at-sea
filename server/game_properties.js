@@ -2,12 +2,12 @@ const MD = require("../data/main_data_json.js").MD;
 const SD = require("../data/ship_data_json.js").SD;
 
 let gameRecordingSettings = {
-    "ms_crosshair_display_around_shooting_ms": 500,
-    "ms_crosshair_display_around_shooting_ticks": undefined // calculated
+    "crosshair_display_around_shooting_ms": 500,
+    "crosshair_display_around_shooting_ticks": undefined // calculated
 }
 
 // Calculate
-gameRecordingSettings["ms_crosshair_display_around_shooting_ticks"] = gameRecordingSettings["ms_crosshair_display_around_shooting_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+gameRecordingSettings["crosshair_display_around_shooting_ticks"] = gameRecordingSettings["crosshair_display_around_shooting_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 
 module.exports = {
     "tick_rate": MD["game_properties"]["tick_rate"],
@@ -41,7 +41,15 @@ module.exports = {
                 "max_size": 1,
             },
             {   
-                "folder_name": "lobby_join", 
+                "folder_name": "desire_to_play_battle", 
+                "max_size": 1,
+            },
+            {   
+                "folder_name": "get_replay_list", 
+                "max_size": 1,
+            },
+            {   
+                "folder_name": "get_replay_data", 
                 "max_size": 1,
             },
         ]

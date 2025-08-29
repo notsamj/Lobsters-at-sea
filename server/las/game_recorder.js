@@ -1,6 +1,7 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
     copyObject = require("../../scripts/general/helper_functions.js").copyObject;
+    objectHasKey = require("../../scripts/general/helper_functions.js").objectHasKey;
     Ship = require("../../scripts/las/ship/ship.js").Ship;
 }
 class GameRecorder {
@@ -96,9 +97,9 @@ class GameRecorder {
             // Go through update list
             for (let updatedDecisionsObject of tickObj["update_list"]){
                 // If we found a fire cannon decision, add an interval
-                if (objectHasKey(updatedDecisionsObject["decisions_updated"], "fire_cannons")){
+                if (objectHasKey(updatedDecisionsObject["decisions_updated"], "fire_cannons") && updatedDecisionsObject["decisions_updated"]["fire_cannons"] === true){
                     let timelineObject = getCreateIntervalTimelineObject(updatedDecisionsObject["ship_id"]);
-                    timelineObject.push([tickObj["tick"]-ticksOfShowingOnEachSide, [tickObj["tick"]+ticksOfShowingOnEachSide]]);
+                    timelineObject.push([tickObj["tick"]-ticksOfShowingOnEachSide, tickObj["tick"]+ticksOfShowingOnEachSide]);
                 }
             }
         }
@@ -107,7 +108,7 @@ class GameRecorder {
         for (let shipID of Object.keys(shipDisplayCrosshairIntervals)){
             let intervalList = shipDisplayCrosshairIntervals[shipID];
             // Loop from n-1 to 1 (last to 2nd element)
-            for (let i = intervalList.length - 1; i > 0; i--){
+            for (let i = intervalList.getLength() - 1; i > 0; i--){
                 let listBelow = intervalList.get(i-1);
                 let myList = intervalList.get(i);
                 let belowEnd = listBelow[1];
@@ -132,7 +133,6 @@ class GameRecorder {
                 if (objectHasKey(updatedDecisionsObject["decisions_updated"], "aiming_cannons")){
                     // If not in an interval then cleanse the decision object
                     if (!isInInterval(updatedDecisionsObject["ship_id"], tickObj["tick"])){
-                        updatedDecisionsObject["decisions_updated"]["aiming_cannons"] = undefined;
                         updatedDecisionsObject["decisions_updated"]["aiming_cannons_position_x"] = undefined;
                         updatedDecisionsObject["decisions_updated"]["aiming_cannons_position_y"] = undefined;
                     }
@@ -162,7 +162,6 @@ class GameRecorder {
 
     reduceRecording(){
         // Apply reductions
-
         this.reduceCrosshairShowing();
     }
 

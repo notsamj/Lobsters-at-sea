@@ -8,11 +8,72 @@ class ReplayViewer extends Gamemode {
         this.timeline = undefined; // Placeholder
         this.currentTimelineIndex = 0;
 
-        this.launch(LOCAL_REPLAYS[0]["data"]);
+        this.mode = undefined;
+
+        this.started = false;
     }
 
     isRunning(){
-        return !this.winningScreen.isActive();
+        return this.started && !this.winningScreen.isActive();
+    }
+
+    launchLocal(localReplayName){
+        this.mode = "local";
+        // Find and launch
+        for (let replayObj of LOCAL_REPLAYS){
+            if (replayObj["name"] === localReplayName){
+                this.launch(replayObj["data"]);
+                return;
+            }
+        }
+        throw new Error("Failed to find local replay: " + localReplayName);
+    }
+
+    async launchOnline(onlineReplayName){
+        this.mode = "online";
+        // Ask for the reply
+        try {
+            SC.sendJSON({
+                "subject": "get_replay_data",
+                "replay_name": onlineReplayName
+            });
+        }catch{
+            console.log("Failed to request replay.");
+            this.handleGameOver(false);
+            return;
+        }
+    }
+
+    async checkForReplayData(){
+        let mailBox = SC.getClientMailbox();
+
+        // Get access
+        await mailBox.requestAccess();
+
+        let replayDataFolder = mailBox.getFolder("replay_data");
+        let messages = replayDataFolder["list"];
+
+        let replayString;
+        let foundMessage = false;
+        // If there's a message
+        if (messages.getLength() > 0){
+            let replayDataMSGJSON = messages.get(0);
+
+            // If not read
+            if (!replayDataMSGJSON["read"]){
+                let replayDataJSON = replayDataMSGJSON["data_json"];
+                replayString = replayDataJSON["replay_string"];
+                foundMessage = true;
+            }
+        }
+
+        // Give up access
+        mailBox.relinquishAccess();
+
+        // If found -> launch
+        if (foundMessage){
+            this.launch(replayString);
+        }
     }
 
     launch(replayString){
@@ -52,6 +113,9 @@ class ReplayViewer extends Gamemode {
             shipJSON["game_instance"] = game;
             game.addShip(new Ship(shipJSON));
         }
+
+        // Note started
+        this.started = true;
     }
 
     handlePause(){
@@ -87,7 +151,6 @@ class ReplayViewer extends Gamemode {
             return;
         }
 
-
         // So now we know that we have the timeline data for the next tick
         let timelineTickList = timelineTickObj["update_list"];
         for (let update of timelineTickList){
@@ -96,7 +159,6 @@ class ReplayViewer extends Gamemode {
             // Modify based on the update
             for (let decisionName of Object.keys(update["decisions_updated"])){
                 pendingDecisionsForShip[decisionName] = update["decisions_updated"][decisionName];
-                //console.log(decisionName, update["decisions_updated"][decisionName])
                 //debugger;
             }
         }
@@ -160,9 +222,16 @@ class ReplayViewer extends Gamemode {
         }
     }
 
-    tick(){
+    getMode(){
+        return this.mode;
+    }
+
+    async tick(){
         // Don't tick when over
         if (!this.isRunning()){
+            if (this.getMode() === "online" && this.started === false){
+                await this.checkForReplayData();
+            }
             return;
         }
 

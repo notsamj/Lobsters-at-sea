@@ -69,7 +69,7 @@ class NotSamLinkedList {
         console.log("Size", this.getSize());
         console.log("Length", this.getLength());
         for (let [element, elementIndex] of this){
-            console.log("@ Index", elementIndex, "has", element, "fetched", this.get(elementIndex));
+            console.log("@ Index", elementIndex, "has", element);
         }
     }
     

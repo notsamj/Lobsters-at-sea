@@ -18,9 +18,11 @@ class Battle extends Gamemode {
     }
 
     end(){
-        // When receive end, tell the Server connection that it's not needed anymore
-        SC.setUserInterest(false);
-        SC.terminateConnection();
+        // Inform server that "I quit"
+        SC.sendJSON({
+            "subject": "desire_to_play_battle",
+            "value": false
+        });
     }
 
     calculateExpectedTicks(){
@@ -59,10 +61,6 @@ class Battle extends Gamemode {
             // Ignore one's above desired tick
             if (tick > previousTick){
                 continue;
-            }
-            // If we've reached a read message 
-            else if (tickDataJSON["read"]){
-                break
             }
             // a message that is too old to be useful
             else if (tickDataJSON["data_json"]["server_tick"] < oldestWindRecordingTick){
@@ -369,6 +367,7 @@ class Battle extends Gamemode {
             let message = endMessages.get(0);
             if (message["read"] === false){
                 winner = message["data_json"]["winner_id"];
+                message["read"] = true;
             }
         }
 

@@ -23,6 +23,23 @@ class ScrollableDisplay extends Component {
         this.setup(scrollableDisplayJSON);
     }
 
+    getMaxEntries(){
+        return this.scrollBar.getMaxEntries();
+    }
+
+    getScrollBar(){
+        return this.scrollBar;
+    }
+
+    getDisplayItems(){
+        return this.displayItems;
+    }
+
+    addDisplayItem(newItem){
+        this.scrollBar.setNumEntries(this.displayItems.getLength() + 1);
+        this.displayItems.push(newItem);
+    }
+
     /*
         Method Name: tick
         Method Parameters: None
@@ -133,19 +150,6 @@ class ScrollableDisplay extends Component {
     
         // Setup display items
         this.displayItems = new NotSamLinkedList();
-
-        // TEMP
-        // Add default ones
-        let handler = () => {
-            GC.newGame(LasLocalGame, ReplayViewer);
-            GC.getMenuManager().switchTo("game");
-        }
-
-        for (let localReplay of LOCAL_REPLAYS){
-            this.displayItems.push({"display_name": localReplay["name"], "handler": handler});
-        }
-
-        this.scrollBar.increaseNumEntries(this.displayItems.getLength());
 
     }
 

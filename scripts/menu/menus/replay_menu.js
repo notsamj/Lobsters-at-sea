@@ -12,6 +12,8 @@ class ReplayMenu extends Menu {
     */
     constructor(){
         super("replay_menu");
+        this.replayMenuTickLock = new Lock();
+        this.scrollableDisplay = undefined; // Declaration
     }
 
     /*
@@ -36,7 +38,109 @@ class ReplayMenu extends Menu {
         }));
 
         // Add the scrollable display
-        this.components.push(new ScrollableDisplay(menuData["scrollable_display"]));
+        let scrollableDisplay = new ScrollableDisplay(menuData["scrollable_display"]);
+        this.scrollableDisplay = scrollableDisplay;
+        
+        // Add default ones
+        let maxEntries = scrollableDisplay.getMaxEntries();
+        let addedCount = 0;
+        for (let localReplay of LOCAL_REPLAYS){
+            // Stop adding as you approach max entries
+            if (addedCount + 1 >= maxEntries){
+                break;
+            }
+            let localReplayName = localReplay["name"];
+            let handler = () => {
+                GC.newGame(LasLocalGame, ReplayViewer);
+                GC.getMenuManager().switchTo("game");
+                GC.getActiveGamemode().launchLocal(localReplayName);
+            }
+            scrollableDisplay.addDisplayItem({"display_name": localReplayName, "handler": handler, "type": "offline"});
+            addedCount++;
+        }
 
+        this.components.push(scrollableDisplay);
+    }
+
+    updateWithNewReplays(replayListJSON){
+        let replays = replayListJSON["replays"];
+
+        let displayItems = this.scrollableDisplay.getDisplayItems();
+
+        // Remove online type
+        for (let i = displayItems.getLength() - 1; i >= 0; i--){
+            let displayItem = displayItems.get(i);
+            if (displayItem["type"] === "online"){
+                displayItems.pop(i);
+            }
+        }
+
+        let offlineLength = displayItems.getLength();
+        let maxEntires = this.scrollableDisplay.getMaxEntries();
+        let entryCount = offlineLength;
+        
+        let onlineEntryIndex = 0;
+
+        // Add the ones that one can
+        while (onlineEntryIndex < replays.length && entryCount < maxEntires){
+            let replayName = replays[onlineEntryIndex];
+            let handler = () => {
+                GC.newGame(LasLocalGame, ReplayViewer);
+                GC.getMenuManager().switchTo("game");
+                GC.getActiveGamemode().launchOnline(replayName);
+            }
+            this.scrollableDisplay.addDisplayItem({"display_name": replayName, "handler": handler, "type": "online"});
+            onlineEntryIndex++;
+            entryCount++;
+        }
+    }
+
+    async checkForReplayList(){
+        let mailBox = SC.getClientMailbox();
+
+        // Await access
+        await mailBox.requestAccess();
+
+
+        let folder = mailBox.getFolder("replay_list_data");
+
+        let messages = folder["list"];
+        // Note: Assume max length 1
+        if (messages.getLength() > 0){
+            let message = messages.get(0);
+            if (!message["read"]){
+                // Mark read
+                message["read"] = true;
+                this.updateWithNewReplays(message["data_json"]);
+            }
+        }
+
+        // Release access
+        mailBox.relinquishAccess();
+
+    }
+
+    informSwitchedTo(){
+        // Tell SC to connec
+        SC.initiateConnection();
+
+        // Send now or when connection is established
+        SC.sendNowOrOnConnection({
+            "subject": "get_replay_list"
+        }, "get_replay_list");
+    }
+
+    async tick(){
+        // Skip if busy
+        if (this.replayMenuTickLock.isLocked()){
+            return;
+        }
+        await this.replayMenuTickLock.awaitUnlock(true);
+
+        // Check for replay list messages
+        await this.checkForReplayList();
+
+        // Release
+        this.replayMenuTickLock.unlock();
     }
 }

@@ -1,8 +1,8 @@
 /*
-    Class Name: ServerConnectionMenu
-    Description: Used for connecting to the server
+    Class Name: BattleMenu
+    Description: Used for connecting to the battle gamemdoe
 */
-class ServerConnectionMenu extends Menu {
+class BattleMenu extends Menu {
     /*
         Method Name: constructor
         Method Parameters: None
@@ -10,7 +10,9 @@ class ServerConnectionMenu extends Menu {
         Method Return: constructor
     */
     constructor(){
-        super("server_connection_menu");
+        super("battle_menu");
+
+        this.requestToJoin = false;
 
         // Declare
         this.scrollingMessageDisplay = undefined;
@@ -26,7 +28,7 @@ class ServerConnectionMenu extends Menu {
         // Background
         this.components.push(new LoadingScreenComponent(true));
 
-        let menuData = MSD["server_connection_menu"];
+        let menuData = MSD["battle_menu"];
 
         // Back Button
         let menuDataBackButton = menuData["back_button"];
@@ -37,12 +39,12 @@ class ServerConnectionMenu extends Menu {
         let backButtonX = menuDataBackButton["x"];
         let selfReference = this;
         this.components.push(new RectangleButton(menuDataBackButton["text"], menuDataBackButton["colour_code"], menuDataBackButton["text_colour_code"], backButtonX, backButtonY, backButtonXSize, backButtonYSize, (instance) => {
-            selfReference.informChangedToMainMenu();
+            selfReference.sendNotInterestedInGame();
             GC.getMenuManager().switchTo("main_menu");
         }));
 
         // Scrolling message display
-        this.scrollingMessageDisplay = new ScrollingMessageDisplay(MSD["server_connection_menu"]);
+        this.scrollingMessageDisplay = new ScrollingMessageDisplay(MSD["battle_menu"]);
         this.components.push(this.scrollingMessageDisplay);
 
         // Set up message sharing
@@ -50,11 +52,11 @@ class ServerConnectionMenu extends Menu {
             selfReference.statusUpdate(eventJSON);
         }
 
-        let serverMessageHandlerFunction = (eventJSON) => {
+        let serverMessageHandlerFunction = (eventJSON) => {  
             selfReference.serverMessage(eventJSON);
         }
 
-        let lobbyJoinFunc = (eventJSON) => {
+        let lobbyJoinFunc = (eventJSON) => {  
             selfReference.lobbyJoinFunc(eventJSON);
         }
 
@@ -70,10 +72,29 @@ class ServerConnectionMenu extends Menu {
 
         // This is the active menu
         let lobbbyJoinRequest = {
-            "subject": "lobby_join"
+            "subject": "desire_to_play_battle",
+            "value": true
         }
 
-        SC.sendJSON(lobbbyJoinRequest);
+        try{
+            SC.sendJSON(lobbbyJoinRequest);
+        }catch {
+            console.log("No connection. Cannot send lobby join request.");
+        }
+    }
+
+    sendNotInterestedInGame(){
+        // This is the active menu
+        let lobbbyQuitRequest = {
+            "subject": "desire_to_play_battle",
+            "value": false
+        }
+
+        try{
+            SC.sendJSON(lobbbyQuitRequest);
+        }catch {
+            console.log("No connection. Cannot send lobby quit request.");
+        }
     }
 
     serverMessage(eventJSON){
@@ -90,24 +111,29 @@ class ServerConnectionMenu extends Menu {
             GC.getGamemodeManager().getActiveGamemode().setup(messageJSON["game_details"]);
             GC.getMenuManager().switchTo("game");
         }else{
-            throw new Error("Unexpected message from server: " + JSON.stringify(eventJSON));
+            //throw new Error("Unexpected message from server: " + JSON.stringify(eventJSON));
         }
     }
 
     statusUpdate(eventJSON){
         let messageText = eventJSON["text"];
         let messageCategory = eventJSON["category"];
-        this.scrollingMessageDisplay.addMessage(messageText, MSD["server_connection_menu"]["category_to_color_code"][messageCategory]);
+        this.scrollingMessageDisplay.addMessage(messageText, MSD["battle_menu"]["category_to_color_code"][messageCategory]);
     }
 
     informSwitchedTo(){
-        SC.setUserInterest(true);
         SC.initiateConnection();
+
+        // Send request to join game
+        this.lobbyJoinFunc();
     }
 
     informChangedToMainMenu(){
-        // Switched to main main
-        SC.setUserInterest(false);
-        SC.terminateConnection();
+        let lobbbyQuitRequest = {
+            "subject": "desire_to_play_battle",
+            "value": false
+        }
+
+        SC.sendJSON(lobbbyQuitRequest);
     }
 }

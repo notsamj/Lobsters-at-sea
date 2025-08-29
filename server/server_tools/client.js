@@ -11,6 +11,62 @@ class Client {
         });
     }
 
+    async checkForSubject(subjectName){
+        // Get access
+        await this.mailBox.requestAccess();
+        
+        let pendingDecisionsFolder = this.mailBox.getFolder(subjectName);
+        let decisionsMessages = pendingDecisionsFolder["list"];
+        
+        let subjectMessageFound = false;
+
+        // Check messages in folder
+        for (let [messageJSONWrapper, messageIndex] of decisionsMessages){
+            // Skip read messages
+            if (messageJSONWrapper["read"]){ continue; }
+
+            let messageJSON = messageJSONWrapper["data_json"];
+
+            // Mark read
+            messageJSONWrapper["read"] = true;
+
+            // Mark found
+            subjectMessageFound = true;
+            break;
+        }
+
+        // Give up access
+        this.mailBox.relinquishAccess();
+
+        // Return result
+        return subjectMessageFound;
+    }
+
+    async checkForStatus(subjectName){
+        // Get access
+        await this.mailBox.requestAccess();
+        
+        let pendingDecisionsFolder = this.mailBox.getFolder(subjectName);
+        let decisionsMessages = pendingDecisionsFolder["list"];
+        
+        let statusFound = false; // Assume false
+
+        // Check messages in folder
+        for (let [messageJSONWrapper, messageIndex] of decisionsMessages){
+            // Note: Allowing read messages (status)
+            let messageJSON = messageJSONWrapper["data_json"];
+
+            statusFound = messageJSONWrapper["data_json"]["value"];
+            break;
+        }
+
+        // Give up access
+        this.mailBox.relinquishAccess();
+
+        // Return result
+        return statusFound;
+    }
+
     getID(){
         return this.id;
     }

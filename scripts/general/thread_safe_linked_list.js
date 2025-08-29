@@ -1,5 +1,8 @@
-const NotSamLinkedList = require("../../scripts/general/notsam_linked_list.js").NotSamLinkedList;
-const Lock = require("../../scripts/general/lock.js").Lock;
+if (typeof window === "undefined"){
+    NotSamLinkedList = require("../../scripts/general/notsam_linked_list.js").NotSamLinkedList;
+    Lock = require("../../scripts/general/lock.js").Lock;
+}
+
 class ThreadSafeLinkedList extends NotSamLinkedList {
     /*
         Method Name: constructor
@@ -34,4 +37,6 @@ class ThreadSafeLinkedList extends NotSamLinkedList {
         this.accessLock.unlock();
     }
 }
-module.exports = { ThreadSafeLinkedList }
+if (typeof window === "undefined"){
+    module.exports = { ThreadSafeLinkedList }
+}

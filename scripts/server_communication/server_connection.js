@@ -2,14 +2,49 @@ class ServerConnection {
     constructor(defaultFolderSettingsJSON={}){
         this.eventHandler = new NSEventHandler();
         this.clientMailbox = new ClientMailbox(defaultFolderSettingsJSON);
+
+        this.messageQueue = new ThreadSafeLinkedList();
+
         this.connectionWS = null;
 
-        this.userDesiresServerConnection = false;
         this.attemptingToConnect = false;
         this.connectionIsActive = false;
     }
 
+    async sendNowOrOnConnection(message, id=null){
+        // Send now if connected
+        if (this.hasConnectionActive()){
+            this.sendJSON(message);
+            return;
+        }
+
+        let hasID = id != null;
+        await this.messageQueue.requestAccess();
+
+        let idTaken = false;
+
+        // Note: null cannot be taken
+        if (id != null){
+            for (let [messageObj, messageObjIndex] of this.messageQueue){
+                if (messageObj["id"] === id){
+                    idTaken = true;
+                    break;
+                }
+            }
+        }
+
+        // If ID is not taken then add
+        if (!idTaken){
+            this.messageQueue.push({"message": message, "id": id});
+        }
+        
+        this.messageQueue.relinquishAccess();
+    }
+
     sendJSON(jsonObj){
+        if (!this.hasConnectionActive()){
+            throw new Error("Cannot send message whilst not connected.")
+        }
         this.connectionWS.send(JSON.stringify(jsonObj));
     }
 
@@ -22,37 +57,25 @@ class ServerConnection {
         this.setConnectionActive(true);
         this.setAttemptingToConnect(false);
 
-        // If the user is on the page, do nothing, user wishes to continue connection
-        if (this.connectionIsDesired()){
-            return;
-        }
-
-        // Else, connection is no longer desired
-
-        // TODO: Send a GOODBYE message?
-
-        // Close WS
-        this.connectionWS.close();
-
-        // User has left the page, shut down the connection
-        this.eventHandler.emit({
-            "name": "status_update",
-            "category": "blue",
-            "text": getPrettyTime() + ' ' + "Terminated the server connection due to user activity."
-        });
-
+        this.sendPendingMessages();
     }
+
+    async sendPendingMessages(){
+        await this.messageQueue.requestAccess();
+        for (let [messageObj, messageObjIndex] of this.messageQueue){
+            this.sendJSON(messageObj["message"]);
+        }
+        // Clear queue
+        this.messageQueue.clear();
+        this.messageQueue.relinquishAccess();
+    }
+
     notifyConnectionFailed(){
         this.setConnectionActive(false);
 
         // If in the process of connecting, end that process
         if (this.isAttemptingConnection()){
             this.setAttemptingToConnect(false);
-        }
-
-        // If the user left the page, do nothing
-        if (!this.connectionIsDesired()){
-            return;
         }
 
         // Try again
@@ -68,10 +91,6 @@ class ServerConnection {
         this.initiateConnection();
     }
 
-    connectionIsDesired(){
-        return this.userDesiresServerConnection;
-    }
-
     setAttemptingToConnect(value){
         this.attemptingToConnect = value;
     }
@@ -84,18 +103,13 @@ class ServerConnection {
         return this.eventHandler;
     }
 
-    setUserInterest(value){
-        this.userDesiresServerConnection = value;
-    }
-
     shutdownConnectionIfOn(){
-        this.setUserInterest(false);
         this.terminateConnection();
     }
 
     async initiateConnection(){
-        // If a connection is currently being attempted then ignore
-        if (this.isAttemptingConnection()){
+        // If has an active connection OR a connection is currently being attempted then ignore 
+        if (this.hasConnectionActive() || this.isAttemptingConnection()){
             return;
         }
 

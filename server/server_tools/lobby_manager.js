@@ -28,11 +28,19 @@ class LobbyManager {
         return this.runningALobby;
     }
 
-    checkActiveParticipants(){
-        let removalFunc = (client) => {
-            return client.connectionIsDead();
+    async checkActiveParticipants(){
+        let removalFunc = async (client) => {
+            return client.connectionIsDead() || (!(await client.checkForStatus("desire_to_play_battle")));
         }
-        this.clients.deleteWithCondition(removalFunc);
+
+
+        // Remove clients meeting removal function criteria
+        for (let [client, clientIndex] of this.clients){
+            // If client needs to be removed
+            if (await removalFunc(client)){
+                this.clients.pop(clientIndex);
+            }
+        }
     }
 
     getAvailableSlotCount(){

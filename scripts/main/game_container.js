@@ -223,6 +223,10 @@ class GameContainer {
         return this.GAMEMODE_MANAGER;
     }
 
+    getActiveGamemode(){
+        return this.GAMEMODE_MANAGER.getActiveGamemode();
+    }
+
     /*
         Method Name: setGameZoom
         Method Parameters: None

@@ -180,7 +180,7 @@ class SpectatorCamera {
 
     getID(){
         if (this.isFollowingAShip()){
-            return this.followedShip.getSpeed();
+            return this.followedShip.getID();
         }
         return "none";
     }

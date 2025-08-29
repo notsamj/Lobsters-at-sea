@@ -44,6 +44,14 @@ const MD = {
             {   
                 "folder_name": "end_data", 
                 "max_size": 1,
+            },
+            {
+                "folder_name": "replay_data",
+                "max_size": 1
+            },
+            {
+                "folder_name": "replay_list_data",
+                "max_size": 1
             }
         ]
     },

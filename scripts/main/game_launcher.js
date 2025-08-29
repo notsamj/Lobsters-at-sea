@@ -51,7 +51,7 @@ function launcherTickHandler(timeElapsedMS){
 
 function registerMenus(){
     GC.getMenuManager().registerMenu(new MyProjectsMenu());
-    GC.getMenuManager().registerMenu(new ServerConnectionMenu());
+    GC.getMenuManager().registerMenu(new BattleMenu());
     GC.getMenuManager().registerMenu(new ReplayMenu());
 }
 

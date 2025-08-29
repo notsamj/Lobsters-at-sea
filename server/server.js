@@ -11,7 +11,7 @@ const https = require("https");
 const Lock = require("../scripts/general/lock.js").Lock;
 const LobbyManager = require("./server_tools/lobby_manager.js").LobbyManager;
 const Client = require("./server_tools/client.js").Client;
-const ThreadSafeLinkedList = require("./server_tools/thread_safe_linked_list.js").ThreadSafeLinkedList;
+const ThreadSafeLinkedList = require("../scripts/general/thread_safe_linked_list.js").ThreadSafeLinkedList;
 const LasServerGame = require("./las/las_server_game.js").LasServerGame;
 const IDManager = require("../scripts/general/id_manager.js").IDManager;
 
@@ -49,12 +49,26 @@ class LASServer {
 
     backupReplayToFile(replayString){
         // Modify to add \ infront of all " so that I can drag into the .js later
-        let modifiedString = replayString.replace("\"", "\\");
+        let modifiedString = replayString.replaceAll("\"", "\\\"");
  
         modifiedString = "const LOCAL_REPLAYS = [{\"name\": \"local_replay_1\", \"data\": \"" + modifiedString + "\"}]"
 
         // Backup
         fs.writeFileSync("replay_backup.replay", modifiedString);
+    }
+
+    test(gameRecorder){
+        let replayString2 = JSON.stringify(gameRecorder.replayObject);
+        let replayString1 = gameRecorder.getReplayString();
+
+        // Modify to add \ infront of all " so that I can drag into the .js later
+        let modifiedString1 = replayString1.replaceAll("\"", "\\\"");
+        let modifiedString2 = replayString2.replaceAll("\"", "\\\"");
+ 
+        let fString = "const LOCAL_REPLAYS = [{\"name\": \"local_replay_1\", \"data\": \"" + modifiedString1 + "\"},{\"name\": \"local_replay_2\", \"data\": \"" + modifiedString2 + "\"}]"
+
+        // Backup
+        fs.writeFileSync("test.replay", fString);
     }
 
     async addReplay(replayString){
@@ -176,13 +190,13 @@ class LASServer {
 
             // Lock mailbox
             await mailBox.requestAccess();
-            let folder = mailBox.getFolder("lobby_join");
+            let folder = mailBox.getFolder("desire_to_play_battle");
             let messages = folder["list"];
 
             if (messages.getLength() > 0){
                 let message = messages.get(0);
                 // If message isn't read
-                if (message["read"] === false){
+                if (message["read"] === false && message["data_json"]["value"] === true){
                     // Add them
                     this.lobbyManager.addClient(client);
 
@@ -217,6 +231,99 @@ class LASServer {
         this.clients.relinquishAccess();
     }
 
+    async handleReplayRequests(){
+        await this.handleReplayListRequests();
+        await this.handleReplayDataRequests();
+    }
+
+    async handleReplayListRequests(){
+        // Get access to clients
+        this.clients.requestAccess();
+        // Check which clients want to join
+        for (let [client, clientIndex] of this.clients){
+            let mailBox = client.getMailBox();
+
+            // Lock mailbox
+            await mailBox.requestAccess();
+            let folder = mailBox.getFolder("get_replay_list");
+            let messages = folder["list"];
+
+            if (messages.getLength() > 0){
+                let message = messages.get(0);
+                // If message isn't read
+                if (message["read"] === false){
+                    await this.sendClientReplayList(client);
+
+                    // Mark message as read
+                    message["read"] = true;
+                }
+            }
+            // Unlock mailbox
+            mailBox.relinquishAccess();
+        }
+        // Give up access
+        this.clients.relinquishAccess();
+    }
+
+    async sendClientReplayList(client){
+        let dataList = await this.mongoDBRefOfDB.collection("replays").find({}).toArray();
+        
+        let replayNameList = [];
+        for (let entry of dataList){
+            replayNameList.push(entry["replay_name"]);
+        }
+
+        client.sendJSON({
+            "subject": "replay_list_data",
+            "replays": replayNameList
+        })
+    }
+
+    async handleReplayDataRequests(){
+        // Get access to clients
+        this.clients.requestAccess();
+        // Check which clients want to join
+        for (let [client, clientIndex] of this.clients){
+            let mailBox = client.getMailBox();
+
+            // Lock mailbox
+            await mailBox.requestAccess();
+            let folder = mailBox.getFolder("get_replay_data");
+            let messages = folder["list"];
+
+            if (messages.getLength() > 0){
+                let message = messages.get(0);
+                // If message isn't read
+                if (message["read"] === false){
+                    await this.sendClientReplayData(client, message["data_json"]["replay_name"]);
+
+                    // Mark message as read
+                    message["read"] = true;
+                }
+            }
+            // Unlock mailbox
+            mailBox.relinquishAccess();
+        }
+        // Give up access
+        this.clients.relinquishAccess();
+    }
+
+    async sendClientReplayData(client, replayName){
+        let dataList = await this.mongoDBRefOfDB.collection("replays").find({}).toArray();
+        
+        let foudndReplayString = null;
+        for (let entry of dataList){
+            if (entry["replay_name"] === replayName){
+                foudndReplayString = entry["replay_string"];
+            }
+        }
+
+        client.sendJSON({
+            "subject": "replay_data",
+            "replay_string": foudndReplayString
+        })
+    }
+
     async tick(){
         // Don't tick if still running a tick
         if (this.tickLock.isLocked()){
@@ -228,6 +335,9 @@ class LASServer {
         // Purge inactive clients
         await this.purgeInactiveClients();
 
+        // Handle replay requests
+        await this.handleReplayRequests();
+
         // If the game is running
         if (this.game.isRunning()){
             this.game.tick();
@@ -235,7 +345,7 @@ class LASServer {
         // Else, game is not running, I am instead running a lobby
         else{
             // Check heartbeat status on all lobby clients and remove any no longer active
-            this.lobbyManager.checkActiveParticipants();
+            await this.lobbyManager.checkActiveParticipants();
 
             let availableLobbySlots = this.lobbyManager.getAvailableSlotCount(); // Expect >= 1
 
