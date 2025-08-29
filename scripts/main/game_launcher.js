@@ -4,7 +4,7 @@ let gameProperties = {
     "approximate_zoom_peek_time_ms": MD["game_properties"]["approximate_zoom_peek_time_ms"],
     "game_zoom": 1, // default
     "ms_between_ticks_floor": MD["game_properties"]["ms_between_ticks_floor"],
-    "sound_data": MD["sound_data"],
+    "sound_data": AUDIO_DATA,
     "loading_screen_data": MD["loading_screen_data"],
     "frame_rate": MD["game_properties"]["frame_rate"],
     "hud_json": MD["hud"],
@@ -53,6 +53,8 @@ function registerMenus(){
     GC.getMenuManager().registerMenu(new MyProjectsMenu());
     GC.getMenuManager().registerMenu(new BattleMenu());
     GC.getMenuManager().registerMenu(new ReplayMenu());
+    GC.getMenuManager().registerMenu(new SettingsMenu());
+    GC.getMenuManager().registerMenu(new SoundMenu());
 }
 
 function stop(){

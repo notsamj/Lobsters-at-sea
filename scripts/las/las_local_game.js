@@ -79,6 +79,9 @@ class LasLocalGame extends LasGame {
         // Process visual effects + sounds from tick
         this.processNewVisualEffects();
 
+        // Play sounds
+        this.playSounds(this.getFocusedFrameX(), this.getFocusedFrameY());
+
         // Clean the tick timeline
         this.getTickTimeline().reset();
 
@@ -256,6 +259,50 @@ class LasLocalGame extends LasGame {
         this.getFocusedEntity().displayWhenFocused();
     }
 
+    playSounds(centerX, centerY){
+        let tickTimeline = this.getTickTimeline();
+        let soundManager = GC.getSoundManager();
+
+        let screenWidth = getZoomedScreenWidth();
+        let screenHeight = getZoomedScreenHeight();
+
+        // Collect cannonball hits
+        let cannonBallHits = tickTimeline.getEventsOfType("cannon_ball_hit");
+
+        for (let [cBH, cBHIndex] of cannonBallHits){
+            let x = cBH["x_pos"];
+            let y = cBH["y_pos"];
+            soundManager.play("cannon_ball_hit", x - centerX, y-centerY);
+        }
+
+        // Collect cannon smoke
+        let cannonBallShots = tickTimeline.getEventsOfType("cannon_shot");
+
+        for (let [cBS, cBSIndex] of cannonBallShots){
+            let x = cBS["x_origin"];
+            let y = cBS["y_origin"];
+            soundManager.play("cannon_shot", x - centerX, y-centerY);
+        }
+
+        // Cannon ball sunk
+        let cannonBallSinkings = tickTimeline.getEventsOfType("cannon_ball_sunk");
+
+        for (let [cBSi, cBSIIndex] of cannonBallSinkings){
+            let x = cBSi["x_pos"];
+            let y = cBSi["y_pos"];
+            soundManager.play("cannon_ball_sinking", x - centerX, y-centerY);
+        }
+
+        // Ship sunk
+        let shipSinkings = tickTimeline.getEventsOfType("ship_sunk");
+
+        for (let [sS, sSIndex] of shipSinkings){
+            let x = sS["x_pos"];
+            let y = sS["y_pos"];
+            soundManager.play("ship_sinking", x - centerX, y-centerY);
+        }
+    }
+
     static registerAllKeybinds(){
         /* TODO: List out all keybinds
             get value from DEFAULT_KEY_BIND in main_data_json
@@ -315,6 +362,10 @@ class LasLocalGame extends LasGame {
 
         menuInputManager.register("scroll_bar_grab", "mousedown", (event) => { return event.which===keyCodeLeftClick; });
         menuInputManager.register("scroll_bar_grab", "mouseup", (event) => { return event.which===keyCodeLeftClick; }, false);
+
+        menuInputManager.register("option_slider_grab", "mousedown", (event) => { return event.which===keyCodeLeftClick; });
+        menuInputManager.register("option_slider_grab", "mouseup", (event) => { return event.which===keyCodeLeftClick; }, false);
+
 
         menuInputManager.registerSpecialType(new TickedValueNode("scroll_in_dir", "wheel", (event) => { return event.deltaY; }, 0));
 
@@ -400,6 +451,9 @@ class LasLocalGame extends LasGame {
 
         // Load help menu images
         await GC.getMenuManager().getMenuByName("help_menu").loadImages();
+
+        // Load sounds
+        await GC.getSoundManager().loadSounds();
 
         console.log("Finished loading game images.")
     }

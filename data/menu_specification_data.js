@@ -142,5 +142,48 @@ const MSD = {
                 "go_to_menu_button_text_colour_code": "#ffffff"
             }
         }
-    }
+    },
+    "settings_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 50,
+            "x_size": 200,
+            "y_size": 76
+        },
+        "scrollable_display": {
+            "scroll_bar": {
+                "x_offset": 150,
+                "y_offset": 150,
+                "width": 40,
+                "min_height": 400,
+                "slider_height": 40,
+                "background_colour_code": "#ffffff",
+                "slider_colour_code": "#ff00ff",
+                "wheel_multiplier": 0.25
+            },
+            "entry": {
+                "y_size": 250,
+                "y_offset": 150,
+                "x_offset": 150,
+                "x_size": 900,
+                "display_name_x_size": 400,
+                "display_name_y_size": 150,
+                "display_name_text_colour_code": "#ffffff",
+                "go_to_menu_button_text": "View",
+                "go_to_menu_button_x_size": 400,
+                "go_to_menu_button_y_size": 100,
+                "go_to_menu_button_background_colour_code": "#3bc44b",
+                "go_to_menu_button_text_colour_code": "#ffffff"
+            }
+        },
+        "settings_menus": [
+            {
+                "display_name": "Sound",
+                "menu_name": "sound_menu"
+            }
+        ]
+    },
 }

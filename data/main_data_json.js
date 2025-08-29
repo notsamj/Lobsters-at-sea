@@ -105,23 +105,6 @@ const MD = {
         "wind_max_magnitude_movement_ticks": undefined // caculated
     },
 
-    "sound_data": {
-        "sounds": [
-        ],
-        "url": "./sounds",
-        "file_type": ".mp3",
-        "last_played_delay_ms": 100, // Extra time to wait before preparing to pause a sound
-        "extra_display_time_ms": 1000, // Min time to display a sound
-        "active_sound_display": {
-            "enabled": false, // off by default,
-            "num_slots": 2, // Will show information for $num_slots sounds and an indicator if more sounds are active
-            "slot_x_size": 100,
-            "slot_y_size": 30,
-            "background_colour": "#000000",
-            "text_colour": "#ffffff"
-        }
-    },
-
     "loading_screen_data": {
         "far_away_multiplier": 2,
         "mesh_width": 8192/8,

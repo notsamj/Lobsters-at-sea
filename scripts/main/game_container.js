@@ -38,6 +38,10 @@ class GameContainer {
         this.setupOngoing = false;
     }
 
+    getSoundManager(){
+        return this.SOUND_MANAGER;
+    }
+
     getGMouseX(){
         return this.gMouseX;
     }

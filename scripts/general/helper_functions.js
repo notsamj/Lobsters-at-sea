@@ -12,7 +12,7 @@ function getLocalStorage(key, valueIfNotFound=null){
     // In node js, you can't access this storage
     if (typeof window === "undefined"){ return valueIfNotFound; }
     let value = localStorage.getItem(key);
-    if (value == null){
+    if (value === null || value === "undefined"){
         return valueIfNotFound;
     }
     return value;
