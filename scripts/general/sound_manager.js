@@ -37,7 +37,7 @@ class SoundManager {
         for (let soundData of this.soundDataJSON["sounds"]){
             let audioDataString = soundData["audio_data"];
             let audioBuffer = await this.createAudioArrayBuffer(audioDataString);
-            this.sounds.push(new Sound(this, soundData["name"], audioBuffer, this.mainVolume));
+            this.sounds.push(new Sound(this, soundData["name"], audioBuffer, this.mainVolume, soundData["default_volume"]));
         }
     }
 
@@ -154,17 +154,19 @@ class Sound {
                 Array buffer of audio data
             mainVolume:
                 The main volume of program
+            defaultVolume:
+                Default volume of this sound
         Method Description: Constructor
         Method Return: Constructor
     */
-    constructor(soundManager, soundName, audioArrayBuffer, mainVolume){
+    constructor(soundManager, soundName, audioArrayBuffer, mainVolume, defaultVolume){
         this.soundManager = soundManager;
         this.name = soundName;
 
         this.audioArrayBuffer = audioArrayBuffer;
         this.audioDataBuffer = undefined;
 
-        this.volume = getLocalStorage(soundName, 0);
+        this.volume = getLocalStorage(soundName, defaultVolume);
         this.audioObjVolume = undefined; // Declare
 
         this.hasBeenLoaded = false;
@@ -225,18 +227,34 @@ class Sound {
         let audioPanner = audioContext.createPanner();
         audioPanner.panningModel = "HRTF";
         audioPanner.distanceModel = "inverse";
-        audioPanner.refDistance = 1;
-        audioPanner.maxDistance = 1000; // TODO: Set this up in settings
-        audioPanner.rolloffFactor = 1;
+        audioPanner.refDistance = 8;
+        audioPanner.maxDistance = 1500; // TODO: Set this up in settings
+        audioPanner.rolloffFactor = 0.25;
         audioPanner.coneInnerAngle = 360;
         audioPanner.coneOuterAngle = 0;
         audioPanner.coneOuterGain = 0;
 
-        let zOffset = 0;
-        audioPanner.setOrientation(xOffset, yOffset, zOffset);
+        // Set position
+        audioPanner.positionX.value = xOffset;
+        audioPanner.positionY.value = yOffset;
+        audioPanner.positionZ.value = 0;
+
+        // Set volume
+        let volumeController = audioContext.createGain();
+        volumeController.gain.value = this.audioObjVolume;
+
+        let construction = bufferSource;
+
+        // Connect buffer to volume controller
+        construction = construction.connect(volumeController);
+
+        // Connect buffer to panner
+        construction = construction.connect(audioPanner);
+        
+        // Connect buffer to audio context
+        construction = construction.connect(audioContext.destination);
 
         // Play
-        bufferSource.connect(audioPanner).connect(audioContext.destination);
         bufferSource.start();
     }
 

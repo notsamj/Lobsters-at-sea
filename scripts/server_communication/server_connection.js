@@ -83,6 +83,8 @@ class ServerConnection {
     }
 
     attemptReconnection(){
+        // Temp
+        if (true){ return; }
         this.eventHandler.emit({
             "name": "status_update",
             "category": "yellow",
