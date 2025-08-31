@@ -19,7 +19,7 @@ let gameProperties = {
     "visual_effect_settings": MD["visual_effect_settings"],
     "max_delay_ms": MD["remote_data_settings"]["max_delay_ms"],
     "max_delay_ticks": MD["remote_data_settings"]["max_delay_ticks"],
-    "will_reduction_on_account_of_sail_strength_multiplier": MD["game_properties"]["will_reduction_on_account_of_sail_strength_multiplier"],
+    "will_reduction_on_account_of_sail_strength_exponent": MD["game_properties"]["will_reduction_on_account_of_sail_strength_exponent"],
     "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
     "winning_screen_settings": MD["winning_screen_settings"],
     "ship_colours": MD["ship_colours"]

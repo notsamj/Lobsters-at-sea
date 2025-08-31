@@ -10,6 +10,7 @@ class LasLocalGame extends LasGame {
         
         this.focusedShip = null;
         this.humanShipController = null;
+        this.botShipControllers = [];
 
         this.focusedCamera = new SpectatorCamera(this, gameProperties["camera_settings"]);
 
@@ -18,6 +19,10 @@ class LasLocalGame extends LasGame {
 
         this.updatingFramePositions = true;
         this.lastUpdatedFrameMS = 0;
+    }
+
+    addBotShipController(botShipController){
+        this.botShipControllers.push(botShipController);
     }
 
     setUpdatingFramePositions(value){
@@ -39,6 +44,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    tickBotControllers(){
+        for (let botShipController of this.botShipControllers){
+            botShipController.tick();
+        }
+    }
+
     displayHumanController(){
         if (this.hasFocusedShip()){
             this.humanShipController.display();
@@ -53,6 +64,10 @@ class LasLocalGame extends LasGame {
 
         // Tick human controller
         this.tickHumanController();
+
+        // Tick bot controllers
+        this.tickBotControllers();
+
 
         // TODO: Update ship orientations, power based on decisions
         this.updateShipOrientationAndSailPower();
@@ -155,7 +170,9 @@ class LasLocalGame extends LasGame {
         }
 
         // Bot ship controllers
-        // TODO
+        for (let botShipController of this.botShipControllers){
+            botShipController.getShip().updateFromPilot(botShipController.getDecisionJSON());
+        }
     }
 
     updateShipOrientationAndSailPower(){

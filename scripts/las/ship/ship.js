@@ -45,7 +45,7 @@ class Ship {
     static getDefaultDecisions(){
         return {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
-            "sail_strength_change": 0, // is either < 0, === 0, > 0
+            "new_sail_strength": null, // on continuous [0, 1]
             "aiming_cannons": false, // false or true
             "fire_cannons": false, // false or true
             "aiming_cannons_position_x": null, // null or a float
@@ -123,12 +123,11 @@ class Ship {
 
         }
 
-        //console.log(ticksAhead, "diff", Math.floor(calculateEuclideanDistance(startingX, startingY, this.xPos, this.yPos)));
     }
 
     hitWithCannonBall(posX, posY, cannonBallID){
         let game = this.getGame();
-        //console.log("Cannon hit", posX, posY)
+
 
         // Report
         game.getTickTimeline().addToTimeline({
@@ -195,15 +194,12 @@ class Ship {
         return this.shipSailStrength;
     }
 
-    resetPendingDecisions(){
-        this.pendingDecisions["sail_strength_change"] = 0;
-        this.pendingDecisions["orientation_direction_change"] = 0;
-
-        this.pendingDecisions["aiming_cannons"] = false;
-        this.pendingDecisions["fire_cannons"] = false;
-        this.pendingDecisions["aiming_cannons_position_x"] = null;
-        this.pendingDecisions["aiming_cannons_position_y"] = null;
-    }
+    /*resetPendingDecisions(){
+        let defaultDecisions = this.getDefaultDecisions();
+        for (let key of Object.keys(defaultDecisions)){
+            this.pendingDecisions[key] = defaultDecisions[key];
+        }
+    }*/
 
     getShipModel(){
         return this.shipModel;
@@ -218,13 +214,9 @@ class Ship {
     }
 
     updateFromPilot(updateJSON){
-        this.pendingDecisions["sail_strength_change"] = updateJSON["sail_strength_change"];
-        this.pendingDecisions["orientation_direction_change"] = updateJSON["orientation_direction_change"];
-
-        this.pendingDecisions["aiming_cannons"] = updateJSON["aiming_cannons"];
-        this.pendingDecisions["fire_cannons"] = updateJSON["fire_cannons"];
-        this.pendingDecisions["aiming_cannons_position_x"] = updateJSON["aiming_cannons_position_x"];
-        this.pendingDecisions["aiming_cannons_position_y"] = updateJSON["aiming_cannons_position_y"];
+        for (let key of Object.keys(updateJSON)){
+            this.pendingDecisions[key] = updateJSON[key];
+        }
     }
 
     // local
@@ -235,14 +227,12 @@ class Ship {
 
     checkShoot(){
         // If not bothing aiming and firing then you can't shoot
-        /*if (this.getID() === 3){
-                console.log(this.establishedDecisions["aiming_cannons"])
-        }*/
+
         
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
-        //console.log("Firing")
+
 
         let aimingCannonsPositionX = this.getAdjustedCannonAimingX();
         let aimingCannonsPositionY = this.getAdjustedCannonAimingY();
@@ -346,8 +336,8 @@ class Ship {
         // orientationDirectionChange is either < 0, === 0, > 0 indicating how to turn
         this.establishedDecisions["orientation_direction_change"] = this.pendingDecisions["orientation_direction_change"];
 
-        // orientationPowerChange is either < 0, === 0, > 0
-        this.establishedDecisions["sail_strength_change"] = this.pendingDecisions["sail_strength_change"];
+        // Update new sail strength
+        this.establishedDecisions["new_sail_strength"] = this.pendingDecisions["new_sail_strength"];
 
         this.establishedDecisions["aiming_cannons"] = this.pendingDecisions["aiming_cannons"];
         this.establishedDecisions["fire_cannons"] = this.pendingDecisions["fire_cannons"];
@@ -393,7 +383,20 @@ class Ship {
 
         // Update power
         let changeAmount = 0.01; // TODO save this somewhere (how fast you can change the sails)
-        this.shipSailStrength = Math.max(0, Math.min(1, this.establishedDecisions["sail_strength_change"] * changeAmount + this.shipSailStrength));
+        let changeVector = 0;
+        // Clearly articulating the two options for a change vector other than zero
+        if (this.establishedDecisions["new_sail_strength"] != null && this.establishedDecisions["new_sail_strength"] > this.shipSailStrength){
+            changeVector = changeAmount;
+        }else if (this.establishedDecisions["new_sail_strength"] != null && this.establishedDecisions["new_sail_strength"] < this.shipSailStrength){
+            changeVector = -1 * changeAmount;
+        }
+
+        // If within changeAmount then don't change
+        if (Math.abs(this.establishedDecisions["new_sail_strength"] - this.shipSailStrength) < changeAmount){
+            changeVector = 0;
+        }
+
+        this.shipSailStrength = Math.max(0, Math.min(1, changeVector + this.shipSailStrength));
     }
 
     getGame(){
@@ -571,13 +574,16 @@ class Ship {
         return this.orientationRAD;
     }
 
+    getPropulsionConstant(){
+        return this.propulsionConstant;
+    }
+
     getPositionInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
         let msProportionOfASecond = ms / 1000;
         let windXA = windObJ.getXA();
         let windYA = windObJ.getYA();
-        //debugger;
         // How strong the sails are affects the wind
         windXA *= this.shipSailStrength;
         windYA *= this.shipSailStrength;
@@ -587,20 +593,15 @@ class Ship {
 
         // Modify by regular wind resistence
         windEffectMagnitude *= game.getGameProperties()["ship_air_affectedness_coefficient"];
-        
-        windXA *= Math.abs(windEffectMagnitude);
-        windYA *= Math.abs(windEffectMagnitude);
 
         let willPowerA = this.propulsionConstant;
 
         // Modify based on sail strength
 
-        let willReductionOnAccountOfSailStrength = 1 - this.shipSailStrength;
-        let willReductionOnAccountOfSailStrengthMultiplier = game.getGameProperties()["will_reduction_on_account_of_sail_strength_multiplier"];
-        let willReductionOnAccountOfSailStrengthCoefficient = willReductionOnAccountOfSailStrength * willReductionOnAccountOfSailStrengthMultiplier;
         //debugger;
         // Modify
-        willPowerA *= (1 - willReductionOnAccountOfSailStrengthCoefficient);
+        let exponent = game.getGameProperties()["will_reduction_on_account_of_sail_strength_exponent"];
+        willPowerA *= Math.pow(this.shipSailStrength, exponent);
         let currentSpeed = this.speed;
 
         let shipMovementResistanceA = Math.sqrt(currentSpeed);
@@ -608,15 +609,12 @@ class Ship {
         let newSpeed = currentSpeed + (willPowerA - shipMovementResistanceA) * msProportionOfASecond;
         newSpeed = Math.max(0, newSpeed);
 
-        let newXV = newSpeed * Math.cos(this.getTickOrientation()) + windXA;
+        let newXV = newSpeed * Math.cos(this.getTickOrientation()) + windXA * this.shipSailStrength * windEffectMagnitude;
         let newXP = this.xPos + newXV * msProportionOfASecond;
 
-        let newYV = newSpeed * Math.sin(this.getTickOrientation()) + windYA;
+        let newYV = newSpeed * Math.sin(this.getTickOrientation()) + windYA * this.shipSailStrength * windEffectMagnitude;
         let newYP = this.yPos + newYV * msProportionOfASecond;
 
-        if (isNaN(newXV)){
-            debugger;
-        }
         return {"x_pos": newXP, "x_v": newXV, "y_pos": newYP, "y_v": newYV, "speed": newSpeed}
     }
 

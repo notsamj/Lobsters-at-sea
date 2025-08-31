@@ -27,7 +27,7 @@ class HumanShipController {
         if (inputManager.isActivated("sails_inc")){
             pV = 1;
         }else if (inputManager.isActivated("sails_dec")){
-            pV = -1;
+            pV = 0;
         }
 
 
@@ -60,8 +60,15 @@ class HumanShipController {
             firingCannons = inputManager.isActivated("fire_cannons");
         }
 
-
-        return {"orientation_direction_change": lrV, "sail_strength_change": pV, "aiming_cannons": aimingCannons, "aiming_cannons_position_x": cannonX, "aiming_cannons_position_y": cannonY, "fire_cannons": firingCannons}
+        let finalDecisionJSON = {
+            "orientation_direction_change": lrV,
+            "new_sail_strength": pV,
+            "aiming_cannons": aimingCannons,
+            "aiming_cannons_position_x": cannonX,
+            "aiming_cannons_position_y": cannonY,
+            "fire_cannons": firingCannons
+        }
+        return finalDecisionJSON;
     }
 
     display(){

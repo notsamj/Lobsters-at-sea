@@ -41,7 +41,7 @@ class Playground extends Gamemode {
         game.addShip(tempShip);
 
         // Focus
-        game.setFocusedShip(tempShip);
+        //game.setFocusedShip(tempShip);
         
 
         // Add test ship
@@ -60,6 +60,14 @@ class Playground extends Gamemode {
 
         let tempShip2 = new Ship(tempShip2JSON);
         game.addShip(tempShip2);
+
+        // Add a bot controller
+        let botControllerJSON = {
+            "ship": tempShip2,
+            "reaction_time_ticks": 0,
+            "update_sail_ticks": 40 * 3,
+        }
+        game.addBotShipController(new BotShipController(botControllerJSON));
     }
 
     tick(){

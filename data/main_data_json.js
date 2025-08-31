@@ -9,9 +9,9 @@ const MD = {
         "expected_canvas_height": 927,
         "cursor_enabled": true,
         "frame_rate": 80,
-        "ship_air_affectedness_coefficient": 2,
+        "ship_air_affectedness_coefficient": 4,
         "cannon_ball_wind_effect_coefficient": 16,
-        "will_reduction_on_account_of_sail_strength_multiplier": 0.075, // if your sail_strength = 0 then your willpower will be reduced by 1 * multiplier * 100 percent, sail_strength = 0.5 then reduced by 0.5 * multiplier * 100 percent
+        "will_reduction_on_account_of_sail_strength_exponent": 0.055, // willPower *= (sailStrength^exponent)
         "max_ships": undefined // calculated
     },
 
