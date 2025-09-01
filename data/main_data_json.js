@@ -26,6 +26,17 @@ const MD = {
         "purple"
     ],
 
+    "colour_to_colour_code": {
+        "white": "#ffffff",
+        "red": "#f4001c",
+        "orange": "#f75a00",
+        "green": "#088919",
+        "blue": "#0800ff",
+        "grey": "#68625e",
+        "black": "#000000",
+        "purple": "#9f00f7"
+    },
+
     "remote_data_settings": {
         "max_delay_ms": 250, // server can be X ms slow before breaking
         "max_delay_ticks": undefined // calculated

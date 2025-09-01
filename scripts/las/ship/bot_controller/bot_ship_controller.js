@@ -202,6 +202,12 @@ class BotShipController {
         }
 
         // Test
+        if (!objectHasKey(this.workingData, "debug_line2")){
+            this.workingData["debug_line2"] = new DebugLine("#ff52fa", myX, myX, desiredPositionX, desiredPositionY, 10);
+            game.visualEffects.push(this.workingData["debug_line2"]);
+        }
+        //console.log(ship.getTickX() - myX, ship.getTickY() - m)
+        this.workingData["debug_line2"].update(myX, myY, desiredPositionX, desiredPositionY);
         //console.log(distanceToDesire, desiredPositionX, desiredPositionY);
     }
 
@@ -329,6 +335,9 @@ class BotShipController {
             timeChunks.push(reactionTimeMS + shotFlyingTimeMS * i / (timeMSDivides - 1));
         }
 
+        // TEMP
+        timeChunks = [shotFlyingTimeMS]
+
         let myCannons = myShip.getCannons();
         let myCannonData = this.perception.getDataToReactTo("my_cannon_data", currentTick);
 
@@ -369,7 +378,13 @@ class BotShipController {
 
                 // Now run a simulation from the center of my ship to the location and see if it hits a ship and WHEN (It's approximate because obviously they're not shot from my ship center)
                 
-                let angleToPoint = displacementToRadians(shipXAtTime-myShipX, shipYAtTime-myShipY);
+                let windDiplacementInTimeX = windXA * windEffectCoefficient * timeStampMS / 1000;
+                let windDiplacementInTimeY = windYA * windEffectCoefficient * timeStampMS / 1000;
+
+                let desirePointForShootingX = shipXAtTime - windDiplacementInTimeX;
+                let desirePointForShootingY = shipYAtTime - windDiplacementInTimeY;
+
+                let angleToPoint = displacementToRadians(desirePointForShootingX-myShipX, desirePointForShootingY-myShipY);
                 let cannonBallStartX = myShipX;
                 let cannonBallStartY = myShipY;
                 let cannonBallXV = myShipXV + windXA * windEffectCoefficient + Math.cos(angleToPoint) * shotSpeed;
@@ -388,27 +403,26 @@ class BotShipController {
 
                 // if hit -> fire and return
                 if (hit){
-                    console.log("Good")
                     this.decisions["aiming_cannons"] = true;
-                    this.decisions["aiming_cannons_position_x"] = shipXAtTime - myShipX;
-                    this.decisions["aiming_cannons_position_y"] = shipYAtTime - myShipY;
+                    this.decisions["aiming_cannons_position_x"] = desirePointForShootingX - myShipX;
+                    this.decisions["aiming_cannons_position_y"] = desirePointForShootingY - myShipY;
                     this.decisions["fire_cannons"] = true;
                     return;
                 }else{
-                    console.log(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipData["x"], shipData["y"], shipXAtTime, shipYAtTime, shipWidth, shipHeight)
+                    //console.log(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipData["x"], shipData["y"], shipXAtTime, shipYAtTime, shipWidth, shipHeight)
                     if (!objectHasKey(this.workingData, "debug_line")){
-                        this.workingData["debug_line"] = new DebugLine("#ff0000", cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, 10);
-                        //game.visualEffects.push(this.workingData["debug_line"]);
+                        this.workingData["debug_line"] = new DebugLine(game.getGameProperties()["colour_to_colour_code"][myShip.getColour()], cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, 10);
+                        game.visualEffects.push(this.workingData["debug_line"]);
                     }
                     //console.log(cannonBallStartX-myShip.getTickX(), cannonBallStartY - myShip.getTickY())
                     this.workingData["debug_line"].update(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY);
 
                     if (!objectHasKey(this.workingData, "debug_circle2")){
-                        this.workingData["debug_circle2"] = new DebugCircle("#730d85", 0, 0, 64);
-                        //game.visualEffects.push(this.workingData["debug_circle2"]);
+                        this.workingData["debug_circle2"] = new DebugCircle(game.getGameProperties()["colour_to_colour_code"][myShip.getColour()], 0, 0, 64);
+                        game.visualEffects.push(this.workingData["debug_circle2"]);
                     }
-                    this.workingData["debug_circle2"].x = shipXAtTime;
-                    this.workingData["debug_circle2"].y = shipYAtTime;
+                    this.workingData["debug_circle2"].x = desirePointForShootingX;
+                    this.workingData["debug_circle2"].y = desirePointForShootingY;
                 }
             }
         }

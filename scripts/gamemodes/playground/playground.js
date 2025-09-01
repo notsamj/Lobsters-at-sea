@@ -38,7 +38,7 @@ class Playground extends Gamemode {
             "id": this.getGame().getIDManager().generateNewID()
         }
         let tempShip = new Ship(tempShipJSON);
-        //game.addShip(tempShip);
+        game.addShip(tempShip);
 
         // Focus
         //game.setFocusedShip(tempShip);
@@ -59,7 +59,7 @@ class Playground extends Gamemode {
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);
+        game.addShip(tempShip2);
 
         // Add a bot controller
         let botControllerJSON = {
@@ -69,13 +69,13 @@ class Playground extends Gamemode {
             "update_enemy_ticks": 40 * 3,
             "update_heading_ticks": 5
         }
-        //game.addBotShipController(new BotShipController(botControllerJSON));
+        game.addBotShipController(new BotShipController(botControllerJSON));
 
         // Add all colors as bots
         let spread = 500;
         let minHealth = 20;
         let maxHealth = 50;
-        let count = 8;
+        let count = 0;
         let c = 0;
         for (let colour of this.getGame().getGameProperties()["ship_colours"]){
             if (c++ >= count){

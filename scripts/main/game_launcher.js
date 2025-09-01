@@ -22,7 +22,8 @@ let gameProperties = {
     "will_reduction_on_account_of_sail_strength_exponent": MD["game_properties"]["will_reduction_on_account_of_sail_strength_exponent"],
     "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
     "winning_screen_settings": MD["winning_screen_settings"],
-    "ship_colours": MD["ship_colours"]
+    "ship_colours": MD["ship_colours"],
+    "colour_to_colour_code": MD["colour_to_colour_code"]
 }
 
 // Create container
