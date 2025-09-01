@@ -31,7 +31,7 @@ class Playground extends Gamemode {
             "starting_y_pos": 0,
             "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
-            "sail_strength": 1,
+            "sail_strength": 0,
             "ship_model": "generic_ship",
             "ship_colour": "white",
             "game_instance": game,
@@ -47,11 +47,11 @@ class Playground extends Gamemode {
         // Add test ship
         let tempShip2JSON = {
             "health": 20,
-            "starting_x_pos": 250,
-            "starting_y_pos": 0,
+            "starting_x_pos": 200,
+            "starting_y_pos": 100,
             "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
-            "sail_strength": 1,
+            "sail_strength": 0,
             "ship_model": "generic_ship",
             "ship_colour": "white",
             "game_instance": game,
@@ -73,8 +73,8 @@ class Playground extends Gamemode {
 
         // Add all colors as bots
         let spread = 500;
-        let minHealth = 2;
-        let maxHealth = 5;
+        let minHealth = 20;
+        let maxHealth = 50;
         let count = 8;
         let c = 0;
         for (let colour of this.getGame().getGameProperties()["ship_colours"]){

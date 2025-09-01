@@ -18,6 +18,22 @@ class Cannon {
         this.calculateRealOffsets(cannonJSON);
     }
 
+    getRangeCWL(){
+        return this.rangeCWL;
+    }
+
+    getRangeCWR(){
+        return this.rangeCWR;
+    }
+
+    getXCenterOffset(){
+        return this.xCenterOffset;
+    }
+
+    getYCenterOffset(){
+        return this.yCenterOffset;
+    }
+
     getReloadLock(){
         return this.reloadLock;
     }
@@ -82,27 +98,40 @@ class Cannon {
     }
 
     getTickX(){
-        let shipCenterX = this.ship.getTickX();
-        let shipOrientationRAD = this.ship.getTickOrientation();
+        return Cannon.getTickX(this.ship.getTickX(), this.ship.getTickOrientation(), this.xCenterOffset, this.yCenterOffset);
+    }
+
+    static getTickX(shipTickX, shipTickOrientation, cannonXCenterOffset, cannonYCenterOffset){
+        let shipCenterX = shipTickX;
+        let shipOrientationRAD = shipTickOrientation;
         let adjustedOrientation = rotateCWRAD(shipOrientationRAD, toRadians(90));
 
-        let rotatedX = shipCenterX + (Math.cos(adjustedOrientation) * this.xCenterOffset - Math.sin(adjustedOrientation) * this.yCenterOffset);
+        let rotatedX = shipCenterX + (Math.cos(adjustedOrientation) * cannonXCenterOffset - Math.sin(adjustedOrientation) * cannonYCenterOffset);
         return rotatedX;
     }
 
     getTickY(){
-        let shipCenterY = this.ship.getTickY();
-        let shipOrientationRAD = this.ship.getTickOrientation();
+        return Cannon.getTickX(this.ship.getTickY(), this.ship.getTickOrientation(), this.xCenterOffset, this.yCenterOffset);
+    }
+
+    static getTickY(shipTickY, shipTickOrientation, cannonXCenterOffset, cannonYCenterOffset){
+        let shipCenterY = shipTickY;
+        let shipOrientationRAD = shipTickOrientation;
         let adjustedOrientation = rotateCWRAD(shipOrientationRAD, toRadians(90));
-        let rotatedY = shipCenterY + (Math.sin(adjustedOrientation) * this.xCenterOffset + Math.cos(adjustedOrientation) * this.yCenterOffset);
+
+        let rotatedY = shipCenterY + (Math.sin(adjustedOrientation) * cannonXCenterOffset + Math.cos(adjustedOrientation) * cannonYCenterOffset);
         return rotatedY;
     }
 
     canAimAt(locX, locY){
-        let aimingAngleRAD = displacementToRadians(locX - this.getTickX(), locY - this.getTickY());
-        let shipOrientationRAD = this.ship.getTickOrientation();
-        let currentRangeCWL = rotateCCWRAD(this.rangeCWL, shipOrientationRAD);
-        let currentRangeCWR = rotateCCWRAD(this.rangeCWR, shipOrientationRAD);
+        return Cannon.couldAimAt(this.rangeCWL, this.rangeCWR, this.ship.getTickOrientation(), this.getTickX(), this.getTickY(), locX, locY);
+    }
+
+    static couldAimAt(rangeCWL, rangeCWR, shipTickOrientation, cannonTickX, cannonTickY, locX, locY){
+        let aimingAngleRAD = displacementToRadians(locX - cannonTickX, locY - cannonTickY);
+        let shipOrientationRAD = shipTickOrientation;
+        let currentRangeCWL = rotateCCWRAD(rangeCWL, shipOrientationRAD);
+        let currentRangeCWR = rotateCCWRAD(rangeCWR, shipOrientationRAD);
         return angleBetweenCWRAD(aimingAngleRAD, currentRangeCWL, currentRangeCWR);
     }
 

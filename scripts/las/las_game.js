@@ -82,7 +82,7 @@ class LasGame {
                 if (ship.getID() === cannonBall.getShooterID()){ continue; }
 
                 let shipPosData = this.shipPositions.get(shipIndex);
-                let collisionDetails = this.checkCannonBallCollision(cannonBallPosData["x_pos"], cannonBallPosData["y_pos"], cannonBall.getTickX(), cannonBall.getTickY(), shipPosData["x_pos"], shipPosData["y_pos"], ship.getTickX(), ship.getTickY(), ship.getWidth(), ship.getHeight());
+                let collisionDetails = this.checkCannonBallCollisionInTick(cannonBallPosData["x_pos"], cannonBallPosData["y_pos"], cannonBall.getTickX(), cannonBall.getTickY(), shipPosData["x_pos"], shipPosData["y_pos"], ship.getTickX(), ship.getTickY(), ship.getWidth(), ship.getHeight());
                 // Hit
                 if (collisionDetails["collision"]){
                     cannonBallDead = true;
@@ -127,8 +127,12 @@ class LasGame {
         }
     }
 
-    checkCannonBallCollision(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight){
+    checkCannonBallCollisionInTick(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight){
         let timeAsProportionOfASecond = this.getGameProperties()["tick_proportion_of_a_second"];
+        return this.checkCannonBallCollisionOverTime(timeAsProportionOfASecond, cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight);
+    }
+
+    checkCannonBallCollisionOverTime(timeAsProportionOfASecond, cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight){
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
         let cannonBallWidth = cannonBallSettings["cannon_ball_width"];
         let cannonBallHeight = cannonBallSettings["cannon_ball_height"];
@@ -196,11 +200,11 @@ class LasGame {
                 let leftObjectY = leftObject["start_y"] + leftObject["v_y"] * time;
                 let rightObjectY = rightObject["start_y"] + rightObject["v_y"] * time;
                 // Check if the y regions overlap
-                let overlapDetails = getIntervalOverlapDetails(leftObjectY + (leftObject["height"]-1)/2, leftObjectY + (leftObject["height"]-1)/2, rightObjectY + (rightObject["height"]-1)/2, rightObjectY + (rightObject["height"]-1)/2);
+                let overlapDetails = getIntervalOverlapDetails(leftObjectY + (leftObject["height"]-1)/2, leftObjectY - (leftObject["height"]-1)/2, rightObjectY + (rightObject["height"]-1)/2, rightObjectY - (rightObject["height"]-1)/2);
                 let overlapInHeight = overlapDetails["overlap"];
                 if (overlapInHeight){
-                    let collisionX = leftObject["start_x"] + leftObject["x_v"] * time + (leftObject["width"]-1)/2;
-                    let collisionY = getOverlapDetails["overlap_center"];
+                    let collisionX = leftObject["start_x"] + leftObject["v_x"] * time + (leftObject["width"]-1)/2;
+                    let collisionY = overlapDetails["overlap_center"];
                     return {"collision": true, "x_pos": collisionX, "y_pos": collisionY};
                 }
             }
@@ -229,11 +233,11 @@ class LasGame {
                 let bottomObjectX = bottomObject["start_x"] + bottomObject["v_x"] * time;
                 let topObjectX = topObject["start_x"] + topObject["v_x"] * time;
                 // Check if the x regions overlap
-                let overlapDetails = getIntervalOverlapDetails(bottomObjectX + (bottomObject["width"]-1)/2, bottomObjectX + (bottomObject["width"]-1)/2, topObjectX + (topObject["width"]-1)/2, topObjectX + (topObject["width"]-1)/2);
+                let overlapDetails = getIntervalOverlapDetails(bottomObjectX + (bottomObject["width"]-1)/2, bottomObjectX - (bottomObject["width"]-1)/2, topObjectX + (topObject["width"]-1)/2, topObjectX - (topObject["width"]-1)/2);
                 let overlapInWidth = overlapDetails["overlap"]; 
                 if (overlapInWidth){
-                    let collisionY = bottomObjectX["start_y"] + topObjectX["y_v"] * time + (topObjectX["height"]-1)/2;
-                    let collisionX = getOverlapDetails["overlap_center"];
+                    let collisionY = bottomObject["start_y"] + topObject["v_y"] * time + (topObject["height"]-1)/2;
+                    let collisionX = overlapDetails["overlap_center"];
                     return {"collision": true, "x_pos": collisionX, "y_pos": collisionY};
                 }
             }
