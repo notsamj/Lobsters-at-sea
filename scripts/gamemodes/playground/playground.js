@@ -26,19 +26,19 @@ class Playground extends Gamemode {
         //game.getWind().windDirectionRAD = toRadians(0);
 
         let tempShipJSON = {
-            "health": 15,
+            "health": randomFloatBetween(20, 100),
             "starting_x_pos": 0,
             "starting_y_pos": 0,
             "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
-            "ship_colour": this.getGame().pickShipColour(),
+            "ship_colour": "white",
             "game_instance": game,
             "id": this.getGame().getIDManager().generateNewID()
         }
         let tempShip = new Ship(tempShipJSON);
-        game.addShip(tempShip);
+        //game.addShip(tempShip);
 
         // Focus
         //game.setFocusedShip(tempShip);
@@ -53,21 +53,59 @@ class Playground extends Gamemode {
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 1,
             "ship_model": "generic_ship",
-            "ship_colour": this.getGame().pickShipColour(),
+            "ship_colour": "white",
             "game_instance": game,
             "id": this.getGame().getIDManager().generateNewID()
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        game.addShip(tempShip2);
+        //game.addShip(tempShip2);
 
         // Add a bot controller
         let botControllerJSON = {
             "ship": tempShip2,
             "reaction_time_ticks": 0,
             "update_sail_ticks": 40 * 3,
+            "update_enemy_ticks": 40 * 3,
+            "update_heading_ticks": 5
         }
-        game.addBotShipController(new BotShipController(botControllerJSON));
+        //game.addBotShipController(new BotShipController(botControllerJSON));
+
+        // Add all colors as bots
+        let spread = 500;
+        let minHealth = 2;
+        let maxHealth = 5;
+        let count = 8;
+        let c = 0;
+        for (let colour of this.getGame().getGameProperties()["ship_colours"]){
+            if (c++ >= count){
+                break;
+            }
+            let csJSON = {
+                "health": randomFloatBetween(minHealth, maxHealth),
+                "starting_x_pos": randomFloatBetween(-1 * spread/2, spread/2),
+                "starting_y_pos": randomFloatBetween(-1 * spread/2, spread/2),
+                "starting_speed": randomFloatBetween(0, 50),
+                "starting_orientation_rad": toRadians(randomFloatBetween(0, 360)),
+                "sail_strength": randomFloatBetween(0, 1),
+                "ship_model": "generic_ship",
+                "ship_colour": this.getGame().pickShipColour(),
+                "game_instance": game,
+                "id": this.getGame().getIDManager().generateNewID()
+            }
+            let cs = new Ship(csJSON);
+            game.addShip(cs);
+
+            let cbJSON = {
+                "ship": cs,
+                "reaction_time_ticks": randomNumberInclusive(4,15),
+                "update_sail_ticks": randomNumberInclusive(40*2,40*3),
+                "update_enemy_ticks": randomNumberInclusive(40*2,40*3),
+                "update_heading_ticks": randomNumberInclusive(40*4,40*6)
+            }
+
+            game.addBotShipController(new BotShipController(cbJSON));
+        }
     }
 
     tick(){

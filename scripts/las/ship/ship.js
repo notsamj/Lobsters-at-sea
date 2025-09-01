@@ -228,7 +228,6 @@ class Ship {
     checkShoot(){
         // If not bothing aiming and firing then you can't shoot
 
-        
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
@@ -236,7 +235,6 @@ class Ship {
 
         let aimingCannonsPositionX = this.getAdjustedCannonAimingX();
         let aimingCannonsPositionY = this.getAdjustedCannonAimingY();
-
 
         // Fire elligible cannons
         for (let cannon of this.cannons){

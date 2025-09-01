@@ -61,6 +61,20 @@ function randomBoolean(){
 }
 
 /*
+    Method Name: randomNumberInclusive
+    Method Parameters:
+        min:
+            Minimum value (inclusive)
+        maxInclusive:
+            Maximum value (inclusive)
+    Method Description: Come up with a number in a given range [min, maxInclusive]
+    Method Return: int
+*/
+function randomNumberInclusive(min, maxInclusive){
+    return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
+}
+
+/*
     Function Name: loadLocalImage
     Function Parameters: 
         url:
@@ -163,6 +177,12 @@ function copyObject(obj){
         }
     }
     return newObject;
+}
+
+function copyOverObject(sourceObj, destinationObject){
+    for (let key of Object.keys(sourceObj)){
+        destinationObject[key] = sourceObj[key];
+    }
 }
 
 

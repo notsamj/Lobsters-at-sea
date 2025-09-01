@@ -95,8 +95,8 @@ const MD = {
     "wind_settings": {
         "wind_min_magnitude": 3,
         "wind_max_magnitude": 40,
-        "wind_min_direction_movement_ms": 20000, // 20s
-        "wind_max_direction_movement_ms": 80000, // 80s
+        "wind_min_direction_movement_ms": 40000, // 40s
+        "wind_max_direction_movement_ms": 120000, // 120s
         "wind_min_magnitude_movement_ms": 15000, // 15s
         "wind_max_magnitude_movement_ms": 40000, // 40s
         "wind_min_direction_movement_ticks": undefined, // caculated

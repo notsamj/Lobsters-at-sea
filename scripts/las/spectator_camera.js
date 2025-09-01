@@ -136,7 +136,7 @@ class SpectatorCamera {
     }
 
     getFreeCamTickY(){
-        return this.x;
+        return this.y;
     }
 
     getTickY(){
@@ -252,6 +252,7 @@ class SpectatorCamera {
         let myY = this.getTickY();
 
         for (let [ship, shipIndex] of ships){
+            if (ship.isDead()){ continue; }
             let distanceToShip = calculateEuclideanDistance(myX, myY, ship.getTickX(), ship.getTickY());
             if (bestD === undefined || distanceToShip < bestD){
                 bestD = distanceToShip;
@@ -302,16 +303,43 @@ class SpectatorCamera {
 
         // Get index of next one in direction
 
-        let nextIndex = currentShipIndex + direction;
+        // Find a living ship
+        let noLivingShips = false;
+        let startIndex = currentShipIndex;
+        while (!noLivingShips){
+            // Update index
+            let nextIndex = currentShipIndex + direction;
+            if (nextIndex >= ships.getLength()){
+                nextIndex = 0;
+            }else if (nextIndex < 0){
+                nextIndex = ships.getLength() - 1;
+            }
 
-        if (nextIndex >= ships.getLength()){
-            nextIndex = 0;
-        }else if (nextIndex < 0){
-            nextIndex = ships.getLength() - 1;
+            let shipAtIndex = ships.get(nextIndex);
+            // If ship is alive then good index
+            if (!shipAtIndex.isDead()){
+                currentShipIndex = nextIndex;
+                break;
+            }
+
+            // If index is start index
+            if (nextIndex === startIndex){
+                noLivingShips = true;
+            }
+            // Keep searching
+            else{
+                currentShipIndex = nextIndex;
+            }
+        }
+
+        // No living ships
+        if (noLivingShips){
+            this.followedShip = null;
+            return;
         }
 
         // Change to new entity
-        this.followedShip = ships.get(nextIndex);
+        this.followedShip = ships.get(currentShipIndex);
     }
 
     /*
@@ -378,6 +406,15 @@ class SpectatorCamera {
         this.followedShip = null;
     }
 
+    checkShipIsDead(){
+        if (!this.isFollowingAShip()){
+            return;
+        }
+        if (this.getFollowedShip().isDead()){
+            this.snapToClosestEntity();
+        }
+    }
+
     /*
         Method Name: tick
         Method Parameters: None
@@ -385,6 +422,9 @@ class SpectatorCamera {
         Method Return: void
     */
     tick(){
+        // Check if following ship is dead
+        this.checkShipIsDead();
+
         // Update tick locks
         this.xLock.tick();
         this.yLock.tick();

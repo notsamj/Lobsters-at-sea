@@ -145,18 +145,21 @@ class LasLocalGame extends LasGame {
 
     tickShips(){
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.tick();
         }
     }
 
     moveShips(){
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.moveOneTick();
         }
     }
 
     allowShipsToShoot(){
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.checkShoot();
         }
     }

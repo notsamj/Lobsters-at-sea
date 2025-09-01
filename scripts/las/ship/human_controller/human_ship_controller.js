@@ -14,7 +14,7 @@ class HumanShipController {
 
     getDecisionJSON(){
         let lrV = 0;
-        let pV = 0;
+        let pV = this.getShip().getTickSailStrength();
 
         let inputManager = GC.getGameUserInputManager();
 
@@ -25,9 +25,9 @@ class HumanShipController {
         }
 
         if (inputManager.isActivated("sails_inc")){
-            pV = 1;
+            pV = this.getShip().getTickSailStrength() + 1;
         }else if (inputManager.isActivated("sails_dec")){
-            pV = 0;
+            pV = this.getShip().getTickSailStrength() - 1;
         }
 
 
