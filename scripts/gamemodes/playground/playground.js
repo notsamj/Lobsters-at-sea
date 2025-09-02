@@ -26,7 +26,7 @@ class Playground extends Gamemode {
         //game.getWind().windDirectionRAD = toRadians(0);
 
         let tempShipJSON = {
-            "health": randomFloatBetween(20, 100),
+            "health": 300,
             "starting_x_pos": 0,
             "starting_y_pos": 0,
             "starting_speed": 0,
@@ -38,7 +38,7 @@ class Playground extends Gamemode {
             "id": this.getGame().getIDManager().generateNewID()
         }
         let tempShip = new Ship(tempShipJSON);
-        game.addShip(tempShip);
+        //game.addShip(tempShip);
 
         // Focus
         //game.setFocusedShip(tempShip);
@@ -47,8 +47,8 @@ class Playground extends Gamemode {
         // Add test ship
         let tempShip2JSON = {
             "health": 20,
-            "starting_x_pos": 200,
-            "starting_y_pos": 100,
+            "starting_x_pos": 500,
+            "starting_y_pos": -200,
             "starting_speed": 0,
             "starting_orientation_rad": toRadians(90),
             "sail_strength": 0,
@@ -59,7 +59,7 @@ class Playground extends Gamemode {
         }
 
         let tempShip2 = new Ship(tempShip2JSON);
-        game.addShip(tempShip2);
+        //game.addShip(tempShip2);
 
         // Add a bot controller
         let botControllerJSON = {
@@ -69,13 +69,16 @@ class Playground extends Gamemode {
             "update_enemy_ticks": 40 * 3,
             "update_heading_ticks": 5
         }
-        game.addBotShipController(new BotShipController(botControllerJSON));
+        let botController = new BotShipController(botControllerJSON);
+        botController.updateSailTickLock.lock();
+        //game.addBotShipController(botController);
+        //game.setFocusedShip(tempShip2);
 
         // Add all colors as bots
         let spread = 500;
         let minHealth = 20;
         let maxHealth = 50;
-        let count = 0;
+        let count = 8;
         let c = 0;
         for (let colour of this.getGame().getGameProperties()["ship_colours"]){
             if (c++ >= count){
