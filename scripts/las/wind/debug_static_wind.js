@@ -10,8 +10,8 @@ if (typeof window === "undefined"){
 class DebugStaticWind {
     constructor(game){
         this.game = game;
-        this.windMagntiude = 37.55;
-        this.windDirectionRAD = toRadians(119);
+        this.windMagntiude = 30.0;
+        this.windDirectionRAD = toRadians(316);
 
         this.windMagnitudeChangePerTick = undefined;
         this.windDirectionChangePerTickRAD = undefined;

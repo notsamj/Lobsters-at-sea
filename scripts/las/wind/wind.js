@@ -27,9 +27,13 @@ class Wind {
     }
 
     reset(){
-        this.randomizer.setSeed(this.game.getGameProperties()["random_seed"]);
+        this.resetWithNewSeed(this.game.getGameProperties()["random_seed"]);
+    }
+
+    resetWithNewSeed(newSeed){
+        this.randomizer.setSeed(newSeed);
         //console.log("Reset wind")
-        this.initialize();   
+        this.initialize(); 
     }
 
     getRandom(){

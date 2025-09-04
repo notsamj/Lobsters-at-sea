@@ -233,6 +233,8 @@ if (typeof window === "undefined"){
     module.exports = {
         copyArray,
         copyObject,
-        objectHasKey
+        objectHasKey,
+        randomFloatBetween,
+        randomNumberInclusive
     }
 }

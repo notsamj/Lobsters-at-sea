@@ -4,7 +4,7 @@ const SD = {
         "ship_height": 128,
         "image_width": 512,
         "image_height": 512,
-        "turning_radius_degrees": 90, // degrees per thousand pixels moved
+        "turning_radius_degrees": 120, // degrees per thousand pixels moved
         "max_self_propulsion_speed": 150, // max speed the ship can muster in it's desired direction in pixels/second (not counting wind)
         /*"cannons": [
             // right side

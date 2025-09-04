@@ -45,6 +45,7 @@ class OptionSlider extends Component {
         this.backgroundBarColour = Colour.fromCode(backgroundBarColourCode);
         this.sliderColour = Colour.fromCode(sliderColourCode);
         this.textColourCode = textColourCode;
+        this.toStringFunction = null;
     }
 
     /*
@@ -92,6 +93,14 @@ class OptionSlider extends Component {
         }
     }
 
+    getWidth(){
+        if (typeof this.width === "function"){
+            return this.width(getScreenWidth());
+        }else{
+            return this.width;
+        }
+    }
+
     /*
         Method Name: display
         Method Parameters: None
@@ -102,7 +111,7 @@ class OptionSlider extends Component {
         
         // Background Rectangle
         let screenYForRects = GC.getMenuManager().changeToScreenY(this.getY() - this.textHeight);
-        noStrokeRectangle(this.backgroundBarColour, this.getX(), screenYForRects, this.width, this.height);
+        noStrokeRectangle(this.backgroundBarColour, this.getX(), screenYForRects, this.getWidth(), this.height);
     
         // Slider
         noStrokeRectangle(this.sliderColour, this.sliderX, screenYForRects, this.sliderWidth, this.height);
@@ -110,11 +119,12 @@ class OptionSlider extends Component {
         // Text
         let value = this.accessValue();
         let valueString = this.accessValue().toString();
-        // Float
-        if (Math.floor(value) != value){
-            valueString = value.toFixed(2);
+        if (this.toStringFunction === null){
+            valueString = value.toString();
+        }else{
+            valueString = this.toStringFunction(value);
         }
-        Menu.makeText(valueString, this.textColourCode, this.getX(), this.getY(), this.width, this.textHeight);
+        Menu.makeText(valueString, this.textColourCode, this.getX(), this.getY(), this.getWidth(), this.textHeight);
     }
 
     /*
@@ -128,12 +138,29 @@ class OptionSlider extends Component {
     }
 
     /*
+        Method Name: setToStringFunction
+        Method Parameters: 
+            func:
+                A function that converts the value of this slider to a string
+        Method Description: Stores a function for conversion to string
+        Method Return: void
+    */
+    setToStringFunction(func){
+        this.toStringFunction = func;
+    }
+
+    /*
         Method Name: tick
         Method Parameters: None
         Method Description: Checks if the slider should move
         Method Return: void
     */
     tick(){
+        this.checkMove();
+        this.updateSliderX();
+    }
+
+    checkMove(){
         let menuManager = GC.getMenuManager();
         let gMouseX = GC.getGMouseX();
         let gMouseY = GC.getGMouseY();
@@ -215,6 +242,6 @@ class OptionSlider extends Component {
         Method Return: Boolean
     */
     coveredByX(x){
-        return x >= this.getX() && x <= this.getX() + this.width;
+        return x >= this.getX() && x <= this.getX() + this.getWidth();
     }
 }

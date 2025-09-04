@@ -1,10 +1,15 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
-    BotPerception = require("./bot_perception.js").BotPerception;
+    BotPerception = require("./bot_perception/bot_perception.js").BotPerception;
+    Ship = require("../ship.js").Ship;
+    randomFloatBetween = require("../../../general/helper_functions.js").randomFloatBetween;
+    fixRadians = require("../../../general/math_helper.js").fixRadians;
 }
 class BotShipController {
     constructor(botShipControllerJSON){
         this.ship = botShipControllerJSON["ship"];
+
+        this.offsets = botShipControllerJSON["offsets"];
 
         this.perception = new BotPerception(botShipControllerJSON["reaction_time_ticks"]);
 
@@ -20,6 +25,18 @@ class BotShipController {
         this.updateSailTickLock = new TickLock(botShipControllerJSON["update_sail_ticks"]);
 
         this.decisions = copyObject(Ship.getDefaultDecisions());
+    }
+
+    getOffset(offsetName){
+        if (objectHasKey(this.offsets, offsetName)){
+            return this.offsets[offsetName];
+        }
+        throw new Error("Offet: " + offsetName + " not found.");
+    }
+
+    generateOffset(offsetName){
+        let offset = this.getOffset(offsetName);
+        return randomFloatBetween(offset[0], offset[1]);
     }
 
     resetDecisions(){
@@ -53,12 +70,14 @@ class BotShipController {
         this.perception.inputData("default", true, currentTick);
 
         // Save my data
-        this.perception.inputData("my_orientation_rad", myShip.getTickOrientation(), currentTick);
-        this.perception.inputData("my_speed", myShip.getSpeed(), currentTick);
-        this.perception.inputData("my_x", myShip.getTickX(), currentTick);
-        this.perception.inputData("my_y", myShip.getTickY(), currentTick);
-        this.perception.inputData("my_x_v", myShip.getTickXV(), currentTick);
-        this.perception.inputData("my_y_v", myShip.getTickYV(), currentTick);
+        let myOrientationRAD = fixRadians(myShip.getTickOrientation() + toRadians(this.generateOffset("my_orientation_deg")));
+        this.perception.inputData("my_orientation_rad", myOrientationRAD, currentTick);
+        //debugger;
+        this.perception.inputData("my_speed", myShip.getSpeed() + this.generateOffset("my_speed"), currentTick);
+        this.perception.inputData("my_x", myShip.getTickX() + this.generateOffset("my_x"), currentTick);
+        this.perception.inputData("my_y", myShip.getTickY() + this.generateOffset("my_y"), currentTick);
+        this.perception.inputData("my_x_v", myShip.getTickXV() + this.generateOffset("my_x_v"), currentTick);
+        this.perception.inputData("my_y_v", myShip.getTickYV() + this.generateOffset("my_y_v"), currentTick);
         
         // My cannon data
         let cannonData = []
@@ -72,19 +91,19 @@ class BotShipController {
 
         // Save wind direction
         let windDirectionRAD = wind.getWindDirectionRAD();
+        windDirectionRAD = fixRadians(windDirectionRAD + toRadians(this.generateOffset("wind_direction_deg")));
         this.perception.inputData("wind_direction_rad", windDirectionRAD, currentTick);
+        //console.log(windDirectionRAD)
 
         // Save wind magnitude
         let windDirectionMagnitude = wind.getWindMagnitude();
-        this.perception.inputData("wind_direction_magnitude", windDirectionMagnitude, currentTick);
+        this.perception.inputData("wind_direction_magnitude", windDirectionMagnitude + this.generateOffset("wind_direction_magnitude"), currentTick);
 
         // Save wind xa
-        let windXA = wind.getXA();
-        this.perception.inputData("wind_xa", windXA, currentTick);
+        this.perception.inputData("wind_xa", Math.cos(windDirectionRAD) * windDirectionMagnitude, currentTick);
 
         // Save wind ya
-        let windYA = wind.getYA();
-        this.perception.inputData("wind_ya", windYA, currentTick);
+        this.perception.inputData("wind_ya", Math.sin(windDirectionRAD) * windDirectionMagnitude, currentTick);
 
         // Save other ship data
         let allShips = game.getShips();
@@ -94,10 +113,11 @@ class BotShipController {
             if (ship.getID() === myShip.getID()){ continue; }
             allShipData[ship.getID()] = {
                 "alive": ship.isAlive(),
-                "x": ship.getTickX(),
-                "y": ship.getTickY(),
-                "x_v": ship.getTickXV(),
-                "y_v": ship.getTickYV()
+                "x": ship.getTickX() + this.generateOffset("enemy_x"),
+                "y": ship.getTickY() + this.generateOffset("enemy_y"),
+                "x_v": ship.getTickXV() + this.generateOffset("enemy_x_v"),
+                "y_v": ship.getTickYV() + this.generateOffset("enemy_y_v"),
+                "orientation_rad": ship.getTickOrientation()
             }
         }
         this.perception.inputData("enemy_ship_data", allShipData, currentTick);
@@ -121,15 +141,300 @@ class BotShipController {
         this.determineDesiredHeading();
         this.determineSailStrength();
         this.determineShooting();
+        //this.testDetermineShooting();
     }
 
-    determineDesiredHeading(){
+    /*testDetermineShooting(){
+        let currentTick = this.workingData["tick"];
+        let reactionTimeMS = this.reactionTimeMS;
+        let myShip = this.getShip();
+        let game = myShip.getGame();
+        let shotFlyingTimeMS = game.getGameProperties()["cannon_ball_settings"]["ms_until_hit_water"];
+        let shotSpeed = game.getGameProperties()["cannon_settings"]["shot_speed"];
+        let shotDistance = shotSpeed * shotFlyingTimeMS / 1000;
+
+        let myShipX = this.perception.getDataToReactTo("my_x", currentTick);
+        let myShipY = this.perception.getDataToReactTo("my_y", currentTick);
+        let myShipXV = this.perception.getDataToReactTo("my_x_v", currentTick);
+        let myShipYV = this.perception.getDataToReactTo("my_y_v", currentTick);
+        let myShipXAfterReactionTime = myShipX + (reactionTimeMS * myShipXV / 1000);
+        let myShipYAfterReactionTime = myShipY + (reactionTimeMS * myShipYV / 1000);
+        let myShipTickOrientation = this.perception.getDataToReactTo("my_orientation_rad", currentTick);
+
+        // Add a simplified wind reduction
+        let windXA = this.perception.getDataToReactTo("wind_xa", currentTick);
+        let windYA = this.perception.getDataToReactTo("wind_ya", currentTick);
+        let windEffectCoefficient = game.getGameProperties()["cannon_ball_wind_effect_coefficient"];
+        let windTotalDistanceHelp = Math.sqrt(Math.pow(windXA, 2) + Math.pow(windYA, 2)) * windEffectCoefficient * shotFlyingTimeMS / 1000;
+
+        let shotDistanceWithMaxWindHelp = shotDistance + windTotalDistanceHelp;
+
+
+        // Find ships within this
+        let shipsWithinRange = [];
+
+        let myCannons = myShip.getCannons();
+        let myCannonData = this.perception.getDataToReactTo("my_cannon_data", currentTick);
+
+        // Check all ships
+        let allShips = game.getShips();
+        let enemyShipData = this.perception.getDataToReactTo("enemy_ship_data", currentTick);
+
+        let searchPrecision = 1; // ms
+        let maxDistance = game.getGameProperties()["bot_settings"]["max_expected_hit_distance"];
+
+        // Calculator required stuff
+
+        let countCannons = (shipData, timeStampMS, reactionTimeMS) => {
+            let shipXAtTime = shipData["x"] + shipData["x_v"] * (reactionTimeMS + timeStampMS) / 1000;
+            let shipYAtTime = shipData["y"] + shipData["y_v"] * (reactionTimeMS + timeStampMS) / 1000; 
+
+            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+
+            let aimAtX = shipXAtTime - windDiplacementInTimeX;
+            let aimAtY = shipYAtTime - windDiplacementInTimeY;
+
+            let angleToPoint = displacementToRadians(aimAtX - myShipX, aimAtY - myShipY);
+
+            let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
+            let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
+            let cannonBallEndX = myShipXAfterReactionTime + cannonBallXV * timeStampMS / 1000;
+            let cannonBallEndY = myShipYAfterReactionTime + cannonBallYV * timeStampMS / 1000;
+
+            let expectedHitX = cannonBallEndX + windDiplacementInTimeX;
+            let expectedHitY = cannonBallEndY + windDiplacementInTimeY;
+
+            // Check the number of cannons LOADED and CAN_AIM_AT_LOCATION
+            let cannonCount = 0;
+            for (let cannon of myCannons){
+                let cannonIsLoaded = myCannonData[cannon.getCannonIndex()]["is_loaded"];
+                if (!cannonIsLoaded){ continue; }
+                let rangeCWL = cannon.getRangeCWL();
+                let rangeCWR = cannon.getRangeCWR();
+                let cannonXCenterOffset = cannon.getXCenterOffset();
+                let cannonYCenterOffset = cannon.getYCenterOffset();
+                let cannonTickX = Cannon.getTickX(myShipXAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+                let cannonTickY = Cannon.getTickY(myShipYAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+
+                let cannonCouldAimAtIt = Cannon.couldAimAt(rangeCWL, rangeCWR, myShipTickOrientation, cannonTickX, cannonTickY, aimAtX, aimAtY);
+                // Record that 1 more cannon can aim at it
+                if (cannonCouldAimAtIt){
+                    cannonCount += 1;
+                }
+            }
+            return {"aim_at_x": aimAtX, "aim_at_y": aimAtY, "cannon_count": cannonCount, "time": timeStampMS, "shipXAtTime": shipXAtTime, "shipYAtTime": shipYAtTime, "expectedHitX": expectedHitX, "expectedHitY": expectedHitY}
+        }
+
+        let distanceFromTargetCalculator = (shipData, timeStampMS, reactionTimeMS) => {
+            let shipXAtTime = shipData["x"] + shipData["x_v"] * (timeStampMS + reactionTimeMS) / 1000;
+            let shipYAtTime = shipData["y"] + shipData["y_v"] * (timeStampMS + reactionTimeMS) / 1000; 
+
+            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+
+            let aimAtX = shipXAtTime - windDiplacementInTimeX;
+            let aimAtY = shipYAtTime - windDiplacementInTimeY;
+
+            let angleToPoint = displacementToRadians(aimAtX - myShipX, aimAtY - myShipY);
+
+            let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
+            let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
+            let cannonBallEndX = myShipXAfterReactionTime + cannonBallXV * timeStampMS / 1000;
+            let cannonBallEndY = myShipYAfterReactionTime + cannonBallYV * timeStampMS / 1000;
+
+            let expectedHitX = cannonBallEndX + windDiplacementInTimeX;
+            let expectedHitY = cannonBallEndY + windDiplacementInTimeY;
+
+            return { "distance": calculateEuclideanDistance(aimAtX, aimAtY, cannonBallEndX, cannonBallEndY), "time": timeStampMS, "shipXAtTime": shipXAtTime, "shipYAtTime": shipYAtTime, "expectedHitX": expectedHitX, "expectedHitY": expectedHitY};
+        }
+
+        // Go through each ship (closest to furthest)
+        let ship = allShips.get(0);
+        let shipData = enemyShipData[ship.getID()];
+
+        // Use ternary search
+        let minTime = 0;
+        let maxTime = shotFlyingTimeMS;
+        let currentResult;
+
+        // Loop until percision is found
+        //debugger;
+        while (maxTime - minTime > searchPrecision){
+            let rightLeftDifference = maxTime - minTime;
+            let pointM1 = minTime + rightLeftDifference / 3;
+            let pointM2 = maxTime - rightLeftDifference / 3;
+
+            // If score is better on the right -> Move search right
+            let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+            let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
+            let distanceM1 = m1Result["distance"];
+            let distanceM2 = m2Result["distance"];
+
+            if (distanceM1 > distanceM2){
+                minTime = pointM1;
+                currentResult = m2Result;
+            }else{
+                maxTime = pointM2;
+                currentResult = m1Result;
+            }
+        }
+
+        let bestDistance = currentResult["distance"];
+        let bestTime = currentResult["time"];
+
+        // Search for left bound
+        minTime = 0;
+        maxTime = bestTime;
+        let leftBoundTime = bestTime;
+        while (maxTime - minTime > searchPrecision){
+            let rightLeftDifference = maxTime - minTime;
+            let pointM1 = minTime + rightLeftDifference / 3;
+            let pointM2 = maxTime - rightLeftDifference / 3;
+
+            // Find distance to MAX_DISTANCE
+            let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+            let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
+            let distanceM1 = Math.abs(m1Result["distance"] - maxDistance);
+            let distanceM2 = Math.abs(m2Result["distance"] - maxDistance);
+            if (distanceM1 > distanceM2){
+                minTime = pointM1;
+            }else{
+                maxTime = pointM2;
+                leftBoundTime = m1Result["time"]; // Always keep right result
+            }
+        } 
+
+        // Search for right bound
+        minTime = bestTime;
+        maxTime = shotFlyingTimeMS;
+        let rightBoundTime = bestTime;
+        while (maxTime - minTime > searchPrecision){
+            let rightLeftDifference = maxTime - minTime;
+            let pointM1 = minTime + rightLeftDifference / 3;
+            let pointM2 = maxTime - rightLeftDifference / 3;
+
+            // Find distance to MAX_DISTANCE
+            let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+            let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
+            let distanceM1 = Math.abs(m1Result["distance"] - maxDistance);
+            let distanceM2 = Math.abs(m2Result["distance"] - maxDistance);
+            if (distanceM1 > distanceM2){
+                minTime = pointM1;
+                rightBoundTime = m1Result["time"]; // Always keep left result
+            }else{
+                maxTime = pointM2;
+            }
+        } 
+
+        minTime = leftBoundTime;
+        maxTime = rightBoundTime;
+
+        let shootCannonsResult = countCannons(shipData, bestTime, reactionTimeMS);
+        let timeDown = bestTime - searchPrecision;
+        let timeUp = bestTime + searchPrecision;
+        
+        // Check upwards
+        while (shootCannonsResult["cannon_count"] === 0 && (timeUp < maxTime || timeDown > minTime)){
+            let downResult = {"cannon_count": 0}
+            let upResult = {"cannon_count": 0}
+
+            if (timeDown > minTime){
+                downResult = countCannons(shipData, timeDown, reactionTimeMS);
+
+                // Move to next timeDown
+                timeDown -= searchPrecision;
+            }
+
+            if (timeUp < maxTime){
+                upResult = countCannons(shipData, timeUp, reactionTimeMS);
+
+                // Move to next timeUp
+                timeUp += searchPrecision;
+            }
+
+            if (downResult["cannon_count"] > upResult["cannon_count"]){
+                shootCannonsResult = downResult;
+            }else{
+                shootCannonsResult = upResult;
+            }
+        }
+
+
+        // No cannons can shoot
+        if (shootCannonsResult["cannon_count"] === 0){
+            return;
+        }
+
+        currentResult = shootCannonsResult;
+
+
+        if (!objectHasKey(this.workingData, "debug_circle")){
+            this.workingData["debug_circle"] = new DebugCircle("#000000", 0, 0, 20);
+            game.visualEffects.push(this.workingData["debug_circle"]);
+        }
+        this.workingData["debug_circle"].update(currentResult["shipXAtTime"], currentResult["shipYAtTime"]);
+
+        if (!objectHasKey(this.workingData, "debug_circle2")){
+            this.workingData["debug_circle2"] = new DebugCircle("#00ff00", 0, 0, 20);
+            game.visualEffects.push(this.workingData["debug_circle2"]);
+        }
+
+        this.workingData["debug_circle2"].update(currentResult["expectedHitX"], currentResult["expectedHitY"]);
+    }*/
+
+    /*determineDesiredHeading(){
         if (this.updateHeadingLock.isLocked() || this.workingData["best_enemy"] === undefined){
             return;
         }
         this.updateHeadingLock.lock();
         
         let currentTick = this.workingData["tick"];
+        let game = this.getShip().getGame();
+
+        // My info
+        let myX = this.perception.getDataToReactTo("my_x", currentTick);
+        let myY = this.perception.getDataToReactTo("my_y", currentTick);
+        let myOrientationRAD = this.perception.getDataToReactTo("my_orientation_rad", currentTick);
+
+        // My aim for enemy rump
+        let bestEnemyShipID = this.workingData["best_enemy"].getID();
+        let enemyShipData = this.perception.getDataToReactTo("enemy_ship_data", currentTick)[bestEnemyShipID];
+        let bestEnemyX = enemyShipData["x"];
+        let bestEnemyY = enemyShipData["y"];
+        let enemyOrientation = enemyShipData["orientation_rad"];
+
+        let desiredPositionX = bestEnemyX - Math.cos(enemyOrientation) * 32;
+        let desiredPositionY = bestEnemyY - Math.sin(enemyOrientation) * 32;
+
+
+        // Now just get the angle
+        let heading = displacementToRadians(desiredPositionX - myX, desiredPositionY - myY);
+
+        let minAmount = toRadians(0.5);
+
+        let distanceCW = calculateAngleDiffCWRAD(myOrientationRAD, heading);
+        let distanceCCW = calculateAngleDiffCCWRAD(myOrientationRAD, heading);
+
+        // Determine if turning
+
+        if (distanceCW <= distanceCCW && distanceCW >= minAmount){
+            this.decisions["orientation_direction_change"] = 1;
+        }else if (distanceCCW < distanceCW && distanceCW >= minAmount){
+            this.decisions["orientation_direction_change"] = -1;
+        }else{
+            this.decisions["orientation_direction_change"] = 0;
+        }
+    }*/
+
+    /*determineDesiredHeading(){
+        if (this.updateHeadingLock.isLocked() || this.workingData["best_enemy"] === undefined){
+            return;
+        }
+        this.updateHeadingLock.lock();
+        
+        let currentTick = this.workingData["tick"];
+        let game = this.getShip().getGame();
 
         // My info
         let myX = this.perception.getDataToReactTo("my_x", currentTick);
@@ -149,42 +454,32 @@ class BotShipController {
         // Wind info (Note: This is more like wind velocity not acceleration but whatever...)
         let windXA = this.perception.getDataToReactTo("wind_xa", currentTick);
         let windYA = this.perception.getDataToReactTo("wind_ya", currentTick);
+        let windOppositeOrientation = rotateCWRAD(this.perception.getDataToReactTo("wind_direction_rad", currentTick), toRadians(180));
+        let windEffectCoefficient = game.getGameProperties()["cannon_ball_wind_effect_coefficient"];
 
         // Cannon ball info
-        let game = this.getShip().getGame();
         let flightTimeSeconds = game.getGameProperties()["cannon_ball_settings"]["ms_until_hit_water"] / 1000;
         let cannonShotSpeed = game.getGameProperties()["cannon_settings"]["shot_speed"];
-
-        // Find desired position
-        let totalWindDisplacementX = flightTimeSeconds * windXA * game.getGameProperties()["cannon_ball_wind_effect_coefficient"];
-        let totalWindDisplacementY = flightTimeSeconds * windYA * game.getGameProperties()["cannon_ball_wind_effect_coefficient"];
 
         let desiredPositionX = bestEnemyX;
         let desiredPositionY = bestEnemyY;
 
-        // Take into consideration the wind
-        desiredPositionX -= totalWindDisplacementX;
-        desiredPositionY -= totalWindDisplacementY;
+        // So the question is if the enemy fired against the wind, how far would the cannon ball go
+        let cannonBallXV = bestEnemyXV + windXA * windEffectCoefficient + Math.cos(windOppositeOrientation) * cannonShotSpeed;
+        let cannonBallYV = bestEnemyYV + windYA * windEffectCoefficient + Math.sin(windOppositeOrientation) * cannonShotSpeed;
+        //console.log("x", bestEnemyXV, windXA * windEffectCoefficient, Math.cos(windOppositeOrientation) * cannonShotSpeed);
+        //console.log("y", bestEnemyYV, windYA * windEffectCoefficient, Math.sin(windOppositeOrientation) * cannonShotSpeed);
 
-        // Take into account difference in position based on our realtive velocities
-        let relativeVelocityX = myXV - bestEnemyXV;
-        let relativeVelocityY = myYV - bestEnemyYV;
+        desiredPositionX = bestEnemyX + cannonBallXV * flightTimeSeconds;
+        desiredPositionY = bestEnemyY + cannonBallYV * flightTimeSeconds;
 
-        let totalRelativeVelocityDisplacementX = relativeVelocityX * flightTimeSeconds;
-        let totalRelativeVelocityDisplacementY = relativeVelocityY * flightTimeSeconds;
-
-        // Take into consideration the relative velocity
-        desiredPositionX -= totalRelativeVelocityDisplacementX;
-        desiredPositionY -= totalRelativeVelocityDisplacementY;
-
-        // Take into account cannon speed (i'm unse of this one)
-        let angleFromEnemyShipToCurrentOffsetPointRAD = displacementToRadians(desiredPositionX - bestEnemyX, desiredPositionY - bestEnemyY);
-
-        desiredPositionX += Math.cos(angleFromEnemyShipToCurrentOffsetPointRAD) * cannonShotSpeed * flightTimeSeconds;
-        desiredPositionY += Math.sin(angleFromEnemyShipToCurrentOffsetPointRAD) * cannonShotSpeed * flightTimeSeconds;
 
         // Now just get the angle
         let heading = displacementToRadians(desiredPositionX - myX, desiredPositionY - myY);
+
+        if (this.workingData["requested_shooting_angle"] != null){
+            heading = this.workingData["requested_shooting_angle"];
+        }
 
         let minAmount = toRadians(0.5);
 
@@ -202,13 +497,126 @@ class BotShipController {
         }
 
         // Test
-        if (!objectHasKey(this.workingData, "debug_line2")){
-            this.workingData["debug_line2"] = new DebugLine("#ff52fa", 0, 0, 0, 0, 10);
-            //game.visualEffects.push(this.workingData["debug_line2"]);
+    }*/
+
+    determineDesiredHeading(){
+        if (this.updateHeadingLock.isLocked() || this.workingData["best_enemy"] === undefined){
+            return;
         }
-        //console.log(ship.getTickX() - myX, ship.getTickY() - m)
-        this.workingData["debug_line2"].update(myX, myY, desiredPositionX, desiredPositionY);
-        //console.log(distanceToDesire, desiredPositionX, desiredPositionY);
+        this.updateHeadingLock.lock();
+        
+        let currentTick = this.workingData["tick"];
+        let game = this.getShip().getGame();
+
+        // Cannon infox
+        let shotFlyingTimeMS = game.getGameProperties()["cannon_ball_settings"]["ms_until_hit_water"];
+        let shotSpeed = game.getGameProperties()["cannon_settings"]["shot_speed"];
+
+        // My info
+        let myX = this.perception.getDataToReactTo("my_x", currentTick);
+        let myY = this.perception.getDataToReactTo("my_y", currentTick);
+        let myXV = this.perception.getDataToReactTo("my_x_v", currentTick);
+        let myYV = this.perception.getDataToReactTo("my_y_v", currentTick);
+        let myOrientationRAD = this.perception.getDataToReactTo("my_orientation_rad", currentTick);
+
+        // Enemy info
+        let bestEnemyShipID = this.workingData["best_enemy"].getID();
+        let enemyShipData = this.perception.getDataToReactTo("enemy_ship_data", currentTick)[bestEnemyShipID];
+        let bestEnemyX = enemyShipData["x"];
+        let bestEnemyY = enemyShipData["y"];
+        let bestEnemyXV = enemyShipData["x_v"];
+        let bestEnemyYV = enemyShipData["y_v"];
+
+        // Wind info (Note: This is more like wind velocity not acceleration but whatever...)
+        let windXA = this.perception.getDataToReactTo("wind_xa", currentTick);
+        let windYA = this.perception.getDataToReactTo("wind_ya", currentTick);
+        let windOppositeOrientation = rotateCWRAD(this.perception.getDataToReactTo("wind_direction_rad", currentTick), toRadians(180));
+        let windEffectCoefficient = game.getGameProperties()["cannon_ball_wind_effect_coefficient"];
+
+        let getSign = (anInteger) => {
+            if (anInteger >= 0){
+                return 1;
+            }else{
+                return -1;
+            }
+        }
+
+        let displacementEnemyToMeX = bestEnemyX - myX;
+        let displacementEnemyToMeY = bestEnemyY - myY;
+
+        let IHaveWindAdvantageX = getSign(displacementEnemyToMeX) === getSign(windXA);
+        let IHaveWindAdvantageY = getSign(displacementEnemyToMeY) === getSign(windYA);
+
+        let desiredPositionX;
+        let desiredPositionY;
+        // If I have both wind advantage
+        if (IHaveWindAdvantageX && IHaveWindAdvantageY){
+            console.log("a")
+            desiredPositionX = bestEnemyX;
+            desiredPositionY = bestEnemyY;
+        }else if (IHaveWindAdvantageX){
+            console.log("b")
+            let totalCannonReachX = getSign(windXA) * shotSpeed * shotFlyingTimeMS / 1000 + 0.5 * windXA * Math.pow(shotFlyingTimeMS / 1000, 2);
+            desiredPositionX = bestEnemyX + totalCannonReachX;
+            desiredPositionY = bestEnemyY;
+        }else if (IHaveWindAdvantageY){
+            console.log("c")
+            let totalCannonReachY = getSign(windYA) * shotSpeed * shotFlyingTimeMS / 1000 + 0.5 * windYA * Math.pow(shotFlyingTimeMS / 1000, 2);
+            desiredPositionX = bestEnemyX;
+            desiredPositionY = bestEnemyY + totalCannonReachY;  
+        }else{  
+            // Else, no advantage
+
+            // Target higher speed direction and keep out of the way on the other one
+            if (windXA < windYA){
+                let totalCannonReachX = getSign(windXA) * shotSpeed * shotFlyingTimeMS / 1000 + 0.5 * windXA * Math.pow(shotFlyingTimeMS / 1000, 2);
+                desiredPositionX = bestEnemyX + totalCannonReachX;
+                desiredPositionY = bestEnemyY;
+                console.log("d1")
+            }else{
+                let totalCannonReachY = getSign(windYA) * shotSpeed * shotFlyingTimeMS / 1000 + 0.5 * windYA * Math.pow(shotFlyingTimeMS / 1000, 2);
+                desiredPositionX = bestEnemyX;
+                desiredPositionY = bestEnemyY + totalCannonReachY;  
+                console.log("d2")
+            }
+        }
+
+        /*
+        // Cannon ball info
+        let flightTimeSeconds = game.getGameProperties()["cannon_ball_settings"]["ms_until_hit_water"] / 1000;
+        let cannonShotSpeed = game.getGameProperties()["cannon_settings"]["shot_speed"];
+
+        let desiredPositionX = bestEnemyX;
+        let desiredPositionY = bestEnemyY;
+
+        // So the question is if the enemy fired against the wind, how far would the cannon ball go
+        let cannonBallXV = bestEnemyXV + windXA * windEffectCoefficient + Math.cos(windOppositeOrientation) * cannonShotSpeed;
+        let cannonBallYV = bestEnemyYV + windYA * windEffectCoefficient + Math.sin(windOppositeOrientation) * cannonShotSpeed;
+        //console.log("x", bestEnemyXV, windXA * windEffectCoefficient, Math.cos(windOppositeOrientation) * cannonShotSpeed);
+        //console.log("y", bestEnemyYV, windYA * windEffectCoefficient, Math.sin(windOppositeOrientation) * cannonShotSpeed);
+
+        desiredPositionX = bestEnemyX + cannonBallXV * flightTimeSeconds;
+        desiredPositionY = bestEnemyY + cannonBallYV * flightTimeSeconds;*/
+
+
+        // Now just get the angle
+        let heading = displacementToRadians(desiredPositionX - myX, desiredPositionY - myY);
+        let minAmount = toRadians(0.5);
+
+        let distanceCW = calculateAngleDiffCWRAD(myOrientationRAD, heading);
+        let distanceCCW = calculateAngleDiffCCWRAD(myOrientationRAD, heading);
+
+        // Determine if turning
+
+        if (distanceCW <= distanceCCW && distanceCW >= minAmount){
+            this.decisions["orientation_direction_change"] = 1;
+        }else if (distanceCCW < distanceCW && distanceCW >= minAmount){
+            this.decisions["orientation_direction_change"] = -1;
+        }else{
+            this.decisions["orientation_direction_change"] = 0;
+        }
+
+        // Test
     }
 
     determineBestEnemy(){
@@ -274,7 +682,10 @@ class BotShipController {
                     simulateShootingAtPosition and see if you hit a ship within flying time m
         */
 
+        // Set flag for heading function
+
         let currentTick = this.workingData["tick"];
+        let reactionTimeMS = this.reactionTimeMS;
         let myShip = this.getShip();
         let game = myShip.getGame();
         let shotFlyingTimeMS = game.getGameProperties()["cannon_ball_settings"]["ms_until_hit_water"];
@@ -285,6 +696,8 @@ class BotShipController {
         let myShipY = this.perception.getDataToReactTo("my_y", currentTick);
         let myShipXV = this.perception.getDataToReactTo("my_x_v", currentTick);
         let myShipYV = this.perception.getDataToReactTo("my_y_v", currentTick);
+        let myShipXAfterReactionTime = myShipX + (reactionTimeMS * myShipXV / 1000);
+        let myShipYAfterReactionTime = myShipY + (reactionTimeMS * myShipYV / 1000);
         let myShipTickOrientation = this.perception.getDataToReactTo("my_orientation_rad", currentTick);
 
         // Add a simplified wind reduction
@@ -312,9 +725,6 @@ class BotShipController {
             if (!shipData["alive"]){ continue; }
 
             let shipDistance = calculateEuclideanDistance(shipData["x"], shipData["y"], myShipX, myShipY);
-            if (isNaN(shipDistance)){
-                debugger;
-            }
             if (shipDistance <= shotDistanceWithMaxWindHelp){
                 shipsWithinRange.push({"ship": ship, "distance": shipDistance});
             }
@@ -330,17 +740,16 @@ class BotShipController {
         let myCannonData = this.perception.getDataToReactTo("my_cannon_data", currentTick);
 
         let searchPrecision = 1; // ms
-        let maxDistance = 128; // TEMP
+        let maxDistance = game.getGameProperties()["bot_settings"]["max_expected_hit_distance"];
 
         // Calculator required stuff
 
-        let distanceFromTargetCalculator = (shipData, timeStampMS) => {
-            //debugger;
-            let shipXAtTime = shipData["x"] + shipData["x_v"] * timeStampMS / 1000;
-            let shipYAtTime = shipData["y"] + shipData["y_v"] * timeStampMS / 1000; 
+        let distanceFromTargetCalculator = (shipData, timeStampMS, reactionTimeMS) => {
+            let shipXAtTime = shipData["x"] + shipData["x_v"] * (timeStampMS + reactionTimeMS) / 1000;
+            let shipYAtTime = shipData["y"] + shipData["y_v"] * (timeStampMS + reactionTimeMS) / 1000; 
 
-            let windDiplacementInTimeX = windXA * windEffectCoefficient * timeStampMS / 1000;
-            let windDiplacementInTimeY = windYA * windEffectCoefficient * timeStampMS / 1000;
+            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
 
             let aimAtX = shipXAtTime - windDiplacementInTimeX;
             let aimAtY = shipYAtTime - windDiplacementInTimeY;
@@ -349,39 +758,18 @@ class BotShipController {
 
             let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
             let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
-            let cannonBallEndX = myShipX + cannonBallXV * timeStampMS / 1000;
-            let cannonBallEndY = myShipY + cannonBallYV * timeStampMS / 1000;
+            let cannonBallEndX = myShipXAfterReactionTime + cannonBallXV * timeStampMS / 1000;
+            let cannonBallEndY = myShipYAfterReactionTime + cannonBallYV * timeStampMS / 1000;
 
             return { "distance": calculateEuclideanDistance(aimAtX, aimAtY, cannonBallEndX, cannonBallEndY), "time": timeStampMS };
         }
 
-        let debugCalculation = (shipData, timeStampMS) => {
-            //debugger;
-            let shipXAtTime = shipData["x"] + shipData["x_v"] * timeStampMS / 1000;
-            let shipYAtTime = shipData["y"] + shipData["y_v"] * timeStampMS / 1000; 
+        let countCannons = (shipData, timeStampMS, reactionTimeMS) => {
+            let shipXAtTime = shipData["x"] + shipData["x_v"] * (reactionTimeMS + timeStampMS) / 1000;
+            let shipYAtTime = shipData["y"] + shipData["y_v"] * (reactionTimeMS + timeStampMS) / 1000; 
 
-            let windDiplacementInTimeX = windXA * windEffectCoefficient * timeStampMS / 1000;
-            let windDiplacementInTimeY = windYA * windEffectCoefficient * timeStampMS / 1000;
-
-            let aimAtX = shipXAtTime - windDiplacementInTimeX;
-            let aimAtY = shipYAtTime - windDiplacementInTimeY;
-
-            let angleToPoint = displacementToRadians(aimAtX - myShipX, aimAtY - myShipY);
-
-            let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
-            let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
-            let cannonBallEndX = myShipX + cannonBallXV * timeStampMS / 1000;
-            let cannonBallEndY = myShipY + cannonBallYV * timeStampMS / 1000;
-
-            return { "cannon_ball_end_x": cannonBallEndX, "cannon_ball_end_y": cannonBallEndY,};
-        }
-
-        let countCannons = (shipData, timeStampMS) => {
-            let shipXAtTime = shipData["x"] + shipData["x_v"] * timeStampMS / 1000;
-            let shipYAtTime = shipData["y"] + shipData["y_v"] * timeStampMS / 1000; 
-
-            let windDiplacementInTimeX = windXA * windEffectCoefficient * timeStampMS / 1000;
-            let windDiplacementInTimeY = windYA * windEffectCoefficient * timeStampMS / 1000;
+            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
 
             let aimAtX = shipXAtTime - windDiplacementInTimeX;
             let aimAtY = shipYAtTime - windDiplacementInTimeY;
@@ -395,8 +783,8 @@ class BotShipController {
                 let rangeCWR = cannon.getRangeCWR();
                 let cannonXCenterOffset = cannon.getXCenterOffset();
                 let cannonYCenterOffset = cannon.getYCenterOffset();
-                let cannonTickX = Cannon.getTickX(myShipX, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
-                let cannonTickY = Cannon.getTickY(myShipY, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+                let cannonTickX = Cannon.getTickX(myShipXAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+                let cannonTickY = Cannon.getTickY(myShipYAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
 
                 let cannonCouldAimAtIt = Cannon.couldAimAt(rangeCWL, rangeCWR, myShipTickOrientation, cannonTickX, cannonTickY, aimAtX, aimAtY);
                 // Record that 1 more cannon can aim at it
@@ -406,9 +794,51 @@ class BotShipController {
             }
             return {"aim_at_x": aimAtX, "aim_at_y": aimAtY, "cannon_count": cannonCount}
         }
+        /*
+        let countCannons = (shipData, timeStampMS, reactionTimeMS) => {
+            let shipXAtTime = shipData["x"] + shipData["x_v"] * (reactionTimeMS + timeStampMS) / 1000;
+            let shipYAtTime = shipData["y"] + shipData["y_v"] * (reactionTimeMS + timeStampMS) / 1000; 
+
+            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
+
+            let aimAtX = shipXAtTime - windDiplacementInTimeX;
+            let aimAtY = shipYAtTime - windDiplacementInTimeY;
+
+            let angleToPoint = displacementToRadians(aimAtX - myShipX, aimAtY - myShipY);
+
+            let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
+            let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
+            let cannonBallEndX = myShipXAfterReactionTime + cannonBallXV * timeStampMS / 1000;
+            let cannonBallEndY = myShipYAfterReactionTime + cannonBallYV * timeStampMS / 1000;
+
+            let expectedHitX = cannonBallEndX + windDiplacementInTimeX;
+            let expectedHitY = cannonBallEndY + windDiplacementInTimeY;
+
+            // Check the number of cannons LOADED and CAN_AIM_AT_LOCATION
+            let cannonCount = 0;
+            for (let cannon of myCannons){
+                let cannonIsLoaded = myCannonData[cannon.getCannonIndex()]["is_loaded"];
+                if (!cannonIsLoaded){ continue; }
+                let rangeCWL = cannon.getRangeCWL();
+                let rangeCWR = cannon.getRangeCWR();
+                let cannonXCenterOffset = cannon.getXCenterOffset();
+                let cannonYCenterOffset = cannon.getYCenterOffset();
+                let cannonTickX = Cannon.getTickX(myShipXAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+                let cannonTickY = Cannon.getTickY(myShipYAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
+
+                let cannonCouldAimAtIt = Cannon.couldAimAt(rangeCWL, rangeCWR, myShipTickOrientation, cannonTickX, cannonTickY, aimAtX, aimAtY);
+                // Record that 1 more cannon can aim at it
+                if (cannonCouldAimAtIt){
+                    cannonCount += 1;
+                }
+            }
+            return {"aim_at_x": aimAtX, "aim_at_y": aimAtY, "cannon_count": cannonCount, "time": timeStampMS, "shipXAtTime": shipXAtTime, "shipYAtTime": shipYAtTime, "expectedHitX": expectedHitX, "expectedHitY": expectedHitY}
+        }*/
 
         // Go through each ship (closest to furthest)
         for (let shipObj of shipsWithinRange){
+            //debugger;
             //console.log("Here")
             let ship = shipObj["ship"];
             let shipData = enemyShipData[ship.getID()];
@@ -426,8 +856,8 @@ class BotShipController {
                 let pointM2 = maxTime - rightLeftDifference / 3;
 
                 // If score is better on the right -> Move search right
-                let m1Result = distanceFromTargetCalculator(shipData, pointM1);
-                let m2Result = distanceFromTargetCalculator(shipData, pointM2);
+                let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+                let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
                 let distanceM1 = m1Result["distance"];
                 let distanceM2 = m2Result["distance"];
 
@@ -458,8 +888,8 @@ class BotShipController {
                 let pointM2 = maxTime - rightLeftDifference / 3;
 
                 // Find distance to MAX_DISTANCE
-                let m1Result = distanceFromTargetCalculator(shipData, pointM1);
-                let m2Result = distanceFromTargetCalculator(shipData, pointM2);
+                let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+                let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
                 let distanceM1 = Math.abs(m1Result["distance"] - maxDistance);
                 let distanceM2 = Math.abs(m2Result["distance"] - maxDistance);
                 if (distanceM1 > distanceM2){
@@ -480,8 +910,8 @@ class BotShipController {
                 let pointM2 = maxTime - rightLeftDifference / 3;
 
                 // Find distance to MAX_DISTANCE
-                let m1Result = distanceFromTargetCalculator(shipData, pointM1);
-                let m2Result = distanceFromTargetCalculator(shipData, pointM2);
+                let m1Result = distanceFromTargetCalculator(shipData, pointM1, reactionTimeMS);
+                let m2Result = distanceFromTargetCalculator(shipData, pointM2, reactionTimeMS);
                 let distanceM1 = Math.abs(m1Result["distance"] - maxDistance);
                 let distanceM2 = Math.abs(m2Result["distance"] - maxDistance);
                 if (distanceM1 > distanceM2){
@@ -494,43 +924,20 @@ class BotShipController {
 
             minTime = leftBoundTime;
             maxTime = rightBoundTime;
-            let shootCannonsResult = countCannons(shipData, bestTime);
-            let debugFinalTime;
-            while (maxTime - minTime > searchPrecision){
-                let rightLeftDifference = maxTime - minTime;
-                let pointM1 = minTime + rightLeftDifference / 3;
-                let pointM2 = maxTime - rightLeftDifference / 3;
-
-                // Find highest cannon count
-                let m1Result = countCannons(shipData, pointM1);
-                let m2Result = countCannons(shipData, pointM2);
-                let countM1 = m1Result["cannon_count"];
-                let countM2 = m2Result["cannon_count"];
-
-                if (countM1 < countM2){
-                    minTime = pointM1;
-                    shootCannonsResult = m1Result;
-                    debugFinalTime = pointM1;
-                }else{
-                    maxTime = pointM2;
-                    shootCannonsResult = m1Result;
-                    debugFinalTime = pointM2;
-                }
+            let shootCannonsResult = countCannons(shipData, bestTime, reactionTimeMS);
+            let currentTime = minTime;
+            // Loop until out of time or find a cannon to shoot
+            while (shootCannonsResult["cannon_count"] === 0 && currentTime < maxTime){
+                shootCannonsResult = countCannons(shipData, currentTime, reactionTimeMS);
+                currentTime += searchPrecision;
             }
 
-            //debugger;
             // No cannons can shoot
             if (shootCannonsResult["cannon_count"] === 0){
                 continue;
             }
 
-            /*if (!objectHasKey(this.workingData, "debug_circle")){
-                this.workingData["debug_circle"] = new DebugCircle("#000000", 0, 0, 20);
-                game.visualEffects.push(this.workingData["debug_circle"]);
-            }
-
-            this.workingData["debug_circle"].update(shootCannonsResult["aim_at_x"], shootCannonsResult["aim_at_y"]);
-
+            /*
             if (!objectHasKey(this.workingData, "debug_circle2")){
                 this.workingData["debug_circle2"] = new DebugCircle("#00ff00", 0, 0, 20);
                 game.visualEffects.push(this.workingData["debug_circle2"]);
@@ -561,6 +968,23 @@ class BotShipController {
             this.decisions["aiming_cannons_position_x"] = shootCannonsResult["aim_at_x"] - myShipX;
             this.decisions["aiming_cannons_position_y"] = shootCannonsResult["aim_at_y"] - myShipY;
             this.decisions["fire_cannons"] = true;
+
+           /* if (!objectHasKey(this.workingData, "debug_circle2")){
+                //this.workingData["debug_circle2"] = new DebugCircle("#00ff00", 0, 0, 20);
+                //game.visualEffects.push(this.workingData["debug_circle2"]);
+            }
+
+            //this.workingData["debug_circle2"].update(shootCannonsResult["expectedHitX"], shootCannonsResult["expectedHitY"]);
+
+            if (!objectHasKey(this.workingData, "debug_circle1")){
+                //this.workingData["debug_circle1"] = new DebugCircle("#ff0000", 0, 0, 20);
+                //game.visualEffects.push(this.workingData["debug_circle1"]);
+            }
+
+            //this.workingData["debug_circle1"].update(shootCannonsResult["aim_at_x"], shootCannonsResult["aim_at_y"]);
+
+            //console.log("Firing", shootCannonsResult["time"]);
+            */
 
             // End function
             return;

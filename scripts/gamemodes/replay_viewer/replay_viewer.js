@@ -9,12 +9,169 @@ class ReplayViewer extends Gamemode {
         this.currentTimelineIndex = 0;
 
         this.mode = undefined;
+        this.replayString = undefined;
 
-        this.started = false;
+        this.running = false;
+
+        // UI
+        this.paused = false;
+        this.playPauseButton = undefined;
+        this.slider = undefined; // Declare
+        this.setupUI();
+
+        this.sliderTicks = 0;
+    }
+
+    pauseUnpauseReplay(){
+        if (this.isReplayPaused()){
+            this.unpauseReplay();
+        }else{
+            this.pauseReplay();
+        }
+    }
+
+    pauseReplay(){
+        this.paused = true;
+        this.getGame().setUpdatingFramePositions(false);
+    }
+
+    unpauseReplay(){
+        this.paused = false;
+        this.updateToNewTicks();
+        this.handleUnpause();
+        this.getGame().setUpdatingFramePositions(true);
+    }
+
+    resetForTickJump(){
+        this.winningScreen.reset();
+        this.getGame().reset();
+        this.currentTimelineIndex = 0;
+        this.running = false;
+    }
+
+    updateToNewTicks(){
+        this.resetForTickJump();
+        let game = this.getGame();
+
+        this.loadFromString(this.replayString);
+
+        // Loop until ticks match
+        while (game.getTickCount() != this.sliderTicks){
+            let before = game.getTickCount();
+            this.tickGame();
+            if (game.getTickCount() === before){
+                debugger;
+            }
+        }
+        GC.getSoundManager().clearSoundQueue();
+
+        // Mark running
+        this.running = true;
+    }
+
+    isReplayPaused(){
+        return this.paused;
+    }
+
+    getSliderTicks(){
+        return this.sliderTicks;
+    }
+
+    sliderSetSliderTicks(sliderTicks){
+        // When update -> pause
+        if (!this.isReplayPaused()){
+            this.pauseReplay();
+        }
+        this.setSliderTicks(sliderTicks);
+    }
+
+    setSliderTicks(sliderTicks){
+        this.sliderTicks = sliderTicks;
+    }
+
+    ticksToTimeStamp(ticks){
+        let totalSeconds = Math.floor(this.getGame().getGameProperties()["ms_between_ticks"] * ticks / 1000);
+        let hours = Math.floor(totalSeconds / (60 * 60));
+        let minutes = Math.floor((totalSeconds - hours * (60 * 60)) / 60);
+        let seconds = totalSeconds - hours * (60 * 60) - minutes * 60;
+        let hoursString;
+        if (hours >= 10){
+            hoursString = hours.toString();
+        }else{
+            hoursString = "0" + hours.toString();
+        }
+
+        let minutesString;
+        if (minutes >= 10){
+            minutesString = minutes.toString();
+        }else{
+            minutesString = "0" + minutes.toString();
+        }
+
+        let secondsString;
+        if (seconds >= 10){
+            secondsString = Math.floor(seconds).toString();
+        }else{
+            secondsString = "0" + Math.floor(seconds).toString();
+        }
+        return hoursString + ":" + minutesString + ":" + secondsString;
+    }
+
+    setupUI(){
+        let pauseColour = MSD["replay_viewer"]["pause_colour_code"];
+        let playColour = MSD["replay_viewer"]["play_colour_code"];
+        let textColour = MSD["replay_viewer"]["play_pause_text_colour_code"];
+
+        let sideBuffer = MSD["replay_viewer"]["size_buffer"];
+
+        let playPauseButtonHeight = MSD["replay_viewer"]["play_pause_height"];
+        let playPauseButtonWidth = MSD["replay_viewer"]["play_pause_width"];
+
+        let sliderHeight = MSD["replay_viewer"]["slider_height"];
+        let sliderTextHeight = MSD["replay_viewer"]["slider_text_height"];
+        let sliderKnobWidth = MSD["replay_viewer"]["slider_knob_width_px"];
+
+        let replayViewerInstance = this;
+        let dudFunc = () => {}
+        let getPlayPauseText = () => {
+            return replayViewerInstance.isReplayPaused() ? "Play" : "Pause";
+        }
+        let getPlayPauseColor = () => {
+            return replayViewerInstance.isReplayPaused() ? playColour : pauseColour;
+        }
+        let getPlayPauseX = () => {
+            return sideBuffer;
+        }
+
+        let getPlayPauseY = () => {
+            return sideBuffer + playPauseButtonHeight;
+        }
+
+        this.playPauseButton = new RectangleButton(getPlayPauseText, getPlayPauseColor, textColour, getPlayPauseX, getPlayPauseY, playPauseButtonHeight, playPauseButtonWidth, dudFunc);
+
+        let getSliderX = (screenWidth) => {
+            return getPlayPauseX(screenWidth) + playPauseButtonWidth;
+        }
+        let getSliderY = () => {
+            return sideBuffer + sliderHeight + sliderTextHeight;
+        }
+        let getSliderWidth = (screenWidth) => {
+            return Math.max(1, screenWidth - sideBuffer * 2 - playPauseButtonWidth);
+        }
+        let getSliderValue = () => {
+            return replayViewerInstance.getSliderTicks();
+        }
+        let setSliderValue = (newValue) => {
+            return replayViewerInstance.sliderSetSliderTicks(newValue);
+        }
+        this.slider = new QuantitySlider(getSliderX, getSliderY, getSliderWidth, sliderHeight, sliderTextHeight, sliderKnobWidth, getSliderValue, setSliderValue, 0, undefined, false);
+        this.slider.setToStringFunction((value) => {
+            return replayViewerInstance.ticksToTimeStamp(value);
+        });
     }
 
     isRunning(){
-        return this.started && !this.winningScreen.isActive();
+        return this.running && !this.winningScreen.isActive() && !this.paused;
     }
 
     launchLocal(localReplayName){
@@ -77,10 +234,17 @@ class ReplayViewer extends Gamemode {
     }
 
     launch(replayString){
+        this.loadFromString(replayString);
+        this.running = true;
+    }
+
+    loadFromString(replayString){
+        this.replayString = replayString;
         let game = this.getGame();
         let replayJSON = JSON.parse(replayString);
         let gameDetails = replayJSON["opening_message"]["game_details"];
         this.timeline = replayJSON["timeline"];
+        this.slider.setMaxValue(this.timeline[this.timeline.length-1]["tick"]);
 
         // Set data received
 
@@ -113,9 +277,6 @@ class ReplayViewer extends Gamemode {
             shipJSON["game_instance"] = game;
             game.addShip(new Ship(shipJSON));
         }
-
-        // Note started
-        this.started = true;
     }
 
     handlePause(){
@@ -227,14 +388,21 @@ class ReplayViewer extends Gamemode {
     }
 
     async tick(){
+        // Check ui
+        this.tickUI();
+
         // Don't tick when over
         if (!this.isRunning()){
-            if (this.getMode() === "online" && this.started === false){
+            if (this.getMode() === "online" && this.replayString === undefined){
                 await this.checkForReplayData();
             }
             return;
         }
 
+        this.tickGame();
+    }
+
+    tickGame(){
         // Check win
         this.checkWin();
 
@@ -243,6 +411,22 @@ class ReplayViewer extends Gamemode {
 
         // Set up pending decisions
         this.applyPendingDecisions();
+    }
+
+    tickUI(){
+        let leftClick = GC.getGameUserInputManager().isActivated("left_click_ticked");
+        if (leftClick){
+            if (this.playPauseButton.covers(GC.getLastClickedMouseX(), GC.getMenuManager().changeFromScreenY(GC.getLastClickedMouseY()))){
+                this.pauseUnpauseReplay();
+            }
+        }
+
+        this.playPauseButton.tick();
+        this.slider.tick();
+
+        if (!this.isReplayPaused()){
+            this.sliderTicks = this.getGame().getTickCount();
+        }
     }
 
     getName(){ return "replay_viewer"; }
@@ -258,11 +442,19 @@ class ReplayViewer extends Gamemode {
         // Display winning screen if active
         if (this.winningScreen.isActive()){
             this.winningScreen.display();
-            return;
+        }else{
+            // display hud
+            this.displayHUD();
         }
 
-        // Else display hud
-        this.displayHUD();
+
+        // Display UI
+        this.displayUI();
+    }
+
+    displayUI(){
+        this.playPauseButton.display();
+        this.slider.display();
     }
 
     displayHUD(){
@@ -286,7 +478,6 @@ class ReplayViewer extends Gamemode {
         hud.updateElement("sail strength", this.getGame().getFocusedEntity().getTickSailStrength().toFixed(2));
         hud.updateElement("id", this.getGame().getFocusedEntity().getID());
         
-
         // Display HUD
         hud.display();
     }

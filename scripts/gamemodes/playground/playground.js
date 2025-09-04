@@ -20,66 +20,79 @@ class Playground extends Gamemode {
     prepareTestEnvironment(){
         let game = this.getGame();
 
+        // Randomize wind
+        game.getWind().resetWithNewSeed(randomNumberInclusive(1, 100000));
+
         // Destroy wind
-        //game.wind = new DebugStaticWind(this);
-        //game.getWind().windMagntiude = 0;
+        game.wind = new DebugStaticWind(this);
+        game.wind.windMagntiude = 30;
+        game.wind.windDirectionRAD = toRadians(316);
         //game.getWind().windDirectionRAD = toRadians(0);
 
-        let tempShipJSON = {
-            "health": 300,
-            "starting_x_pos": 0,
-            "starting_y_pos": 0,
-            "starting_speed": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 0,
-            "ship_model": "generic_ship",
-            "ship_colour": "white",
-            "game_instance": game,
-            "id": this.getGame().getIDManager().generateNewID()
-        }
+        let botControllerModel1 = copyObject(MD["saved_models"][0]);
+        let tempShipJSON = botControllerModel1["ship_json"];
+        tempShipJSON["id"] = "me";
+
+        //tempShipJSON["sail_strength"] = 0.1;
+        tempShipJSON["sail_strength"] = 0;
+
+        tempShipJSON["starting_x_pos"] = -250;
+        tempShipJSON["starting_y_pos"] = -500;
+        tempShipJSON["starting_speed"] = 0;
+        tempShipJSON["health"] = 10000;
+        tempShipJSON["game_instance"] = game;
         let tempShip = new Ship(tempShipJSON);
         //game.addShip(tempShip);
+
+        console.log("Bot1 model", botControllerModel1["model_name"]);
 
         // Focus
         //game.setFocusedShip(tempShip);
         
 
+        let botControllerModel2 = copyObject(MD["saved_models"][0]);
         // Add test ship
-        let tempShip2JSON = {
-            "health": 20,
-            "starting_x_pos": 500,
-            "starting_y_pos": -200,
-            "starting_speed": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 0,
-            "ship_model": "generic_ship",
-            "ship_colour": "white",
-            "game_instance": game,
-            "id": this.getGame().getIDManager().generateNewID()
-        }
+        let tempShip2JSON = botControllerModel2["ship_json"];
+        tempShip2JSON["starting_x_pos"] = -700;
+        tempShip2JSON["starting_y_pos"] = -600;
+        tempShip2JSON["starting_speed"] = 139;
+        tempShip2JSON["sail_strength"] = 0.33;
+        tempShip2JSON["starting_orientation_rad"] = toRadians(244.88)
+
+        //tempShip2JSON["starting_x_pos"] = randomFloatBetween(-2000,2000);
+        //tempShip2JSON["starting_y_pos"] = randomFloatBetween(-2000,2000);
+
+        tempShip2JSON["ship_colour"] = "red";
+
+        tempShip2JSON["game_instance"] = game;
 
         let tempShip2 = new Ship(tempShip2JSON);
-        //game.addShip(tempShip2);
+        game.addShip(tempShip2);
 
         // Add a bot controller
-        let botControllerJSON = {
-            "ship": tempShip2,
-            "reaction_time_ticks": 0,
-            "update_sail_ticks": 40 * 3,
-            "update_enemy_ticks": 40 * 3,
-            "update_heading_ticks": 5
-        }
-        let botController = new BotShipController(botControllerJSON);
-        botController.updateSailTickLock.lock();
+        let botController2JSON = botControllerModel2["bot_controller_json"];
+        botController2JSON["ship"] = tempShip2;
+
+        console.log("Bot2 model", botControllerModel2["model_name"])
+        let botController = new BotShipController(botController2JSON);
+        //botController.updateSailTickLock.lock();
+        //botController.updateSailTickLock.ticksLeft = 999999;
         //game.addBotShipController(botController);
-        //game.setFocusedShip(tempShip2);
+
+        game.getFocusedEntity().snapToClosestEntity();
+
+        game.setFocusedShip(tempShip2);
 
         // Add all colors as bots
-        let spread = 500;
-        let minHealth = 20;
-        let maxHealth = 50;
-        let count = 8;
+        let spread = 3000;
+        let minHealth = 50;
+        let maxHealth = 30;
+        let minReactionTimeTicks = 4; // 4 (100ms)
+        let maxReactionTimeTicks = 8; // 15 (375ms)
+        let count = 1;
         let c = 0;
+        let colorBotModel = copyObject(MD["saved_models"][0]);
+        console.log("Color bots model", colorBotModel["model_name"])
         for (let colour of this.getGame().getGameProperties()["ship_colours"]){
             if (c++ >= count){
                 break;
@@ -98,14 +111,8 @@ class Playground extends Gamemode {
             }
             let cs = new Ship(csJSON);
             game.addShip(cs);
-
-            let cbJSON = {
-                "ship": cs,
-                "reaction_time_ticks": randomNumberInclusive(4,15),
-                "update_sail_ticks": randomNumberInclusive(40*2,40*3),
-                "update_enemy_ticks": randomNumberInclusive(40*2,40*3),
-                "update_heading_ticks": randomNumberInclusive(40*4,40*6)
-            }
+            let cbJSON = copyObject(colorBotModel["bot_controller_json"]);
+            cbJSON["ship"] = cs;
 
             game.addBotShipController(new BotShipController(cbJSON));
         }
@@ -126,6 +133,10 @@ class Playground extends Gamemode {
         // Display game
         this.getGame().display();
 
+        this.displayHUD();
+    }
+
+    displayHUD(){
         let hud = GC.getHUD();
 
         // Display FPS

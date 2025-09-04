@@ -497,7 +497,7 @@ class Battle extends Gamemode {
         if (endProperly){
             if (game.hasFocusedShip()){
                 let myShipID = game.getFocusedShip().getID();
-                if (winner === winner){
+                if (myShipID === winner){
                     colourCode = winningScreenSettings["winning_colour_code"];
                     winningText = winningScreenSettings["winning_text"];
                 }else{
@@ -571,9 +571,9 @@ class Battle extends Gamemode {
         hud.updateElement("x_v", this.getGame().getFocusedEntity().getTickXV().toFixed(2));
         hud.updateElement("y", this.getGame().getFocusedEntity().getTickY().toFixed(2));
         hud.updateElement("y_v", this.getGame().getFocusedEntity().getTickYV().toFixed(2));
+        hud.updateElement("speed", this.getGame().getFocusedEntity().getSpeed().toFixed(2));
         hud.updateElement("orientation", toDegrees(this.getGame().getFocusedEntity().getTickOrientation()).toFixed(2));
         hud.updateElement("sail strength", this.getGame().getFocusedEntity().getTickSailStrength().toFixed(2));
-        hud.updateElement("id", this.getGame().getFocusedEntity().getID());
         
 
         // Display HUD

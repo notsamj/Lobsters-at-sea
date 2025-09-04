@@ -117,6 +117,22 @@ class RectangleButton extends Component {
         }
     }
 
+    getColourCode(){
+        if (typeof this.colourCode === "function"){
+            return this.colourCode();
+        }else{
+            return this.colourCode;
+        }
+    }
+
+    getTextColourCode(){
+        if (typeof this.textColourCode === "function"){
+            return this.textColourCode();
+        }else{
+            return this.textColourCode;
+        }
+    }
+
     /*
         Method Name: display
         Method Parameters: None
@@ -124,7 +140,7 @@ class RectangleButton extends Component {
         Method Return: void
     */
     display(){
-        Menu.makeRectangleWithText(this.getText(), this.colourCode, this.textColourCode, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        Menu.makeRectangleWithText(this.getText(), this.getColourCode(), this.getTextColourCode(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
     /*

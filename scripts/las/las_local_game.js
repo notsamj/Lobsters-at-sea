@@ -277,6 +277,9 @@ class LasLocalGame extends LasGame {
 
         // Display relevant things when focused
         this.getFocusedEntity().displayWhenFocused();
+
+        // Play sounds
+        GC.getSoundManager().playSounds();
     }
 
     playSounds(centerX, centerY){
@@ -292,7 +295,7 @@ class LasLocalGame extends LasGame {
         for (let [cBH, cBHIndex] of cannonBallHits){
             let x = cBH["x_pos"];
             let y = cBH["y_pos"];
-            soundManager.play("cannon_ball_hit", x - centerX, y-centerY);
+            soundManager.queueUp("cannon_ball_hit", x - centerX, y-centerY);
         }
 
         // Collect cannon smoke
@@ -301,7 +304,7 @@ class LasLocalGame extends LasGame {
         for (let [cBS, cBSIndex] of cannonBallShots){
             let x = cBS["x_origin"];
             let y = cBS["y_origin"];
-            soundManager.play("cannon_shot", x - centerX, y-centerY);
+            soundManager.queueUp("cannon_shot", x - centerX, y-centerY);
         }
 
         // Cannon ball sunk
@@ -310,7 +313,7 @@ class LasLocalGame extends LasGame {
         for (let [cBSi, cBSIIndex] of cannonBallSinkings){
             let x = cBSi["x_pos"];
             let y = cBSi["y_pos"];
-            soundManager.play("cannon_ball_sinking", x - centerX, y-centerY);
+            soundManager.queueUp("cannon_ball_sinking", x - centerX, y-centerY);
         }
 
         // Ship sunk
@@ -319,7 +322,7 @@ class LasLocalGame extends LasGame {
         for (let [sS, sSIndex] of shipSinkings){
             let x = sS["x_pos"];
             let y = sS["y_pos"];
-            soundManager.play("ship_sinking", x - centerX, y-centerY);
+            soundManager.queueUp("ship_sinking", x - centerX, y-centerY);
         }
     }
 

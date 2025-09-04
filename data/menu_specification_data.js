@@ -186,4 +186,15 @@ const MSD = {
             }
         ]
     },
+    "replay_viewer": {
+        "pause_colour_code": "#eb4034",
+        "play_colour_code": "#40cc04",
+        "play_pause_text_colour_code": "#fcfcfc",
+        "size_buffer": 50,
+        "play_pause_height": 50,
+        "play_pause_width": 50,
+        "slider_height": 50,
+        "slider_text_height": 30,
+        "slider_knob_width_px": 50
+    }
 }

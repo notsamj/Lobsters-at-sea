@@ -45,6 +45,11 @@ class QuantitySlider extends OptionSlider {
         this.updateSliderX();
     }
 
+    setMaxValue(maxValue){
+        this.maxValue = maxValue;
+        this.updateSliderX();
+    }
+
     /*
         Method Name: updateSliderX
         Method Parameters: None
@@ -54,7 +59,7 @@ class QuantitySlider extends OptionSlider {
     updateSliderX(){
         let currentValue = this.accessValue();
         let currentPercentage = (currentValue - this.minValue) / (this.maxValue - this.minValue);
-        let pxToMove = this.width - this.sliderWidth;
+        let pxToMove = this.getWidth() - this.sliderWidth;
         this.sliderX = this.getX() + Math.round(currentPercentage * pxToMove);
     }
 
@@ -70,12 +75,11 @@ class QuantitySlider extends OptionSlider {
         // Update the slider position
         let sliderOffset = GC.getGMouseX() - this.getX() - this.sliderWidth/2;
         // Either set value to extremes or in between
-        let calculatedValue = sliderOffset / (this.width - this.sliderWidth) * (this.maxValue - this.minValue) + this.minValue;
+        let calculatedValue = sliderOffset / (this.getWidth() - this.sliderWidth) * (this.maxValue - this.minValue) + this.minValue;
         if (!this.usingFloat){
             calculatedValue = Math.floor(calculatedValue);
         }
         let newValue = Math.min(Math.max(calculatedValue, this.minValue), this.maxValue);
         this.modifyValue(newValue);
-        this.updateSliderX();
     }
 }

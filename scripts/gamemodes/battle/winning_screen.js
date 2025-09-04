@@ -5,6 +5,12 @@ class WinningScreen {
         this.textColour = undefined;
     }
 
+    reset(){
+        this.active = false;
+        this.text = undefined;
+        this.textColour = undefined;
+    }
+
     setUp(text, textColourCode){
         this.text = text;
         this.textColour = Colour.fromCode(textColourCode);

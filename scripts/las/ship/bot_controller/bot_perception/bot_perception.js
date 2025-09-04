@@ -1,6 +1,6 @@
 // If using NodeJS then do imports
 if (typeof window === "undefined"){
-    copyObject = require("../../../general/helper_functions.js").copyObject;
+    objectHasKey = require("../../../../general/helper_functions.js").objectHasKey;
 }
 /*
     Class Name: BotPerception

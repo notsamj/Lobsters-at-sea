@@ -23,7 +23,8 @@ let gameProperties = {
     "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
     "winning_screen_settings": MD["winning_screen_settings"],
     "ship_colours": MD["ship_colours"],
-    "colour_to_colour_code": MD["colour_to_colour_code"]
+    "colour_to_colour_code": MD["colour_to_colour_code"],
+    "bot_settings": MD["bot_settings"]
 }
 
 // Create container

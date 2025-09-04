@@ -64,6 +64,21 @@ class SoundManager {
         this.findSound(soundName).play(xOffset, yOffset);
     }
 
+    queueUp(soundName, xOffset, yOffset){
+        this.soundQueue.push({"sound_name": soundName, "x_offset": xOffset, "y_offset": yOffset});
+    }
+
+    clearSoundQueue(){
+        this.soundQueue.clear();
+    }
+
+    playSounds(){
+        for (let [soundObj, soundObjIndex] of this.soundQueue){
+            this.play(soundObj["sound_name"], soundObj["x_offset"], soundObj["y_offset"]);
+        }
+        this.soundQueue.clear();
+    }
+
     /*
         Method Name: loadSounds
         Method Parameters:

@@ -15,6 +15,10 @@ const MD = {
         "max_ships": undefined // calculated
     },
 
+    "bot_settings": {
+        "max_expected_hit_distance": 64, // Distance expected from target to hit. If less than distance expected -> shoot
+    },
+
     "ship_colours": [
         "white",
         "red",
@@ -239,8 +243,118 @@ const MD = {
             "max_velocity": 30,
             "min_size": 20,
             "max_size": 30
+        },
+    },
+    "saved_models": [
+        {
+            "model_name": "perfect",
+            "ship_json": {
+                "health": 75,
+                "starting_x_pos": null,
+                "starting_y_pos": null,
+                "starting_speed": 0,
+                "starting_orientation_rad": 0,
+                "sail_strength": 1,
+                "ship_model": "generic_ship",
+                "ship_colour": "white",
+                "game_instance": null,
+                "id": "bot1"
+            },
+            "bot_controller_json": {
+                "ship": null,
+                "reaction_time_ticks": 0,
+                "update_sail_ticks": 40,
+                "update_enemy_ticks": 40,
+                "update_heading_ticks": 0,
+                "offsets": {
+                    "my_orientation_deg": [0,0],
+                    "my_speed": [0,0],
+                    "my_x": [0,0],
+                    "my_y": [0,0],
+                    "my_x_v": [0,0],
+                    "my_y_v": [0,0],
+                    "wind_direction_deg": [0,0],
+                    "wind_direction_magnitude": [0,0],
+                    "enemy_x": [0,0],
+                    "enemy_y": [0,0],
+                    "enemy_x_v": [0,0],
+                    "enemy_y_v": [0,0]
+                }
+            }
+        },
+        {
+            "model_name": "near-perfect", // 11% winrate against perfect
+            "ship_json": {
+                "health": 50,
+                "starting_x_pos": null,
+                "starting_y_pos": null,
+                "starting_speed": 0,
+                "starting_orientation_rad": 0,
+                "sail_strength": 1,
+                "ship_model": "generic_ship",
+                "ship_colour": "white",
+                "game_instance": null,
+                "id": "bot2"
+            },
+            "bot_controller_json": {
+                "ship": null,
+                "reaction_time_ticks": 9, // 4 -> 100ms, 15 -> 375ms
+                "update_sail_ticks": 40,
+                "update_enemy_ticks": 40,
+                "update_heading_ticks": 40,
+                "offsets": {
+                    "my_orientation_deg": [0,5],
+                    "my_speed": [20,40],
+                    "my_x": [100,200],
+                    "my_y": [100,200],
+                    "my_x_v": [10,100],
+                    "my_y_v": [10,100],
+                    "wind_direction_deg": [0,45],
+                    "wind_direction_magnitude": [3,10],
+                    "enemy_x": [200,400],
+                    "enemy_y": [200,400],
+                    "enemy_x_v": [25,100],
+                    "enemy_y_v": [25,100]
+                }
+            }
+        },
+        {
+            "model_name": "number_3", // 30% winrate against near-perfect
+            "ship_json": {
+                "health": 50,
+                "starting_x_pos": null,
+                "starting_y_pos": null,
+                "starting_speed": 0,
+                "starting_orientation_rad": 0,
+                "sail_strength": 1,
+                "ship_model": "generic_ship",
+                "ship_colour": "white",
+                "game_instance": null,
+                "id": "bot3"
+            },
+            "bot_controller_json": {
+                "ship": null,
+                "reaction_time_ticks": 12, // 4 -> 100ms, 15 -> 375ms
+                "update_sail_ticks": 40,
+                "update_enemy_ticks": 40,
+                "update_heading_ticks": 40,
+                "offsets": {
+                    "my_orientation_deg": [0,20],
+                    "my_speed": [30,40],
+                    "my_x": [150,400],
+                    "my_y": [150,400],
+                    "my_x_v": [50,100],
+                    "my_y_v": [50,100],
+                    "wind_direction_deg": [0,60],
+                    "wind_direction_magnitude": [5,10],
+                    "enemy_x": [400,600],
+                    "enemy_y": [400,600],
+                    "enemy_x_v": [50,100],
+                    "enemy_y_v": [50,100]
+                }
+            }
         }
-    }
+    ]
 }
 
 // Perform data calculations

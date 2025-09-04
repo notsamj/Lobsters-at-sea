@@ -33,7 +33,9 @@ module.exports = {
     "ship_air_affectedness_coefficient": MD["game_properties"]["ship_air_affectedness_coefficient"],
     "winning_screen_settings": MD["winning_screen_settings"],
     "ship_colours": MD["ship_colours"],
+    "bot_settings": MD["bot_settings"],
     "game_recorder_settings": gameRecordingSettings,
+    "saved_models": MD["saved_models"],
     "default_folder_settings": {
         "default_folders": [
             {   

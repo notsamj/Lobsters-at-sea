@@ -3,6 +3,7 @@ const Ship = require("../../scripts/las/ship/ship.js").Ship;
 const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
 const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
 const GameRecorder = require("./game_recorder.js").GameRecorder;
+const BotShipController = require("../../scripts/las/ship/bot_controller/bot_ship_controller.js").BotShipController;
 
 class LasServerGame extends LasGame {
     constructor(gameProperties, server){
@@ -17,6 +18,7 @@ class LasServerGame extends LasGame {
         this.tickGapMS = 1000 / gameProperties["tick_rate"]; // float likely
         this.clients = new NotSamLinkedList();
         this.clientIDToShipID = {};
+        this.botShipControllers = [];
     }
 
     async start(clientData){
@@ -26,33 +28,23 @@ class LasServerGame extends LasGame {
         this.running = true;
         this.gameStartTime = Date.now();
         // Just testing
-        let tempShipJSON = {
-            "starting_x_pos": 0,
-            "starting_y_pos": 0,
-            "starting_speed": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 1,
-            "ship_model": "generic_ship",
-            "ship_colour": this.pickShipColour(),
-            "game_instance": this,
-            "id": this.getIDManager().generateNewID(),
-            "health": 10
-        }
-        this.ships.push(new Ship(tempShipJSON));
 
-        let tempShipJSON2 = {
-            "starting_x_pos": 350,
-            "starting_y_pos": 0,
-            "starting_speed": 0,
-            "starting_orientation_rad": toRadians(90),
-            "sail_strength": 1,
-            "ship_model": "generic_ship",
-            "ship_colour": this.pickShipColour(),
-            "game_instance": this,
-            "id": this.getIDManager().generateNewID(),
-            "health": 10
-        }
-        this.ships.push(new Ship(tempShipJSON2));
+        let botControllerModel = copyObject(this.getGameProperties()["saved_models"][0]);
+        // Set id
+        botControllerModel["id"] = this.getIDManager().generateNewID();
+
+        let tempShipJSON = botControllerModel["ship_json"];
+        tempShipJSON["game_instance"] = this;
+
+        let tempShip = new Ship(tempShipJSON);
+        this.addShip(tempShip);
+
+
+        let botController2JSON = botControllerModel["bot_controller_json"];
+        botController2JSON["ship"] = tempShip;
+
+        let botController = new BotShipController(botController2JSON);
+        this.addBotShipController(botController)
 
         // Add the clients
         this.clients.addAllFromLL(clientList);
@@ -63,6 +55,11 @@ class LasServerGame extends LasGame {
         // Send opening message
         this.sendOpeningMessage(clientsArePlayers);
     }
+
+    addBotShipController(botShipController){
+        this.botShipControllers.push(botShipController);
+    }
+
 
     sendOpeningMessage(clientsArePlayers){
         let openingMessageJSON = {
@@ -84,14 +81,14 @@ class LasServerGame extends LasGame {
                 let newShipJSON = {
                     "starting_x_pos": 450,
                     "starting_y_pos": 0,
-                    "starting_speed": 0,
+                    "starting_speed": 100,
                     "starting_orientation_rad": toRadians(90),
                     "sail_strength": 1,
                     "ship_model": "generic_ship",
                     "ship_colour": this.pickShipColour(),
                     "game_instance": this,
                     "id": newShipID,
-                    "health": 10
+                    "health": 50
                 }
                 this.ships.push(new Ship(newShipJSON));
 
@@ -148,6 +145,12 @@ class LasServerGame extends LasGame {
         }
     }
 
+    tickBotControllers(){
+        for (let botShipController of this.botShipControllers){
+            botShipController.tick();
+        }
+    }
+
     reset(){
         this.running = false;
         this.clients.clear();
@@ -161,6 +164,7 @@ class LasServerGame extends LasGame {
         this.tickCount = 0;
         this.gameStartTime = undefined;
         this.clientIDToShipID = {};
+        this.botShipControllers = [];
     }
 
     end(){
@@ -384,6 +388,9 @@ class LasServerGame extends LasGame {
             // Maintenace ticks
             this.tickShips();
 
+            // Tick bot controllers
+            this.tickBotControllers();
+
             // TODO: Update ship orientations, power based on decisions
             this.updateShipOrientationAndSailPower();
 
@@ -400,6 +407,9 @@ class LasServerGame extends LasGame {
             this.handleCannonBallCollisionsAndDeaths();
             this.handleNewCannonShots();
 
+            // Take input from the user
+            this.updateBotShipDecisions();
+
             // Update wind
             this.wind.tickUpdate();
 
@@ -411,6 +421,13 @@ class LasServerGame extends LasGame {
 
             // Up the tick count
             this.incrementTickCount();
+        }
+    }
+
+    updateBotShipDecisions(){
+        // Bot ship controllers
+        for (let botShipController of this.botShipControllers){
+            botShipController.getShip().updateFromPilot(botShipController.getDecisionJSON());
         }
     }
 
