@@ -53,10 +53,6 @@ class VisualEffect {
         let myRightX = myXScreenCoordINT + zoomedRectangleWidth-1;
         let myBottomY = myYScreenCoordINT + zoomedRectangleHeight-1;
 
-        /*console.log(myRightX, myLeftX, myBottomY, myTopY)
-        if (isNaN(myRightX)){
-            debugger;
-        }*/
         // If not on screen then return
         if (myRightX < 0){ return; }
         if (myLeftX >= screenWidth){ return; }
@@ -114,8 +110,6 @@ class VisualEffect {
         let myRightX = myXScreenCoordINT + circleDiameter/2;
         let myBottomY = myYScreenCoordINT + circleDiameter/2;
 
-        //console.log(myLeftX, myTopY, myRightX, myBottomY)
-        //debugger;
         // If not on screen then return
         if (myRightX < 0){ return; }
         if (myLeftX >= screenWidth){ return; }

@@ -16,8 +16,8 @@ class OptionSlider extends Component {
                 Height of the option slider
             textHeight:
                 Height of the text (px) (int)
-            sliderWidthPX:
-                Width of a slider
+            cursorWidthPX:
+                Width of a cursor
             getValueFunction:
                 Function to call to get the value
             setValueFunction:
@@ -31,14 +31,14 @@ class OptionSlider extends Component {
         Method Description: Constructor
         Method Return: Constructor
     */
-    constructor(x, y, width, height, textHeight, sliderWidthPX, getValueFunction, setValueFunction, backgroundBarColourCode="#000000", sliderColourCode="#ffffff", textColourCode="#000000"){
+    constructor(x, y, width, height, textHeight, cursorWidthPX, getValueFunction, setValueFunction, backgroundBarColourCode="#000000", sliderColourCode="#ffffff", textColourCode="#000000"){
         super();
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.textHeight = textHeight;
-        this.sliderWidth = sliderWidthPX;
+        this.cursorWidth = cursorWidthPX;
         this.getValueFunction = getValueFunction;
         this.setValueFunction = setValueFunction;
         this.sliding = false;
@@ -114,7 +114,7 @@ class OptionSlider extends Component {
         noStrokeRectangle(this.backgroundBarColour, this.getX(), screenYForRects, this.getWidth(), this.height);
     
         // Slider
-        noStrokeRectangle(this.sliderColour, this.sliderX, screenYForRects, this.sliderWidth, this.height);
+        noStrokeRectangle(this.sliderColour, this.sliderX, screenYForRects, this.cursorWidth, this.height);
 
         // Text
         let value = this.accessValue();

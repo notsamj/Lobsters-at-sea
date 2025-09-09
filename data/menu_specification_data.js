@@ -13,6 +13,139 @@ const MSD = {
         "info_text": "Made by notsamj.\nPress 'H' at any time for help!",
         "info_color_code": "#000000"
     },
+    "challenge_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 25,
+            "x_size": 100,
+            "y_size": 50
+        },
+        "menu_items_start_x": 200,
+        "menu_items_start_y": 150,
+        "character_image": {
+            "width": 256,
+            "height": 256,
+            "selection": [
+                "generic_ship_left_white",
+                "freecam"
+            ]
+        },
+        "toggle_bot_button": {
+            "y_offset": 25,
+            "x_size": 128,
+            "y_size": 64,
+            "manual_text": "Manual Sails",
+            "automatic_text": "Auto Sails",
+            "manual_colour_code": "#931cd4",
+            "automatic_colour_code": "#019191",
+            "heal_mode_text": "Heal Mode",
+            "health_pool_mode_text": "Health Pool Mode",
+            "heal_mode_colour_code": "#03fc30",
+            "health_pool_mode_colour_code": "#de1432",
+            "text_colour_code": "#ffffff"
+        },
+        "starting_level_text": {
+            "text": "Starting level",
+            "text_colour_code": "#ffffff",
+            "y_offset": 15,
+            "width": 260,
+            "height": 30
+        },
+        "starting_level_slider": {
+            "text_colour_code": "#ffffff",
+            "slider_colour_code": "#ffffff",
+            "background_colour_code": "#eb4034",
+            "slider_width": 128,
+            "slider_height": 50,
+            "text_height": 60,
+            "y_offset": 10,
+            "slider_cursor_width": 20
+        },
+        "start_game_button": {
+            "text": "START",
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "height": 130,
+            "width": 500,
+            "y_pos_from_bottom": 0
+        }
+    },
+    "skirmish_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 25,
+            "x_size": 100,
+            "y_size": 50
+        },
+        "menu_items_start_x": 200,
+        "menu_items_start_y": 50,
+        "character_image": {
+            "width": 128,
+            "height": 128,
+            "selection": [
+                "generic_ship_left_white",
+                "freecam"
+            ]
+        },
+        "toggle_bot_button": {
+            "y_offset": 25,
+            "x_size": 128,
+            "y_size": 64,
+            "manual_text": "Manual Sails",
+            "automatic_text": "Auto Sails",
+            "manual_colour_code": "#931cd4",
+            "automatic_colour_code": "#019191",
+            "text_colour_code": "#ffffff"
+        },
+        "bot_ship_count_text": {
+            "text": "Bot ship count",
+            "text_colour_code": "#ffffff",
+            "y_offset": 15,
+            "width": 260,
+            "height": 30
+        },
+        "bot_ship_count_slider": {
+            "text_colour_code": "#ffffff",
+            "slider_colour_code": "#ffffff",
+            "background_colour_code": "#eb4034",
+            "slider_width": 128,
+            "slider_height": 50,
+            "text_height": 60,
+            "y_offset": 10,
+            "slider_cursor_width": 20
+        },
+        "bot_ship_model_text": {
+            "text": "Bot ship model",
+            "text_colour_code": "#ffffff",
+            "y_offset": 15,
+            "width": 260,
+            "height": 30
+        },
+        "bot_ship_model_slider": {
+            "text_colour_code": "#ffffff",
+            "slider_colour_code": "#ffffff",
+            "background_colour_code": "#eb4034",
+            "slider_width": 128,
+            "slider_height": 50,
+            "text_height": 60,
+            "y_offset": 10,
+            "slider_cursor_width": 20
+        },
+        "start_game_button": {
+            "text": "START",
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "height": 130,
+            "width": 500,
+            "y_pos_from_bottom": 0
+        }
+    },
     "battle_menu": {
         "back_button": {
             "colour_code": "#3bc44b",
@@ -105,6 +238,48 @@ const MSD = {
             "y_offset": 0,
             "text_colour_code": "#e6f5f4"
         }
+    },
+    "gamemode_viewer_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 50,
+            "x_size": 200,
+            "y_size": 76
+        },
+        "scrollable_display": {
+            "scroll_bar": {
+                "x_offset": 150,
+                "y_offset": 150,
+                "width": 40,
+                "min_height": 400,
+                "slider_height": 40,
+                "background_colour_code": "#ffffff",
+                "slider_colour_code": "#ff00ff",
+                "wheel_multiplier": 0.25
+            },
+            "entry": {
+                "y_size": 250,
+                "y_offset": 150,
+                "x_offset": 150,
+                "x_size": 900,
+                "display_name_x_size": 400,
+                "display_name_y_size": 150,
+                "display_name_text_colour_code": "#ffffff",
+                "go_to_menu_button_text": "View",
+                "go_to_menu_button_x_size": 400,
+                "go_to_menu_button_y_size": 100,
+                "go_to_menu_button_background_colour_code": "#3bc44b",
+                "go_to_menu_button_text_colour_code": "#ffffff"
+            }
+        },
+        "gamemodes": [
+            { "display_name": "Challenge", "menu_name": "challenge_menu" },
+            { "display_name": "Skirmish", "menu_name": "skirmish_menu" },
+            { "display_name": "Multiplayer Battle", "menu_name": "battle_menu" }
+        ]
     },
     "replay_menu": {
         "back_button": {

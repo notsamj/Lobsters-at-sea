@@ -21,39 +21,69 @@ class LasServerGame extends LasGame {
         this.botShipControllers = [];
     }
 
-    async start(clientData){
-        let clientList = clientData["client_data"];
-        let clientsArePlayers = clientData["client_role"] === 1;
+    async start(setupData){
+        let clientList = setupData["client_data"];
+        let clientsArePlayers = setupData["expected_players_data"]["player_role"] === 1;
         // Set running
         this.running = true;
         this.gameStartTime = Date.now();
-        // Just testing
-
-        let botControllerModel = copyObject(this.getGameProperties()["saved_models"][0]);
-        // Set id
-        botControllerModel["id"] = this.getIDManager().generateNewID();
-
-        let tempShipJSON = botControllerModel["ship_json"];
-        tempShipJSON["game_instance"] = this;
-
-        let tempShip = new Ship(tempShipJSON);
-        this.addShip(tempShip);
-
-
-        let botController2JSON = botControllerModel["bot_controller_json"];
-        botController2JSON["ship"] = tempShip;
-
-        let botController = new BotShipController(botController2JSON);
-        this.addBotShipController(botController)
 
         // Add the clients
         this.clients.addAllFromLL(clientList);
+
+        // Add bots
+        this.addBots(setupData["bot_data"], setupData["gamemode_data"]);
 
         // Clear client pending decisions
         await this.clearAllClientPendingDecisions();
 
         // Send opening message
-        this.sendOpeningMessage(clientsArePlayers);
+        this.spawnClientsAndSendOpeningMessage(clientsArePlayers, setupData["gamemode_data"]);
+    }
+
+    addBots(botData, gamemodeData){
+        // Find bot model
+        let botModel = undefined;
+
+        for (let model of this.getGameProperties()["saved_models"]){
+            // If the model is found
+            if (model["model_name"] === botData["bot_model_name"]){
+                botModel = model;
+                break;
+            }
+        }
+
+        // If not found -> Error
+        if (botModel === undefined){
+            throw new Error("Failed to find bot model: " + botModel + ".");
+        }
+
+
+        // Add bots
+        for (let i = 0; i < botData["bot_count"]; i++){
+            let botModelCopy = copyObject(botModel);
+
+            let botShipJSON = botModelCopy["ship_json"];
+            botShipJSON["id"] = this.getIDManager().generateNewID();
+            botShipJSON["game_instance"] = this;
+
+            // Set varied settings
+            botShipJSON["starting_x_pos"] = randomFloatBetween(-1 * gamemodeData["spread"]/2, gamemodeData["spread"]/2);
+            botShipJSON["starting_y_pos"] = randomFloatBetween(-1 * gamemodeData["spread"]/2, gamemodeData["spread"]/2);
+            botShipJSON["starting_speed"] = 0;
+            botShipJSON["starting_orientation_rad"] = toRadians(randomFloatBetween(0, 360));
+            botShipJSON["starting_sail_strength"] = randomFloatBetween(0, 1);
+            botShipJSON["ship_colour"] = this.pickShipColour();
+
+            let botShip = new Ship(botShipJSON);
+            this.addShip(botShip);
+
+            let botControllerJSON = botModelCopy["bot_controller_json"];
+            botControllerJSON["ship"] = botShip;
+            let botShipController = new BotShipController(botControllerJSON);
+            this.addBotShipController(botShipController);
+        }
+    
     }
 
     addBotShipController(botShipController){
@@ -61,7 +91,7 @@ class LasServerGame extends LasGame {
     }
 
 
-    sendOpeningMessage(clientsArePlayers){
+    spawnClientsAndSendOpeningMessage(clientsArePlayers, gamemodeData){
         let openingMessageJSON = {
             "subject": "game_start",
             "game_details": {
@@ -70,30 +100,27 @@ class LasServerGame extends LasGame {
                 "clients_are_players": clientsArePlayers,
                 "ships": [],
             }
-            // TODO
         }
 
         // If clients are playing, make a ship for each
         let clientShipIDs = {};
         if (clientsArePlayers){
             for (let [client, clientIndex] of this.clients){
-                let newShipID = this.getIDManager().generateNewID();
-                let newShipJSON = {
-                    "starting_x_pos": 450,
-                    "starting_y_pos": 0,
-                    "starting_speed": 100,
-                    "starting_orientation_rad": toRadians(90),
-                    "sail_strength": 1,
-                    "ship_model": "generic_ship",
-                    "ship_colour": this.pickShipColour(),
-                    "game_instance": this,
-                    "id": newShipID,
-                    "health": 50
-                }
+                let playerModel = this.getGameProperties()["saved_models"][0]; // Best model
+                let newShipJSON = copyObject(playerModel["ship_json"]); 
+                newShipJSON["id"] = this.getIDManager().generateNewID();
+                newShipJSON["starting_x_pos"] = randomFloatBetween(-1 * gamemodeData["spread"]/2, gamemodeData["spread"]/2);
+                newShipJSON["starting_y_pos"] = randomFloatBetween(-1 * gamemodeData["spread"]/2, gamemodeData["spread"]/2);
+                newShipJSON["starting_speed"] = 0;
+                newShipJSON["starting_orientation_rad"] = toRadians(randomFloatBetween(0, 360));
+                newShipJSON["starting_sail_strength"] = 1;
+                newShipJSON["ship_colour"] = this.pickShipColour();
+                newShipJSON["game_instance"] = this;
+
                 this.ships.push(new Ship(newShipJSON));
 
                 // Store ID of ship
-                clientShipIDs[clientIndex] = newShipID;
+                clientShipIDs[clientIndex] = newShipJSON["id"];
             }
         }
 
@@ -107,7 +134,7 @@ class LasServerGame extends LasGame {
                     "starting_y_pos": ship.getTickY(),
                     "starting_speed": ship.getSpeed(),
                     "starting_orientation_rad": ship.getTickOrientation(),
-                    "sail_strength": ship.getTickSailStrength(),
+                    "starting_sail_strength": ship.getTickSailStrength(),
                     "ship_model": ship.getShipModel(),
                     "ship_colour": ship.getColour(),
                     "id": ship.getID(),
@@ -147,6 +174,7 @@ class LasServerGame extends LasGame {
 
     tickBotControllers(){
         for (let botShipController of this.botShipControllers){
+            if (botShipController.getShip().isDead()){ continue; }
             botShipController.tick();
         }
     }
@@ -378,13 +406,15 @@ class LasServerGame extends LasGame {
 
         // If still running after check
         if (this.isRunning()){
+            // Clean tick timeline
+            this.tickTimeline.reset();
+            
             // Update from received pending decisions
             await this.takeAllUserPendingDecisions();
 
             // Record
             this.recordShipDecisions();
 
-            //this.getWind().print();
             // Maintenace ticks
             this.tickShips();
 
@@ -407,6 +437,9 @@ class LasServerGame extends LasGame {
             this.handleCannonBallCollisionsAndDeaths();
             this.handleNewCannonShots();
 
+            // Process kills
+            this.processKills();
+
             // Take input from the user
             this.updateBotShipDecisions();
 
@@ -416,11 +449,23 @@ class LasServerGame extends LasGame {
             // Output to clients
             this.sendClientsTickAndPositionData();
 
-            // Clean tick timeline
-            this.tickTimeline.reset();
-
             // Up the tick count
             this.incrementTickCount();
+        }
+    }
+
+    processKills(){
+        let shipSinkings = this.getTickTimeline().getEventsOfType("ship_sunk");
+
+        let vampireHealthAmount = this.getGameProperties()["saved_models"][0]["health"];
+
+        // Apply vampire effect
+        for (let [shipSinkingObj, shipSinkingIndex] of shipSinkings){
+            let killerShip = this.getShipByID(shipSinkingObj["shooter_ship_id"]);
+
+            // Doesn't apply if killer is dead
+            if (killerShip.isDead()){ continue; }
+            killerShip.setHealth(killerShip.getHealth() + vampireHealthAmount);
         }
     }
 
@@ -460,19 +505,21 @@ class LasServerGame extends LasGame {
 
     moveShips(){
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.moveOneTick();
         }
     }
 
     allowShipsToShoot(){
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.checkShoot();
         }
     }
 
     updateShipOrientationAndSailPower(){
-        
         for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
             ship.updateShipOrientationAndSailPower();
         }
     }

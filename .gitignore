@@ -7,3 +7,4 @@ server/run_server.bat
 /temporary_backup_code
 /sounds/sound_originals
 /sounds
+run_http_server.bat

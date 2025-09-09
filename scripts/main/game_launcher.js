@@ -24,7 +24,8 @@ let gameProperties = {
     "winning_screen_settings": MD["winning_screen_settings"],
     "ship_colours": MD["ship_colours"],
     "colour_to_colour_code": MD["colour_to_colour_code"],
-    "bot_settings": MD["bot_settings"]
+    "bot_settings": MD["bot_settings"],
+    "challenge": MD["challenge"]
 }
 
 // Create container
@@ -57,6 +58,9 @@ function registerMenus(){
     GC.getMenuManager().registerMenu(new ReplayMenu());
     GC.getMenuManager().registerMenu(new SettingsMenu());
     GC.getMenuManager().registerMenu(new SoundMenu());
+    GC.getMenuManager().registerMenu(new GamemodeViewerMenu());
+    GC.getMenuManager().registerMenu(new ChallengeMenu());
+    GC.getMenuManager().registerMenu(new SkirmishMenu());
 }
 
 function stop(){

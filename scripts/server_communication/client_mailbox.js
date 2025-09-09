@@ -73,7 +73,6 @@ class ClientMailbox {
     }
 
     deliver(dataJSON, folderName="general"){
-        //console.log("Delvering", JSON.stringify(dataJSON))
         let folderObj = this.getCreateFolder(folderName);
         folderObj["list"].push({"read": false, "data_json": dataJSON});
 

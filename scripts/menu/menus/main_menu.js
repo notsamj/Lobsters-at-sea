@@ -38,21 +38,22 @@ class MainMenu extends Menu {
         let logoY = (innerHeight) => { return innerHeight; }
         this.components.push(new StaticImage(GC.getImage("logo"), logoX, logoY, logoSizeX, logoSizeY));
 
-        // Playground
-        let playgroundButtonY = (innerHeight) => { return innerHeight - gapSize; };
-        this.components.push(new RectangleButton("Playground", buttonColorCode, buttonTextColorCode, buttonX, playgroundButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
-            GC.newGame(LasLocalGame, Playground);
+        // challenge
+        let challengeButtonY = (innerHeight) => { return innerHeight - gapSize; };
+        this.components.push(new RectangleButton("Challenge", buttonColorCode, buttonTextColorCode, buttonX, challengeButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
+            GC.newGame(LasLocalGame, Challenge);
+            GC.getActiveGamemode().startUp();
             GC.getMenuManager().switchTo("game");
         }));
 
-        // Battle
-        let battleButtonY = (innerHeight) => { return playgroundButtonY(innerHeight) - buttonSizeY - gapSize; }
-        this.components.push(new RectangleButton("Battle", buttonColorCode, buttonTextColorCode, buttonX, battleButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
-            GC.getMenuManager().switchTo("battle_menu");
+        // Gamemode viewer
+        let gamemodeViewerY = (innerHeight) => { return challengeButtonY(innerHeight) - buttonSizeY - gapSize; }
+        this.components.push(new RectangleButton("Gamemodes", buttonColorCode, buttonTextColorCode, buttonX, gamemodeViewerY, buttonSizeX, buttonSizeY, (menuInstance) => {
+            GC.getMenuManager().switchTo("gamemode_viewer_menu");
         }));
 
         // Replays
-        let replayButtonY = (innerHeight) => { return battleButtonY(innerHeight) - buttonSizeY - gapSize; }
+        let replayButtonY = (innerHeight) => { return gamemodeViewerY(innerHeight) - buttonSizeY - gapSize; }
         this.components.push(new RectangleButton("Replays", buttonColorCode, buttonTextColorCode, buttonX, replayButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
             // TODO: Go to Replays menu
             GC.getMenuManager().switchTo("replay_menu");

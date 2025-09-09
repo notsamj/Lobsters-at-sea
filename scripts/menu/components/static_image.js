@@ -94,7 +94,7 @@ class StaticImage extends Component {
         Method Return: int
     */
     getWidth(){
-        return this.image.width;
+        return this.getImage().width;
     }
 
     /*
@@ -104,7 +104,7 @@ class StaticImage extends Component {
         Method Return: int
     */
     getHeight(){
-        return this.image.height;
+        return this.getImage().height;
     }
 
     /*

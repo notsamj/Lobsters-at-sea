@@ -16,7 +16,9 @@ const MD = {
     },
 
     "bot_settings": {
-        "max_expected_hit_distance": 64, // Distance expected from target to hit. If less than distance expected -> shoot
+        "start_max_expected_hit_distance": 84, // Distance expected from target to hit. If less than distance expected -> shoot
+        "max_expected_hit_distance": 250,
+        "constant_max_expected_hit_distance": 1500
     },
 
     "ship_colours": [
@@ -29,6 +31,11 @@ const MD = {
         "black",
         "purple"
     ],
+
+    "mobile_settings": {
+        "max_tap_time_ms": 200,
+        "max_tap_time_ticks": undefined // calculated
+    },
 
     "colour_to_colour_code": {
         "white": "#ffffff",
@@ -108,10 +115,10 @@ const MD = {
     },
 
     "wind_settings": {
-        "wind_min_magnitude": 3,
-        "wind_max_magnitude": 40,
-        "wind_min_direction_movement_ms": 40000, // 40s
-        "wind_max_direction_movement_ms": 120000, // 120s
+        "wind_min_magnitude": 30,
+        "wind_max_magnitude": 50,
+        "wind_min_direction_movement_ms": 25000, // 40s
+        "wind_max_direction_movement_ms": 70000, // 120s
         "wind_min_magnitude_movement_ms": 15000, // 15s
         "wind_max_magnitude_movement_ms": 40000, // 40s
         "wind_min_direction_movement_ticks": undefined, // caculated
@@ -180,18 +187,18 @@ const MD = {
     },
 
     "cannon_settings": {
-        "reload_ms": 1000, // 1s for now
-        "shot_speed": 500,
+        "reload_ms": 2000, // 1s for now
+        "shot_speed": 650,
         "reload_ticks": null // calculated
     },
 
     "cannon_ball_settings": {
         "image_width": 32,
         "image_height": 32,
-        "cannon_ball_height": 8,
-        "cannon_ball_width": 8,
+        "cannon_ball_height": 16,
+        "cannon_ball_width": 16,
         "ticks_until_hit_water": null, // calculated
-        "ms_until_hit_water": 1500
+        "ms_until_hit_water": 1200
     },
 
     "visual_effect_settings": {
@@ -247,14 +254,14 @@ const MD = {
     },
     "saved_models": [
         {
-            "model_name": "perfect",
+            "model_name": "The Master",
             "ship_json": {
-                "health": 75,
+                "health": 50,
                 "starting_x_pos": null,
                 "starting_y_pos": null,
                 "starting_speed": 0,
                 "starting_orientation_rad": 0,
-                "sail_strength": 1,
+                "starting_sail_strength": 1,
                 "ship_model": "generic_ship",
                 "ship_colour": "white",
                 "game_instance": null,
@@ -265,7 +272,7 @@ const MD = {
                 "reaction_time_ticks": 0,
                 "update_sail_ticks": 40,
                 "update_enemy_ticks": 40,
-                "update_heading_ticks": 0,
+                "update_heading_ticks": 10,
                 "offsets": {
                     "my_orientation_deg": [0,0],
                     "my_speed": [0,0],
@@ -283,14 +290,14 @@ const MD = {
             }
         },
         {
-            "model_name": "near-perfect", // 11% winrate against perfect
+            "model_name": "The Feared Lobster Captain", // 11% winrate against perfect
             "ship_json": {
                 "health": 50,
                 "starting_x_pos": null,
                 "starting_y_pos": null,
                 "starting_speed": 0,
                 "starting_orientation_rad": 0,
-                "sail_strength": 1,
+                "starting_sail_strength": 1,
                 "ship_model": "generic_ship",
                 "ship_colour": "white",
                 "game_instance": null,
@@ -298,35 +305,35 @@ const MD = {
             },
             "bot_controller_json": {
                 "ship": null,
-                "reaction_time_ticks": 9, // 4 -> 100ms, 15 -> 375ms
+                "reaction_time_ticks": 5, // 4 -> 100ms, 15 -> 375ms
                 "update_sail_ticks": 40,
                 "update_enemy_ticks": 40,
                 "update_heading_ticks": 40,
                 "offsets": {
-                    "my_orientation_deg": [0,5],
-                    "my_speed": [20,40],
-                    "my_x": [100,200],
-                    "my_y": [100,200],
-                    "my_x_v": [10,100],
-                    "my_y_v": [10,100],
-                    "wind_direction_deg": [0,45],
-                    "wind_direction_magnitude": [3,10],
-                    "enemy_x": [200,400],
-                    "enemy_y": [200,400],
-                    "enemy_x_v": [25,100],
-                    "enemy_y_v": [25,100]
+                    "my_orientation_deg": [0,2],
+                    "my_speed": [1,3],
+                    "my_x": [5,10],
+                    "my_y": [5,10],
+                    "my_x_v": [2,5],
+                    "my_y_v": [2,5],
+                    "wind_direction_deg": [0,5],
+                    "wind_direction_magnitude": [3,5],
+                    "enemy_x": [5,10],
+                    "enemy_y": [5,10],
+                    "enemy_x_v": [2,5],
+                    "enemy_y_v": [2,5]
                 }
             }
         },
         {
-            "model_name": "number_3", // 30% winrate against near-perfect
+            "model_name": "The Journeyman Lobster", // 30% winrate against near-perfect
             "ship_json": {
                 "health": 50,
                 "starting_x_pos": null,
                 "starting_y_pos": null,
                 "starting_speed": 0,
                 "starting_orientation_rad": 0,
-                "sail_strength": 1,
+                "starting_sail_strength": 1,
                 "ship_model": "generic_ship",
                 "ship_colour": "white",
                 "game_instance": null,
@@ -334,27 +341,123 @@ const MD = {
             },
             "bot_controller_json": {
                 "ship": null,
-                "reaction_time_ticks": 12, // 4 -> 100ms, 15 -> 375ms
-                "update_sail_ticks": 40,
-                "update_enemy_ticks": 40,
-                "update_heading_ticks": 40,
+                "reaction_time_ticks": 10, // 4 -> 100ms, 15 -> 375ms
+                "update_sail_ticks": 80,
+                "update_enemy_ticks": 80,
+                "update_heading_ticks": 60,
                 "offsets": {
-                    "my_orientation_deg": [0,20],
-                    "my_speed": [30,40],
-                    "my_x": [150,400],
-                    "my_y": [150,400],
-                    "my_x_v": [50,100],
-                    "my_y_v": [50,100],
-                    "wind_direction_deg": [0,60],
-                    "wind_direction_magnitude": [5,10],
-                    "enemy_x": [400,600],
-                    "enemy_y": [400,600],
-                    "enemy_x_v": [50,100],
-                    "enemy_y_v": [50,100]
+                    "my_orientation_deg": [0,5],
+                    "my_speed": [2,6],
+                    "my_x": [40,60],
+                    "my_y": [40,60],
+                    "my_x_v": [7,10],
+                    "my_y_v": [7,10],
+                    "wind_direction_deg": [4,7],
+                    "wind_direction_magnitude": [5,7],
+                    "enemy_x": [25,40],
+                    "enemy_y": [25,40],
+                    "enemy_x_v": [7,10],
+                    "enemy_y_v": [7,10]
+                }
+            }
+        },
+        {
+            "model_name": "The Shrimp",
+            "ship_json": {
+                "health": 50,
+                "starting_x_pos": null,
+                "starting_y_pos": null,
+                "starting_speed": 0,
+                "starting_orientation_rad": 0,
+                "starting_sail_strength": 1,
+                "ship_model": "generic_ship",
+                "ship_colour": "white",
+                "game_instance": null,
+                "id": "bot3"
+            },
+            "bot_controller_json": {
+                "ship": null,
+                "reaction_time_ticks": 15, // 4 -> 100ms, 15 -> 375ms
+                "update_sail_ticks": 120,
+                "update_enemy_ticks": 120,
+                "update_heading_ticks": 80,
+                "offsets": {
+                    "my_orientation_deg": [0,5],
+                    "my_speed": [2,6],
+                    "my_x": [40,60],
+                    "my_y": [40,60],
+                    "my_x_v": [7,10],
+                    "my_y_v": [7,10],
+                    "wind_direction_deg": [4,7],
+                    "wind_direction_magnitude": [5,7],
+                    "enemy_x": [25,40],
+                    "enemy_y": [25,40],
+                    "enemy_x_v": [7,10],
+                    "enemy_y_v": [7,10]
+                }
+            }
+        },
+        {
+            "model_name": "The Krill",
+            "ship_json": {
+                "health": 20,
+                "starting_x_pos": null,
+                "starting_y_pos": null,
+                "starting_speed": 0,
+                "starting_orientation_rad": 0,
+                "starting_sail_strength": 1,
+                "ship_model": "generic_ship",
+                "ship_colour": "white",
+                "game_instance": null,
+                "id": "bot3"
+            },
+            "bot_controller_json": {
+                "ship": null,
+                "reaction_time_ticks": 15, // 4 -> 100ms, 15 -> 375ms
+                "update_sail_ticks": 800,
+                "update_enemy_ticks": 120,
+                "update_heading_ticks": 80,
+                "offsets": {
+                    "my_orientation_deg": [0,10],
+                    "my_speed": [4,8],
+                    "my_x": [50,75],
+                    "my_y": [50,75],
+                    "my_x_v": [7,10],
+                    "my_y_v": [7,10],
+                    "wind_direction_deg": [5,9],
+                    "wind_direction_magnitude": [5,9],
+                    "enemy_x": [50,75],
+                    "enemy_y": [50,75],
+                    "enemy_x_v": [7,10],
+                    "enemy_y_v": [7,10]
                 }
             }
         }
-    ]
+    ],
+    "challenge": {
+        "temporary_message_ms": 5000,
+        "temporary_message_ticks": undefined, // calculated
+        "default_setup_json": {
+            "starting_level": 1,
+            "challenger_starting_orientation_rad": 0,
+            "challenger_starting_x_pos": 0,
+            "challenger_starting_y_pos": 0,
+            "challenger_starting_sail_strength": 1,
+            "challenger_starting_speed": 160,
+            "user_is_challenger": true,
+            "heal_mode": true
+        }
+    },
+
+    "skirmish": {
+        "default_setup_json": {
+            "bot_model": "The Master",
+            "spread": 5000,
+            "bot_count": 0,
+            "user_is_a_ship": true,
+            "starting_speed": 160
+        }
+    }
 }
 
 // Perform data calculations
@@ -377,6 +480,10 @@ MD["visual_effect_settings"]["cannon_ball_hit"]["life_length_ticks"] = MD["visua
 MD["visual_effect_settings"]["cannon_smoke"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_smoke"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["cannon_ball_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
 MD["visual_effect_settings"]["ship_splash"]["life_length_ticks"] = MD["visual_effect_settings"]["ship_splash"]["life_length_ms"] / 1000 * MD["game_properties"]["tick_rate"];
+
+MD["challenge"]["temporary_message_ticks"] = MD["challenge"]["temporary_message_ms"]/ 1000 * MD["game_properties"]["tick_rate"];
+
+MD["mobile_settings"]["max_tap_time_ticks"] = MD["mobile_settings"]["max_tap_time_ms"]/ 1000 * MD["game_properties"]["tick_rate"];
 
 // Set tick data storage size
 MD["default_folder_settings"]["default_folders"][0]["max_size"] = MD["remote_data_settings"]["max_delay_ticks"];

@@ -19,6 +19,25 @@ function getLocalStorage(key, valueIfNotFound=null){
 }
 
 /*
+    Function Name: getIndexOfElementInList
+    Function Parameters: 
+        list:
+            A list
+        value:
+            A value to search for
+    Function Description: Finds the index of an element in a list
+    Function Return: int
+*/
+function getIndexOfElementInList(list, value){
+    for (let i = 0; i < list.length; i++){
+        if (list[i] === value){
+            return i;
+        }
+    }
+    return -1;
+}
+
+/*
     Method Name: setLocalStorage
     Method Parameters:
         key:

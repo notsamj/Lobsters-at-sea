@@ -45,7 +45,6 @@ class Battle extends Gamemode {
 
         let game = this.getGame();
         let previousTick = game.getTickCount();
-        //console.log("cb -2", cannonShots.getLength());
 
         // Look for message meeting conditions
         let lastRelevantUpdate = null;
@@ -143,7 +142,6 @@ class Battle extends Gamemode {
             // Set up the cannon smoke
             this.createCannonSmoke(cannonShotJSON, serverTickOfLaunches);
             
-            //console.log("new cannon ball", newCannonBall);
             this.getGame().addCannonBall(newCannonBall);
         }
     }
@@ -188,8 +186,6 @@ class Battle extends Gamemode {
         // If found, remove
         if (index != -1){
             let cannonBall = cannonBalls.get(index);
-            //console.log(this.getGame().getWind().print());
-            //console.log("Cannon ball sunk", cannonBall.getTickX(), cannonBall)
             cannonBalls.pop(index);
         }
     }
@@ -200,15 +196,12 @@ class Battle extends Gamemode {
             // Delete cannon ball
             this.deleteCannonBall(cBSi["cannon_ball_id"]);
             // Add the visual effect
-            //console.log("Added", cBSi["x_pos"], serverTick - this.getGame().getTickCount())
-            //debugger;
             this.getGame().addVisualEffect(new CannonBallSplash(serverTick, this.getGame().getVisualEffectRandomGenerator(), cBSi, visaulEffectsSettings["cannon_ball_splash"]));
         }
     }
     processShipSinkings(shipSinkings, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         for (let sS of shipSinkings){
-            //console.log("Found one")
             // Kill ship
             this.killShip(sS["ship_id"]);
             // Add the visual effect
@@ -310,7 +303,7 @@ class Battle extends Gamemode {
     setup(gameDetailsJSON){
         let game = this.getGame();
         // Set data received
-        this.serverStartTime = gameDetailsJSON["server_start_time"]; 
+        this.serverStartTime = gameDetailsJSON["server_start_time"];
 
         // Update game properties
         game.setGameProperties(gameDetailsJSON["game_properties"]);

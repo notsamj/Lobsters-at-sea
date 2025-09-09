@@ -32,7 +32,6 @@ class Wind {
 
     resetWithNewSeed(newSeed){
         this.randomizer.setSeed(newSeed);
-        //console.log("Reset wind")
         this.initialize(); 
     }
 
@@ -45,7 +44,6 @@ class Wind {
     }
 
     initialize(){
-        //console.log("init wind")
         let windSettings = this.game.getGameProperties()["wind_settings"];
         let initialWindMagnitude = this.getRandom().getFloatInRange(windSettings["wind_min_magnitude"], windSettings["wind_max_magnitude"]);
         let initialWindDirection = this.getRandom().getFloatInRange(0, 2*Math.PI);
@@ -106,7 +104,7 @@ class Wind {
        
         let b4 = this.windDirectionRAD;
         this.windDirectionRAD = fixRadians(this.windDirectionRAD + this.windDirectionChangePerTickRAD);
-        //console.log("New, oold, chang", this.windDirectionRAD, b4, this.windDirectionChangePerTickRAD);
+        
         // Tick locks
         this.windMagnitudeChangeLock.tick();
         this.windDirectionChangeLock.tick();

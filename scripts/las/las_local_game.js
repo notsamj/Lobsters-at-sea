@@ -21,6 +21,10 @@ class LasLocalGame extends LasGame {
         this.lastUpdatedFrameMS = 0;
     }
 
+    getHumanShipController(){
+        return this.humanShipController;
+    }
+
     addBotShipController(botShipController){
         this.botShipControllers.push(botShipController);
     }
@@ -46,6 +50,7 @@ class LasLocalGame extends LasGame {
 
     tickBotControllers(){
         for (let botShipController of this.botShipControllers){
+            if (botShipController.getShip().isDead()){continue;}
             botShipController.tick();
         }
     }
@@ -59,6 +64,9 @@ class LasLocalGame extends LasGame {
     }
 
     tick(){
+        // Clean the tick timeline
+        this.getTickTimeline().reset();
+        
         // Maintenace ticks
         this.tickShips();
 
@@ -96,9 +104,6 @@ class LasLocalGame extends LasGame {
 
         // Play sounds
         this.playSounds(this.getFocusedFrameX(), this.getFocusedFrameY());
-
-        // Clean the tick timeline
-        this.getTickTimeline().reset();
 
         // Up the tick count
         this.incrementTickCount();
@@ -396,7 +401,13 @@ class LasLocalGame extends LasGame {
         let gameInputManager = GC.getGameUserInputManager();
 
         // Click
-        gameInputManager.register("left_click_ticked", "click", (event) => { return event.which===keyCodeLeftClick; }, true, {"ticked": true, "ticked_activation": false});
+        gameInputManager.register("left_click_ticked", "click", (event) => { return event.which===keyCodeLeftClick; }, true, {"ticked": true, "ticked_activation": false}); 
+
+        // Mobile
+        gameInputManager.register("touch_press", "pointerdown", (event) => { return true; });
+        gameInputManager.register("touch_press", "pointerup", (event) => { return true; }, false);
+        //gameInputManager.register("touch_press", "pointercancel", (event) => { return true; }, false);
+
 
         // Keys Menu
         gameInputManager.register("scroll_left_ticked_game", "keydown", (event) => { return event.which===keyCodeScrollL; }, true, {"ticked": true, "ticked_activation": false});
@@ -460,6 +471,9 @@ class LasLocalGame extends LasGame {
 
         // Load cannon ball
         await GC.loadToImages("cannon_ball");
+
+        // Load freecam
+        await GC.loadToImages("freecam");
 
         // Load ships
         let shipPathPrefix = "/ships/generic_ship/";

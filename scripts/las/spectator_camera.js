@@ -124,6 +124,13 @@ class SpectatorCamera {
         return this.getFreeCamTickX();
     }
 
+    getHealth(){
+        if (this.isFollowingAShip()){
+            return this.followedShip.getHealth();
+        }
+        return 0; 
+    }
+
     getFreeCamTickXV(){
         return this.xVelocity;
     }

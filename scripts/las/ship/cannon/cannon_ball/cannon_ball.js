@@ -209,8 +209,6 @@ class CannonBall {
         let rotateY = myYScreenCoordINT + (zoomedCannonBallHeight-1)/2;
         let interpolatedOrientation = this.getFrameOrientation();
 
-        //console.log(rotateX, rotateY)
-
         let imageToUse;
         let displayImageOrientation = interpolatedOrientation;
         

@@ -1,19 +1,19 @@
 /*
-    Class Name: QuantitySlider
-    Description: A type of option slider. A sliding bar for setting a integer or float value in a range.
+    Class Name: SelectionSlider
+    Description: A type of option slider. A sliding bar for picking an option for an array.
 */
-class QuantitySlider extends OptionSlider {
+class SelectionSlider extends OptionSlider {
     /*
         Method Name: constructor
         Method Parameters:
             x:
-                x location of the quantity slider
+                x location of the selection slider
             y:
-                y location of the quantity slider
+                y location of the selection slider
             width:
-                Width of the quantity slider
+                Width of the selection slider
             height:
-                Height of the quantity slider
+                Height of the selection slider
             textHeight:
                 Height of the text (px) (int)
             cursorWidthPX:
@@ -22,12 +22,8 @@ class QuantitySlider extends OptionSlider {
                 Function to call to get the value
             setValueFunction:
                 Function to call to set the value
-            minValue:
-                Minimum value
-            maxValue:
-                Maximum value
-            usingFloat:
-                Whether using floats rather than integers
+            options:
+                A list of possible values for the selection slider
             backgroundBarColourCode:
                 Colour of the bar background (code)
             sliderColourCode:
@@ -37,20 +33,9 @@ class QuantitySlider extends OptionSlider {
         Method Description: Constructor
         Method Return: Constructor
     */
-    constructor(x, y, width, height, textHeight, cursorWidthPX, getValueFunction, setValueFunction, minValue, maxValue, usingFloat=false, backgroundBarColourCode="#000000", sliderColourCode="#ffffff", textColourCode="#000000"){
+    constructor(x, y, width, height, textHeight, cursorWidthPX, getValueFunction, setValueFunction, options, backgroundBarColourCode="#000000", sliderColourCode="#ffffff", textColourCode="#000000"){
         super(x, y, width, height, textHeight, cursorWidthPX, getValueFunction, setValueFunction, backgroundBarColourCode, sliderColourCode, textColourCode);
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.usingFloat = usingFloat;
-        this.updateSliderX();
-    }
-
-    setMaxValue(maxValue){
-        let currentValue = this.accessValue();
-        if (currentValue > maxValue){
-            this.setValueFunction(maxValue);
-        }
-        this.maxValue = maxValue;
+        this.options = options;
         this.updateSliderX();
     }
 
@@ -62,8 +47,9 @@ class QuantitySlider extends OptionSlider {
     */
     updateSliderX(){
         let currentValue = this.accessValue();
-        let currentPercentage = (currentValue - this.minValue) / (this.maxValue - this.minValue);
-        let pxToMove = this.getWidth() - this.cursorWidth;
+        let currentIndex = getIndexOfElementInList(this.options, currentValue);
+        let currentPercentage = (currentIndex) / (this.options.length-1); // Assuming not zero
+        let pxToMove = this.width - this.cursorWidth;
         this.sliderX = this.getX() + Math.round(currentPercentage * pxToMove);
     }
 
@@ -79,11 +65,9 @@ class QuantitySlider extends OptionSlider {
         // Update the slider position
         let cursorOffset = GC.getGMouseX() - this.getX() - this.cursorWidth/2;
         // Either set value to extremes or in between
-        let calculatedValue = cursorOffset / (this.getWidth() - this.cursorWidth) * (this.maxValue - this.minValue) + this.minValue;
-        if (!this.usingFloat){
-            calculatedValue = Math.floor(calculatedValue);
-        }
-        let newValue = Math.min(Math.max(calculatedValue, this.minValue), this.maxValue);
+        let calculatedIndex = Math.max(0, Math.min(this.options.length-1, Math.floor(cursorOffset / (this.width - this.cursorWidth) * this.options.length)));
+        let newValue = this.options[calculatedIndex];
         this.modifyValue(newValue);
+        this.updateSliderX();
     }
 }

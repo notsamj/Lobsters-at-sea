@@ -66,6 +66,15 @@ class LasGame {
         }
     }
 
+    findCannonBall(cannonBallID){
+        for (let [cannonBall, cannonBallIndex] of this.cannonBalls){
+            if (cannonBall.getID() === cannonBallID){
+                return cannonBall;
+            }
+        }
+        throw new Error("Failed to find cannonball with id: " + cannonBallID);
+    }
+
     handleCannonBallCollisionsAndDeaths(){
         // Check each cannon ball
         let cannonBallsToDelete = new NotSamLinkedList();
@@ -93,8 +102,6 @@ class LasGame {
             // Check for hitting water
             if (!cannonBallDead && cannonBall.hasHitWater(this.getTickCount())){
                 cannonBallDead = true;
-                //console.log("Cannon ball sunk", cannonBall.getTickX(), cannonBall)
-                //console.log(this.getGame().getWind().print());
                 // Record the watery death of the cannon ball
                 this.getTickTimeline().addToTimeline({
                     "event_type": "cannon_ball_sunk",

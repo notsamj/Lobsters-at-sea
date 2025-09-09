@@ -1,3 +1,4 @@
+const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
 class LobbyManager {
 
     constructor(lobbySettingsJSON){
@@ -52,7 +53,8 @@ class LobbyManager {
     }
 
     transferToGame(){
-        let data = {"client_data": this.clients.copy(), "client_role": this.playerRole }
+        let data = copyObject(this.lobbySettingsJSON);
+        data["client_data"] = this.clients.copy();
         this.clients.clear();
         return data;
     }

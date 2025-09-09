@@ -26,7 +26,6 @@ class DebugStaticWind {
 
     reset(){
         this.randomizer.setSeed(this.game.getGameProperties()["random_seed"]);
-        //console.log("Reset wind")
         this.initialize();   
     }
 
@@ -39,7 +38,6 @@ class DebugStaticWind {
     }
 
     initialize(){
-        //console.log("init wind")
         let windSettings = this.game.getGameProperties()["wind_settings"];
         let initialWindMagnitude = this.getRandom().getFloatInRange(windSettings["wind_min_magnitude"], windSettings["wind_max_magnitude"]);
         let initialWindDirection = this.getRandom().getFloatInRange(0, 2*Math.PI);

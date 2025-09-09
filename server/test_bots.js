@@ -14,6 +14,9 @@ function runTests(){
     console.log("Model1", bot1JSON["model_name"])
     console.log("Model2", bot2JSON["model_name"])
 
+    bot1JSON["ship_json"]["id"] = bot1JSON["model_name"] + "_0";
+    bot2JSON["ship_json"]["id"] = bot2JSON["model_name"] + "_1";
+
     bot1JSON["ship_json"]["game_instance"] = game;
     bot2JSON["ship_json"]["game_instance"] = game;
 

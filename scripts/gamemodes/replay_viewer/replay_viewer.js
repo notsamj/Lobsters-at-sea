@@ -9,7 +9,7 @@ class ReplayViewer extends Gamemode {
         this.currentTimelineIndex = 0;
 
         this.mode = undefined;
-        this.replayString = undefined;
+        this.replayJSON = undefined;
 
         this.running = false;
 
@@ -53,7 +53,7 @@ class ReplayViewer extends Gamemode {
         this.resetForTickJump();
         let game = this.getGame();
 
-        this.loadFromString(this.replayString);
+        this.loadFromJSON(this.replayJSON);
 
         // Loop until ticks match
         while (game.getTickCount() != this.sliderTicks){
@@ -195,7 +195,7 @@ class ReplayViewer extends Gamemode {
                 "replay_name": onlineReplayName
             });
         }catch{
-            console.log("Failed to request replay.");
+            console.error("Failed to request replay.");
             this.handleGameOver(false);
             return;
         }
@@ -238,10 +238,8 @@ class ReplayViewer extends Gamemode {
         this.running = true;
     }
 
-    loadFromString(replayString){
-        this.replayString = replayString;
+    loadFromJSON(replayJSON){
         let game = this.getGame();
-        let replayJSON = JSON.parse(replayString);
         let gameDetails = replayJSON["opening_message"]["game_details"];
         this.timeline = replayJSON["timeline"];
         this.slider.setMaxValue(this.timeline[this.timeline.length-1]["tick"]);
@@ -277,6 +275,11 @@ class ReplayViewer extends Gamemode {
             shipJSON["game_instance"] = game;
             game.addShip(new Ship(shipJSON));
         }
+    }
+
+    loadFromString(replayString){
+        this.replayJSON = JSON.parse(replayString);
+        this.loadFromJSON(this.replayJSON);
     }
 
     handlePause(){

@@ -38,6 +38,10 @@ class GameContainer {
         this.setupOngoing = false;
     }
 
+    isMobile(){
+        return navigator.maxTouchPoints > 0;
+    }
+
     getSoundManager(){
         return this.SOUND_MANAGER;
     }
@@ -135,10 +139,15 @@ class GameContainer {
 
         // Set up window listeners
 
-        window.onmousemove = (event) => {
+        document.addEventListener("pointerdown", (event) => {
             myClassReference.setGMouseX(event.clientX);
             myClassReference.setGMouseY(event.clientY);
-        }
+        });
+
+        document.addEventListener("pointermove", (event) => {
+            myClassReference.setGMouseX(event.clientX);
+            myClassReference.setGMouseY(event.clientY);
+        });
 
         document.onclick = (event) => {
             myClassReference.setGLastClickedMouseX(event.clientX);
@@ -192,7 +201,6 @@ class GameContainer {
 
         // Indicate that setup is over
         this.setupOngoing = false;
-        console.debug("Startup done")
     }
 
     setGMouseX(newMouseXValue){

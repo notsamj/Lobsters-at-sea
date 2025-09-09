@@ -105,6 +105,9 @@ class LasTest1v1Game extends LasGame {
 
         // If still running after check
         if (this.isRunning()){
+            // Clean tick timeline
+            this.tickTimeline.reset();
+            
             // Maintenace ticks
             this.tickShips();
 
@@ -132,9 +135,6 @@ class LasTest1v1Game extends LasGame {
 
             // Update wind
             this.wind.tickUpdate();
-
-            // Clean tick timeline
-            this.tickTimeline.reset();
 
             // Up the tick count
             this.incrementTickCount();

@@ -17,15 +17,11 @@ class CannonBallHit extends VisualEffect {
                 "width": randomGenerator.getIntInRangeInclusive(visualEffectSettings["min_size"], visualEffectSettings["max_size"]),
                 "height": randomGenerator.getIntInRangeInclusive(visualEffectSettings["min_size"], visualEffectSettings["max_size"]),  
             }
-            /*if (isNaN(rectObj["x_start"]) || isNaN(rectObj["x_v"])){
-                debugger;
-            }*/
             this.rectangles.push(rectObj);
         }
     }
 
     display(centerXOfScreen, centerYOfScreen, currentTick, msBetweenTicks, msSinceLastTick){
-        //console.log(centerXOfScreen, centerYOfScreen, currentTick, msBetweenTicks, msSinceLastTick)
         let msSinceCreation = (currentTick - this.getOriginTick()) * msBetweenTicks + msSinceLastTick;
         let opacity = Math.max(0, Math.min(1, 1 - (msSinceCreation / ((this.getExpirationTick() - this.getOriginTick()) * msBetweenTicks))));
         for (let [rect, rectIndex] of this.rectangles){
