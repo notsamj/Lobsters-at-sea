@@ -5,7 +5,7 @@ module.exports = {
         "player_count": 1 // >= 1
     },
     "bot_data": {
-        "bot_count": 3,
+        "bot_count": 1,
         "bot_model_name": "The Krill"
     },
     "gamemode_data": {

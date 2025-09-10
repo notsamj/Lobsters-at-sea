@@ -1,12 +1,12 @@
 /*
-    Method Name: getLocalStorage
-    Method Parameters:
+    Function Name: getLocalStorage
+    Function Parameters:
         key:
             Key of the item in local storage
         valueIfNotFound:
             Value to return if the item cannot be found
-    Method Description: Finds a value from storage, returns valueIfNotFound if not found.
-    Method Return: void
+    Function Description: Finds a value from storage, returns valueIfNotFound if not found.
+    Function Return: void
 */
 function getLocalStorage(key, valueIfNotFound=null){
     // In node js, you can't access this storage
@@ -19,18 +19,18 @@ function getLocalStorage(key, valueIfNotFound=null){
 }
 
 /*
-    Function Name: getIndexOfElementInList
+    Function Name: getIndexOfElementInArray
     Function Parameters: 
-        list:
-            A list
+        array:
+            An Array
         value:
             A value to search for
-    Function Description: Finds the index of an element in a list
+    Function Description: Finds the index of an element in an array
     Function Return: int
 */
-function getIndexOfElementInList(list, value){
-    for (let i = 0; i < list.length; i++){
-        if (list[i] === value){
+function getIndexOfElementInArray(array, value){
+    for (let i = 0; i < array.length; i++){
+        if (array[i] === value){
             return i;
         }
     }
@@ -38,14 +38,14 @@ function getIndexOfElementInList(list, value){
 }
 
 /*
-    Method Name: setLocalStorage
-    Method Parameters:
+    Function Name: setLocalStorage
+    Function Parameters:
         key:
             Key of the item in local storage
         value:
             Value to put in local storage
-    Method Description: Assignes a key to a value in local storage. Errors are not *really* handled.
-    Method Return: void
+    Function Description: Assignes a key to a value in local storage. Errors are not *really* handled.
+    Function Return: void
 */
 function setLocalStorage(key, value){
     // In node js, you can't access this storage
@@ -56,14 +56,14 @@ function setLocalStorage(key, value){
 }
 
 /*
-    Method Name: randomFloatBetween
-    Method Parameters:
+    Function Name: randomFloatBetween
+    Function Parameters:
         lowerBound:
             Lower bound float value
         upperBound:
             Upper bound float value
-    Method Description: Finds a random float between two ends
-    Method Return: float
+    Function Description: Finds a random float between two ends
+    Function Return: float
 */
 function randomFloatBetween(lowerBound, upperBound){
     return Math.random() * (upperBound - lowerBound) + lowerBound;
@@ -80,14 +80,14 @@ function randomBoolean(){
 }
 
 /*
-    Method Name: randomNumberInclusive
-    Method Parameters:
+    Function Name: randomNumberInclusive
+    Function Parameters:
         min:
             Minimum value (inclusive)
         maxInclusive:
             Maximum value (inclusive)
-    Method Description: Come up with a number in a given range [min, maxInclusive]
-    Method Return: int
+    Function Description: Come up with a number in a given range [min, maxInclusive]
+    Function Return: int
 */
 function randomNumberInclusive(min, maxInclusive){
     return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
@@ -136,14 +136,14 @@ function objectHasKey(obj, key){
 }
 
 /*
-    Method Name: XYToSeed
-    Method Parameters: 
+    Function Name: XYToSeed
+    Function Parameters: 
         x:
             An x coordinate
         y:
             A y coordinate
-    Method Description: Takes an x and y coordinate and converts them to a more-or-less unique seed
-    Method Return: int
+    Function Description: Takes an x and y coordinate and converts them to a more-or-less unique seed
+    Function Return: int
 */
 function XYToSeed(x, y){
     let sqrtExtreme = Math.floor(Math.sqrt(Number.MAX_SAFE_INTEGER));
@@ -161,24 +161,24 @@ function XYToSeed(x, y){
 }
 
 /*
-    Method Name: sleep
-    Method Parameters:
+    Function Name: sleep
+    Function Parameters:
         ms:
             A number of ms to sleep for
-    Method Description: Sleeps for a given amount of time
-    Method Return: Promise
+    Function Description: Sleeps for a given amount of time
+    Function Return: Promise
 */
 async function sleep(ms){
     return new Promise((resolve, reject) => { setTimeout(resolve, ms); })
 }
 
 /*
-    Method Name: copyObject
-    Method Parameters:
+    Function Name: copyObject
+    Function Parameters:
         obj:
             Object to copy
-    Method Description: Creates a copy of an object (to some extent)
-    Method Return: JSON Object
+    Function Description: Creates a copy of an object (to some extent)
+    Function Return: JSON Object
     Note: If you give it and instance of a class it will produce a reference not a copy
 */
 function copyObject(obj){
@@ -198,6 +198,16 @@ function copyObject(obj){
     return newObject;
 }
 
+/*
+    Function Name: copyOverObject
+    Function Parameters:
+        sourceObj:
+            Source JSON
+        destinationObject:
+            Destination JSON
+    Function Description: Copies info from one JSON to another (shallow)
+    Function Return: void
+*/
 function copyOverObject(sourceObj, destinationObject){
     for (let key of Object.keys(sourceObj)){
         destinationObject[key] = sourceObj[key];
@@ -206,14 +216,14 @@ function copyOverObject(sourceObj, destinationObject){
 
 
 /*
-    Method Name: copyArray
-    Method Parameters:
+    Function Name: copyArray
+    Function Parameters:
         array:
             An array to copy
         limit:
             Index limit for copying
-    Method Description: Creates a copy of an array
-    Method Return: void
+    Function Description: Creates a copy of an array
+    Function Return: void
 */
 function copyArray(array, limit=array.length){
     let newArray = [];
@@ -243,6 +253,12 @@ function isJSON(e){
     return e != null && e.constructor === ({}).constructor;
 }
 
+/*
+    Function Name: getPrettyTime
+    Function Parameters: None
+    Function Description: Gets the time in a readable format
+    Function Return: String
+*/
 function getPrettyTime(){
     return new Date().toLocaleTimeString("en-US");
 }

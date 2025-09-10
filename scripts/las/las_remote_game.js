@@ -39,9 +39,29 @@ class LasRemoteGame extends LasGame {
         this.cannonBalls.push(cannonBall);
     }
 
+    /*
+        Method Name: tickHumanController
+        Method Parameters: None
+        Method Description: Ticks the human controller (or camera if applicable)
+        Method Return: void
+    */
+    tickHumanController(){
+        if (this.hasFocusedShip()){
+            this.humanShipController.tick();
+        }else{
+            this.focusedCamera.tick();
+        }
+    }
+
     tick(){
+        // Clean the tick timeline
+        this.getTickTimeline().reset();
+
         // Maintenace ticks
         this.tickShips();
+
+        // Tick human controller
+        this.tickHumanController();
 
         // TODO: Update ship orientations, power based on decisions
         this.updateShipOrientationAndSailPower();
@@ -98,10 +118,6 @@ class LasRemoteGame extends LasGame {
 
             this.focusedShip.updateFromPilot(controllerOutputJSON);
         }
-        // For camera
-        else{
-            this.focusedCamera.tick();
-        }
     }
 
     updateShipOrientationAndSailPower(){
@@ -111,7 +127,7 @@ class LasRemoteGame extends LasGame {
     }
 
     getFocusedEntity(){
-        if (this.focusedShip === null){
+        if (this.focusedShip === null || this.focusedShip.isDead()){
             return this.focusedCamera;
         }
         return this.focusedShip;
@@ -172,8 +188,28 @@ class LasRemoteGame extends LasGame {
         // Display windsock
         this.getWind().display();
 
+        // Display human controller things
+        this.displayHumanController();
+
         // Display relevant things when focused
         this.getFocusedEntity().displayWhenFocused();
+
+        // Play sounds
+        GC.getSoundManager().playSounds();
+    }
+
+    /*
+        Method Name: displayHumanController
+        Method Parameters: None
+        Method Description: Displays and human or camera thingsn needed
+        Method Return: void
+    */
+    displayHumanController(){
+        if (this.hasFocusedShip()){
+            this.humanShipController.display();
+        }else{
+            this.focusedCamera.display();
+        }
     }
 
     displayVisualEffects(){

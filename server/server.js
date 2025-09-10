@@ -56,7 +56,7 @@ class LASServer {
         // Backup
         fs.writeFileSync("replay_backup.replay", modifiedString);
     }
-
+    /*
     test(gameRecorder){
         let replayString2 = JSON.stringify(gameRecorder.replayObject);
         let replayString1 = gameRecorder.getReplayString();
@@ -69,7 +69,7 @@ class LASServer {
 
         // Backup
         fs.writeFileSync("test.replay", fString);
-    }
+    }*/
 
     async addReplay(replayString){
         // Save to file
@@ -386,7 +386,7 @@ class LASServer {
         // Set up connection handling stuff
         this.WSSServer.on("connection", async (connection) => {
             // Await access
-            await this.clients.requestAccess();
+            await this.clients.requestAccess(); 
 
             // Create
             let clientOBJ = new Client(connection, this.clientIDManager.generateNewID(), this, GP["default_folder_settings"]);

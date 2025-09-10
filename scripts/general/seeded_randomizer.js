@@ -22,6 +22,14 @@ class SeededRandomizer {
         this.lastNumber = seed;
     }
 
+    /*
+        Method Name: setSeed
+        Method Parameters: 
+            seed:
+                A seed (int)
+        Method Description: Sets the seed
+        Method Return: void
+    */
     setSeed(seed){
         this.seed = seed;
         this.lastNumber = seed;
@@ -121,8 +129,16 @@ class SeededRandomizer {
         return this.getRandomFloat() * (end-start) + start;
     }
 
-    pick(list){
-        return list[this.getIntInRangeInclusive(0, list.length-1)];
+    /*
+        Method Name: pick
+        Method Parameters: 
+            array:
+                An array
+        Method Description: Picks an item from the array
+        Method Return: any type
+    */
+    pick(array){
+        return array[this.getIntInRangeInclusive(0, array.length-1)];
     }
 
     /*

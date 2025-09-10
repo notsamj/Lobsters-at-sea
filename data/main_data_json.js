@@ -103,7 +103,7 @@ const MD = {
         "text_box_width": 120,
         "ms_lock_length": 1000, // wait 1000ms to display again
         "tick_lock_length": undefined, // calculated
-        "min_distance_to_display": 3500,
+        "min_distance_to_display": 1500,
         "radar_outline_width": 189, // width of radar_outline.png
         "radar_outline_height": 189, // height of radar_outline.png
         "right_x_offset": 256 // wind_sock_width
@@ -155,11 +155,16 @@ const MD = {
         "left_click_ticked": 1, // left click
         "help_access_ticked": 72, // h
         "escape_ticked": 27, // esc
-        "zoom_1/8": 101, // num 5
-        "zoom_1/4": 100, // num 4
-        "zoom_1/2": 99, // num 3
-        "zoom_1": 98, // num 2
-        "zoom_2": 97, // num 1
+        "zoom_1/8": 101, // num pad 5
+        "zoom_1/4": 100, // num pad 4
+        "zoom_1/2": 99, // num pad 3
+        "zoom_1": 98, // num pad 2
+        "zoom_2": 97, // num pad 1
+        "zoom_1/8_alt": 53, // num 5
+        "zoom_1/4_alt": 52, // num 4
+        "zoom_1/2_alt": 51, // num 3
+        "zoom_1_alt": 50, // num 2
+        "zoom_2_alt": 49, // num 1
         "fire_cannons": 1, // left click
         "aiming_cannon": 3, // right click
         "sails_inc": 82, // R
@@ -445,7 +450,8 @@ const MD = {
             "challenger_starting_sail_strength": 1,
             "challenger_starting_speed": 160,
             "user_is_challenger": true,
-            "heal_mode": true
+            "heal_mode": true,
+            "user_automatic_sails": true
         }
     },
 
@@ -455,7 +461,8 @@ const MD = {
             "spread": 5000,
             "bot_count": 0,
             "user_is_a_ship": true,
-            "starting_speed": 160
+            "starting_speed": 160,
+            "user_automatic_sails": true
         }
     }
 }

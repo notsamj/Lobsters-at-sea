@@ -27,6 +27,16 @@ class TickLock extends Lock {
         }
     }
 
+    /*
+        Method Name: replace
+        Method Parameters: 
+            newNumTicks:
+                New number of ticks
+            ready:
+                Whether or not the new lock is ready
+        Method Description: Replaces the lock
+        Method Return: void
+    */
     replace(newNumTicks, ready=true){
         this.ready = ready;
         this.startingReady = ready;

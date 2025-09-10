@@ -168,6 +168,28 @@ function displacementToRadians(dX, dY){
     return angleRAD;
 }
 
+/*
+    Function Name: rectangleCollidesWithRectangle
+    Function Parameters: 
+        lXr1:
+            Left x of rectangle 1
+        rXr1:
+            Right x of rectangle 1
+        tYr1:
+            Top x of rectangle 1
+        bYr1:
+            Bottom x of rectangle 1
+        lXr2:
+            Left x of rectangle 2
+        rXr2:
+            Right x of rectangle 2
+        tYr2:
+            Top x of rectangle 2
+        bYr2:
+            Bottom x of rectangle 2
+    Function Description: Checks if two rectangles are colliding
+    Function Return: boolean
+*/
 function rectangleCollidesWithRectangle(lXr1, rXr1, tYr1, bYr1, lXr2, rXr2, tYr2, bYr2){
     let cXr1 = (lXr1 + rXr1)/2;
     let cXr2 = (lXr2 + rXr2)/2;
@@ -275,27 +297,20 @@ function safeDivide(numerator, denominator, closeToZeroAmount, valueIfCloseToZer
     return numerator / denominator;
 }
 
-/*function getIntervalOverlapDetails(h1, b1, h2, b2){
-    // Check if interval 1 has points within interval 2
-    if (h1 >= b2 && h1 <= h2){
-        return true;
-    }
-    if (b1 >= b2 && b1 <= h2){
-        return true;
-    }
-
-    // Check if interval 1 has points within interval 2
-    if (h2 >= b1 && h2 <= h1){
-        return true;
-    }
-    if (b2 >= b1 && b2 <= h1){
-        return true;
-    }
-
-    // No overlap
-    return {"overlap": false};
-}*/
-
+/*
+    Function Name: getIntervalOverlapDetails
+    Function Parameters: 
+        h1:
+            High of range 1
+        b1:
+            Bottom of range 1
+        h2:
+            High of range 2
+        b2:
+            Bottom of range 2
+    Function Description: Checks if two intervals overlap, and the center
+    Function Return: JSON
+*/
 function getIntervalOverlapDetails(h1, b1, h2, b2){
     // If 1 inside 2
     if (h1 >= b2 && h1 <= h2 && b1 >= b2 && b1 <= h2){

@@ -1,33 +1,55 @@
+/*
+    Class Name: Playground
+    Description: The playground gamemode
+*/
 class Playground extends Gamemode {
 
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(){
         super();
         this.prepareTestEnvironment();
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Handles actions on pause
+        Method Return: void
+    */
     handlePause(){
         if (!GC.getGameTickScheduler().isPaused()){
-                GC.getGameTickScheduler().pause();
+            GC.getGameTickScheduler().pause();
         }
     }
 
+    /*
+        Method Name: handleUnpause
+        Method Parameters: None
+        Method Description: Handles actions on pause
+        Method Return: void
+    */
     handleUnpause(){
         if (GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().unpause();
         }
     }
 
+    /*
+        Method Name: prepareTestEnvironment
+        Method Parameters: None
+        Method Description: Prepares the testing environment
+        Method Return: void
+    */
     prepareTestEnvironment(){
         let game = this.getGame();
 
         // Randomize wind
         game.getWind().resetWithNewSeed(randomNumberInclusive(1, 100000));
-
-        // Destroy wind
-        //game.wind = new DebugStaticWind(this);
-        //game.wind.windMagntiude = 0;
-        //game.wind.windDirectionRAD = toRadians(316);
-        //game.getWind().windDirectionRAD = toRadians(0);
 
         let botControllerModel1 = copyObject(MD["saved_models"][0]);
         let tempShipJSON = botControllerModel1["ship_json"];
@@ -118,17 +140,41 @@ class Playground extends Gamemode {
         }
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Ticks the game
+        Method Return: void
+    */
     tick(){
         // Tick the game
         this.getGame().tick();
     }
 
+    /*
+        Method Name: getName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getName(){ return "playground"; }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LASGame
+    */
     getGame(){
         return GC.getGameInstance();
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display game
         this.getGame().display();
@@ -136,6 +182,12 @@ class Playground extends Gamemode {
         this.displayHUD();
     }
 
+    /*
+        Method Name: displayHUD
+        Method Parameters: None
+        Method Description: Displays the HUD
+        Method Return: void
+    */
     displayHUD(){
         let hud = GC.getHUD();
 

@@ -24,19 +24,39 @@ class NotSamLinkedList {
         }
     }
 
+    /*
+        Method Name: copy
+        Method Parameters: None
+        Method Description: Makes linked list copy
+        Method Return: NotSamLinkedList
+    */
     copy(){
         let newList = new NotSamLinkedList();
         newList.addAllFromLL(this);
         return newList;
     }
 
+    /*
+        Method Name: addAllFromLL
+        Method Parameters: 
+            linkedList:
+                A linked list
+        Method Description: Adds all items from a linked list
+        Method Return: void
+    */
     addAllFromLL(linkedList){
         for (let [value, index] of linkedList){
             this.push(value);
         }
     }
 
-    toList(){
+    /*
+        Method Name: toArray
+        Method Parameters: None
+        Method Description: Creates an Array from the linked list
+        Method Return: void
+    */
+    toArray(){
         let newList = [];
         for (let [value, index] of this){
             newList.push(value);

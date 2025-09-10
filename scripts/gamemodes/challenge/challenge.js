@@ -1,5 +1,15 @@
+/*
+    Class Name: Challenge
+    Description: Challenge gamemode
+*/
 class Challenge extends Gamemode {
 
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(){
         super();
         this.winScreen = new WinningScreen();
@@ -12,10 +22,24 @@ class Challenge extends Gamemode {
         this.temporaryMessage = null;
     }
 
+    /*
+        Method Name: isHealModeEnabled
+        Method Parameters: None
+        Method Description: Checks if the healing mode is enabled
+        Method Return: boolean
+    */
     isHealModeEnabled(){
         return this.healMode;
     }
 
+    /*
+        Method Name: startUp
+        Method Parameters: 
+            setupJSON=null:
+                JSON with setup instructions
+        Method Description: Starts up the game
+        Method Return: void
+    */
     startUp(setupJSON=null){
         let game = this.getGame();
         // Randomzie the wind
@@ -84,10 +108,24 @@ class Challenge extends Gamemode {
         this.running = true;
     }
 
+    /*
+        Method Name: getChallengerShip
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Ship
+    */
     getChallengerShip(){
         return this.challengerShip;
     }
 
+    /*
+        Method Name: startLevel
+        Method Parameters: 
+            currentLevel:
+                Level number
+        Method Description: Starts a new level
+        Method Return: void
+    */
     startLevel(currentLevel){
         let game = this.getGame();
 
@@ -135,18 +173,36 @@ class Challenge extends Gamemode {
         }
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Handles actions on pause
+        Method Return: void
+    */
     handlePause(){
         if (!GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().pause();
         }
     }
 
+    /*
+        Method Name: handleUnpause
+        Method Parameters: None
+        Method Description: Handles actions on unpause
+        Method Return: void
+    */
     handleUnpause(){
         if (GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().unpause();
         }
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Ticks the game
+        Method Return: void
+    */
     tick(){
         if (!this.isRunning()){
             return;
@@ -159,6 +215,12 @@ class Challenge extends Gamemode {
         this.checkGameEvents();
     }
 
+    /*
+        Method Name: checkGameEvents
+        Method Parameters: None
+        Method Description: Checks what is going on and takes actions
+        Method Return: void
+    */
     checkGameEvents(){
         if (this.challengerShip.isDead()){
             this.running = false;
@@ -178,21 +240,51 @@ class Challenge extends Gamemode {
         }
     }
 
+    /*
+        Method Name: endActions
+        Method Parameters: None
+        Method Description: Actions to take on end of game
+        Method Return: void
+    */
     endActions(){
         this.getGame().setUpdatingFramePositions(false);
         this.running = false;
     }
 
+    /*
+        Method Name: isRunning
+        Method Parameters: None
+        Method Description: Checks if the game is running
+        Method Return: boolean
+    */
     isRunning(){
         return this.running;
     }
 
+    /*
+        Method Name: getName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getName(){ return "challenge"; }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LasGame
+    */
     getGame(){
         return GC.getGameInstance();
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display game
         this.getGame().display();
@@ -205,6 +297,12 @@ class Challenge extends Gamemode {
         }
     }
 
+    /*
+        Method Name: displayTemporaryMessage
+        Method Parameters: None
+        Method Description: Displays a temporary message
+        Method Return: void
+    */
     displayTemporaryMessage(){
         if (this.temporaryMessage === null){ return; }
         // Delete old messages
@@ -212,6 +310,12 @@ class Challenge extends Gamemode {
         Menu.makeText(this.temporaryMessage["text"], this.temporaryMessage["colour_code"], Math.floor(getScreenWidth()/2), Math.floor(getScreenHeight() * 0.9), Math.floor(getScreenWidth()*0.70), Math.floor(getScreenHeight()/4), "center", "hanging");
     }
 
+    /*
+        Method Name: displayHUD
+        Method Parameters: None
+        Method Description: Displays the hud
+        Method Return: void
+    */
     displayHUD(){
         let hud = GC.getHUD();
 

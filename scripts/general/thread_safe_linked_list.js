@@ -3,6 +3,10 @@ if (typeof window === "undefined"){
     Lock = require("../../scripts/general/lock.js").Lock;
 }
 
+/*
+    Class Name: ThreadSafeLinkedList
+    Description: A linked list taht has synchronicity controls
+*/
 class ThreadSafeLinkedList extends NotSamLinkedList {
     /*
         Method Name: constructor

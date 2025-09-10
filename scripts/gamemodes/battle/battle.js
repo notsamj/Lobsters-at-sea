@@ -1,5 +1,15 @@
+/*
+    Class Name: Battle
+    Description: Battle gamemode
+*/
 class Battle extends Gamemode {
 
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(){
         super();
 
@@ -13,10 +23,22 @@ class Battle extends Gamemode {
         this.maxDelayMS = undefined;
     }
 
+    /*
+        Method Name: hasGameEnded
+        Method Parameters: None
+        Method Description: Checks if the game has ended
+        Method Return: boolean
+    */
     hasGameEnded(){
         return this.winningScreen.isActive();
     }
 
+    /*
+        Method Name: end
+        Method Parameters: None
+        Method Description: Ends the server the client's intention to quit
+        Method Return: void
+    */
     end(){
         // Inform server that "I quit"
         SC.sendJSON({
@@ -25,10 +47,22 @@ class Battle extends Gamemode {
         });
     }
 
+    /*
+        Method Name: calculateExpectedTicks
+        Method Parameters: None
+        Method Description: Calculates the expected number of tickets elapsed
+        Method Return: float
+    */
     calculateExpectedTicks(){
        return (GC.getGameTickScheduler().getLastTickTime() - (this.serverStartTime)) / this.tickGapMS;
     }
 
+    /*
+        Method Name: updateTickDataFromServer
+        Method Parameters: None
+        Method Description: Takes tick data from the server and updates the game
+        Method Return: void
+    */
     async updateTickDataFromServer(){
         // If any of the cannon shots recieved predate the oldest wind recording -> ignore
 
@@ -80,6 +114,18 @@ class Battle extends Gamemode {
         mailBox.relinquishAccess();
     }
 
+    /*
+        Method Name: catchUpCannonBallMovement
+        Method Parameters: 
+            newCannonBall:
+                A new cannon ball object
+            serverTickOfLaunches:
+                The server tick of the cannon ball's launch
+            endTick:
+                The tick at which the cannon ball will be acaught up
+        Method Description: Catches up the cannon ball's movement
+        Method Return: void
+    */
     catchUpCannonBallMovement(newCannonBall, serverTickOfLaunches, endTick){
         // No need to catch up
         if (endTick === serverTickOfLaunches){
@@ -97,7 +143,6 @@ class Battle extends Gamemode {
 
         // Expect this won't happen
         if (windIndex === -1){
-            debugger;
             throw new Error("Failed to find wind for given tick.");
         }
 
@@ -108,6 +153,18 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: readTickData
+        Method Parameters: 
+            tickDataJSON:
+                JSON of information about a tick
+            serverTick:
+                The tick numbet from the server's POV
+            currentTick:
+                The current tick locally
+        Method Description: Reads some tick data and takes actions
+        Method Return: void
+    */
     readTickData(tickDataJSON, serverTick, currentTick){
         // Process new cannon shots
         this.processCannonBallLaunches(tickDataJSON["new_cannon_shots"], serverTick, currentTick);
@@ -120,8 +177,23 @@ class Battle extends Gamemode {
 
         // Process cannon balls hitting water
         this.processShipSinkings(tickDataJSON["ship_sinkings"], serverTick);
+
+        // Play sounds
+        this.queueUpSounds(tickDataJSON);
     }
 
+    /*
+        Method Name: processCannonBallLaunches
+        Method Parameters: 
+            cannonBallShots:
+                A list of cannon ball shot JSON objects
+            serverTickOfLaunches:
+                The tick number at which these cannon balls were launched
+            currentTick:
+                The current tick
+        Method Description: Processes some cannon ball launches
+        Method Return: void
+    */
     processCannonBallLaunches(cannonBallShots, serverTickOfLaunches, currentTick){
         let gameInstance = this.getGame();
         let cannonBallSettings = gameInstance.getGameProperties()["cannon_ball_settings"];
@@ -146,6 +218,18 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: lockShipCannon
+        Method Parameters: 
+            shipID:
+                The id of the ship associated
+            cannonIndex:
+                The index of the cannon
+            ticksSinceLock:
+                The number of ticks since the "lock" was locked
+        Method Description: Locks a ship's cannon
+        Method Return: void
+    */
     lockShipCannon(shipID, cannonIndex, ticksSinceLock){
         let cannon = this.getGame().getShipByID(shipID).getCannons()[cannonIndex];
         let reloadLock = cannon.getReloadLock();
@@ -156,12 +240,77 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: queueUpSounds
+        Method Parameters: 
+            tickDataJSON:
+                JSON of information about a tick
+        Method Description: Plays sounds in the game
+        Method Return: void
+    */
+    queueUpSounds(tickDataJSON){
+        let centerX = this.getGame().getFocusedTickX();
+        let centerY = this.getGame().getFocusedTickY();
+        let soundManager = GC.getSoundManager();
+
+        let screenWidth = getZoomedScreenWidth();
+        let screenHeight = getZoomedScreenHeight();
+
+        // Collect cannonball hits
+        for (let cBH of tickDataJSON["cannon_ball_hits"]){
+            let x = cBH["x_pos"];
+            let y = cBH["y_pos"];
+            soundManager.queueUp("cannon_ball_hit", x - centerX, y-centerY);
+        }
+
+        // Collect cannon shooting sounds
+        for (let cBS of tickDataJSON["new_cannon_shots"]){
+            let x = cBS["x_origin"];
+            let y = cBS["y_origin"];
+            soundManager.queueUp("cannon_shot", x - centerX, y-centerY);
+        }
+
+        // Cannon ball sunk
+        for (let cBSi of tickDataJSON["cannon_ball_sinkings"]){
+            let x = cBSi["x_pos"];
+            let y = cBSi["y_pos"];
+            soundManager.queueUp("cannon_ball_sinking", x - centerX, y-centerY);
+        }
+
+        // Ship sunk
+        for (let sS of tickDataJSON["ship_sinkings"]){
+            let x = sS["x_pos"];
+            let y = sS["y_pos"];
+            soundManager.queueUp("ship_sinking", x - centerX, y-centerY);
+        }
+    }
+
+    /*
+        Method Name: createCannonSmoke
+        Method Parameters: 
+            cBS:
+                A JSON with cannon smoke information
+            serverTickOfLaunches:
+                The server tick of the launch
+        Method Description: Creates cannon smoke
+        Method Return: void
+    */
     createCannonSmoke(cBS, serverTickOfLaunches){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         // Add the visual effect
         this.getGame().addVisualEffect(new CannonSmoke(serverTickOfLaunches, this.getGame().getVisualEffectRandomGenerator(), cBS, visaulEffectsSettings["cannon_smoke"]));
     }
 
+    /*
+        Method Name: processCannonBallHits
+        Method Parameters: 
+            cannonBallHits:
+                A list of cannon ball hit JSON objects
+            serverTick:
+                The tick of the server
+        Method Description: Processes some cannon ball hits
+        Method Return: void
+    */
     processCannonBallHits(cannonBallHits, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         //debugger;
@@ -173,6 +322,14 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: deleteCannonBall
+        Method Parameters: 
+            id:
+                ID Of a cannon ball
+        Method Description: Deletes a specified cannon ball
+        Method Return: void
+    */
     deleteCannonBall(id){
         let index = -1;
         let cannonBalls = this.getGame().getCannonBalls();
@@ -190,6 +347,16 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: processCannonBallSinkings
+        Method Parameters: 
+            cannonBallSinkings:
+                A list of cannon ball sinking event JSONs
+            serverTick:
+                The tick of the server
+        Method Description: Handles cannon ball sinkings
+        Method Return: void
+    */
     processCannonBallSinkings(cannonBallSinkings, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         for (let cBSi of cannonBallSinkings){
@@ -199,16 +366,35 @@ class Battle extends Gamemode {
             this.getGame().addVisualEffect(new CannonBallSplash(serverTick, this.getGame().getVisualEffectRandomGenerator(), cBSi, visaulEffectsSettings["cannon_ball_splash"]));
         }
     }
+    /*
+        Method Name: processShipSinkings
+        Method Parameters: 
+            shipSinkings:
+                A list of ship sinking event JSONs
+            serverTick:
+                The tick of the server when the events took place
+        Method Description: Processes ship sinking events
+        Method Return: void
+    */
     processShipSinkings(shipSinkings, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
         for (let sS of shipSinkings){
             // Kill ship
             this.killShip(sS["ship_id"]);
+
             // Add the visual effect
             this.getGame().addVisualEffect(new ShipSplash(serverTick, this.getGame().getVisualEffectRandomGenerator(), sS, visaulEffectsSettings["ship_splash"]));
         }
     }
 
+    /*
+        Method Name: killShip
+        Method Parameters: 
+            shipID:
+                ID Of the ship to kill
+        Method Description: Kills a given ship
+        Method Return: void
+    */
     killShip(shipID){
         for (let [ship, shipIndex] of this.getGame().getShips()){
             if (ship.getID() === shipID){
@@ -219,6 +405,12 @@ class Battle extends Gamemode {
         throw new Error("Error finding ship: " + shipID);
     }
 
+    /*
+        Method Name: recordWind
+        Method Parameters: None
+        Method Description: Records the current wind details
+        Method Return: void
+    */
     async recordWind(){
         let wind = this.getGame().getWind();
         let windDataForThisTick = {
@@ -236,6 +428,12 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: updateShipPositionsFromServer
+        Method Parameters: None
+        Method Description: Takes information from the server and updates hips
+        Method Return: Promise (implicit)
+    */
     async updateShipPositionsFromServer(){
         // Get all the tick messages
         let mailBox = SC.getClientMailbox();
@@ -289,6 +487,16 @@ class Battle extends Gamemode {
         this.updateShipsPositions(ticksAhead, lastRelevantUpdate["data_json"]["ship_positions"]);
     }
 
+    /*
+        Method Name: updateShipsPositions
+        Method Parameters: 
+            ticksAhead:
+                The number of ticks ahead the client is from the ship position received
+            shipPositions:
+                A list of ship position JSONs
+        Method Description: Updates ship positions from JSON
+        Method Return: void
+    */
     updateShipsPositions(ticksAhead, shipPositions){
         for (let shipJSON of shipPositions){
             let ship = this.getGame().getShipByID(shipJSON["id"]);
@@ -300,6 +508,14 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: setup
+        Method Parameters: 
+            gameDetailsJSON:
+                GAME details in a json
+        Method Description: Sets up the battle
+        Method Return: void
+    */
     setup(gameDetailsJSON){
         let game = this.getGame();
         // Set data received
@@ -344,10 +560,16 @@ class Battle extends Gamemode {
         }
     }
 
+    /*
+        Method Name: checkEndGame
+        Method Parameters: None
+        Method Description: Checks if the game is over
+        Method Return: Promise<String>
+    */
     async checkEndGame(){
         let mailBox = SC.getClientMailbox();
 
-        let winner = null;
+        let winnerID = null;
 
         // Await access
         await mailBox.requestAccess();
@@ -359,7 +581,7 @@ class Battle extends Gamemode {
         if (endMessages.getLength() > 0){
             let message = endMessages.get(0);
             if (message["read"] === false){
-                winner = message["data_json"]["winner_id"];
+                winnerID = message["data_json"]["winner_id"];
                 message["read"] = true;
             }
         }
@@ -367,9 +589,15 @@ class Battle extends Gamemode {
         // Give up access
         mailBox.relinquishAccess();
 
-        return winner;
+        return winnerID;
     }
 
+    /*
+        Method Name: checkIfTickCountIsProper
+        Method Parameters: None
+        Method Description: Checks if the tick count is an acceptable number
+        Method Return: Promise<boolean>
+    */
     async checkIfTickCountIsProper(){
         let currentTicks = this.getGame().getTickCount();
         let ticksIfITickNow = currentTicks + 1;
@@ -413,12 +641,30 @@ class Battle extends Gamemode {
         return true;
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Nothing
+        Method Return: void
+    */
     handlePause(){ /* DO NOTHING */ }
 
+    /*
+        Method Name: getTickGapMS
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: number
+    */
     getTickGapMS(){
         return this.tickGapMS;
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Ticks the game
+        Method Return: Promise (implicit)
+    */
     async tick(){
         // Nothing to do when over
         if (this.hasGameEnded()){
@@ -458,11 +704,14 @@ class Battle extends Gamemode {
             // Error exit
             this.handleGameOver(null, false);
         } 
-
-        // Address lag
-        //this.experimentalAddressLag();
     }
 
+    /*
+        Method Name: experimentalAddressLag
+        Method Parameters: None
+        Method Description: Experimental function reducing lag
+        Method Return: void
+    */
     experimentalAddressLag(){
         let ticksBehind = this.calculateExpectedTicks() - this.getGame().getTickCount();
         if (ticksBehind > 2){
@@ -472,7 +721,17 @@ class Battle extends Gamemode {
         }
     }
 
-    handleGameOver(winner, hasWinner){
+    /*
+        Method Name: handleGameOver
+        Method Parameters: 
+            winnerID:
+                ID of the winner
+            hasWinner:
+                Boolean whether there is a winner
+        Method Description: Handles game over tasks
+        Method Return: void
+    */
+    handleGameOver(winnerID, hasWinner){
         // Disconnect from server
         this.end();
 
@@ -490,7 +749,7 @@ class Battle extends Gamemode {
         if (endProperly){
             if (game.hasFocusedShip()){
                 let myShipID = game.getFocusedShip().getID();
-                if (myShipID === winner){
+                if (myShipID === winnerID){
                     colourCode = winningScreenSettings["winning_colour_code"];
                     winningText = winningScreenSettings["winning_text"];
                 }else{
@@ -509,8 +768,15 @@ class Battle extends Gamemode {
         this.winningScreen.setUp(winningText, colourCode);
     }
 
+    /*
+        Method Name: sendMyInput
+        Method Parameters: None
+        Method Description: Sends my user input to the server
+        Method Return: void
+    */
     sendMyInput(){
         let game = this.getGame();
+
         // Ignore if no focused ship
         if (!game.hasFocusedShip()){ return; }
 
@@ -527,12 +793,30 @@ class Battle extends Gamemode {
         SC.sendJSON(infoJSON);
     }
 
+    /*
+        Method Name: getName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: string
+    */
     getName(){ return "battle"; }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LasGame
+    */
     getGame(){
         return GC.getGameInstance();
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display game
         this.getGame().display();
@@ -547,6 +831,12 @@ class Battle extends Gamemode {
         this.displayHUD();
     }
 
+    /*
+        Method Name: displayHUD
+        Method Parameters: None
+        Method Description: Displays the hud
+        Method Return: void
+    */
     displayHUD(){
         let hud = GC.getHUD();
 

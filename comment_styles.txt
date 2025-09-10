@@ -1,0 +1,73 @@
+/*
+    Class Name: TODO
+    Description: TODO
+*/
+
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: Constructor
+        Method Return: Constructor
+    */
+
+    /*
+        Method Name: TODO
+        Method Parameters: None
+        Method Description: TODO
+        Method Return: TODO
+    */
+
+    /*
+        Method Name: TODO
+        Method Parameters:
+            TODO:
+                TODO
+        Method Description: TODO
+        Method Return: TODO
+    */
+
+/*
+    Function Name: TODO
+    Function Parameters: None
+    Function Description: TODO
+    Function Return: TODO
+*/
+
+/*
+    Function Name: TODO
+    Function Parameters:
+        TODO:
+            TODO
+    Function Description: TODO
+    Function Return: TODO
+*/
+
+    /*
+        Method Name: TODO
+        Method Parameters: None
+        Method Description: TODO
+        Method Return: void
+    */
+
+    /*
+        Method Name: TODO
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: TODO
+    */
+
+    /*
+        Method Name: TODO
+        Method Parameters:
+            TODO:
+                TODO
+        Method Description: Setter
+        Method Return: void
+    */
+
+    /*
+        Method Name: TODO
+        Method Parameters: None
+        Method Description: Interface for a function that is associated with a member variable of this class
+        Method Return: TODO
+    */

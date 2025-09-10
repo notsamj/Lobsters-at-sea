@@ -21,6 +21,12 @@ class LoadingScreen {
 
     }
 
+    /*
+        Method Name: getLoadingScreenJSON
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getLoadingScreenJSON(){
         return this.loadingScreenJSON;
     }

@@ -38,6 +38,12 @@ class GamemodeManager {
         }
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Tells game to handle the pause
+        Method Return: void
+    */
     handlePause(){
         if (this.hasActiveGamemode()){
             this.gamemode.handlePause();

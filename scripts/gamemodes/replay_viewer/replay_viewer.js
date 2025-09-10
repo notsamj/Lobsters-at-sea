@@ -1,5 +1,15 @@
+/*
+    Class Name: ReplayViewer
+    Description: Gamemode for viewing replays
+*/
 class ReplayViewer extends Gamemode {
 
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(){
         super();
 
@@ -22,6 +32,12 @@ class ReplayViewer extends Gamemode {
         this.sliderTicks = 0;
     }
 
+    /*
+        Method Name: pauseUnpauseReplay
+        Method Parameters: None
+        Method Description: Toggles whether the replay is paused
+        Method Return: void
+    */
     pauseUnpauseReplay(){
         if (this.isReplayPaused()){
             this.unpauseReplay();
@@ -30,11 +46,23 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: pauseReplay
+        Method Parameters: None
+        Method Description: Pauses replay
+        Method Return: void
+    */
     pauseReplay(){
         this.paused = true;
         this.getGame().setUpdatingFramePositions(false);
     }
 
+    /*
+        Method Name: unpauseReplay
+        Method Parameters: None
+        Method Description: Unpauses replay
+        Method Return: void
+    */
     unpauseReplay(){
         this.paused = false;
         this.updateToNewTicks();
@@ -42,6 +70,12 @@ class ReplayViewer extends Gamemode {
         this.getGame().setUpdatingFramePositions(true);
     }
 
+    /*
+        Method Name: resetForTickJump
+        Method Parameters: None
+        Method Description: Reset the reviewer before jumping ticks
+        Method Return: void
+    */
     resetForTickJump(){
         this.winningScreen.reset();
         this.getGame().reset();
@@ -49,6 +83,12 @@ class ReplayViewer extends Gamemode {
         this.running = false;
     }
 
+    /*
+        Method Name: updateToNewTicks
+        Method Parameters: None
+        Method Description: Jumps to a new tick
+        Method Return: void
+    */
     updateToNewTicks(){
         this.resetForTickJump();
         let game = this.getGame();
@@ -69,14 +109,34 @@ class ReplayViewer extends Gamemode {
         this.running = true;
     }
 
+    /*
+        Method Name: isReplayPaused
+        Method Parameters: None
+        Method Description: Checks if the replay is pauded
+        Method Return: boolean
+    */
     isReplayPaused(){
         return this.paused;
     }
 
+    /*
+        Method Name: getSliderTicks
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getSliderTicks(){
         return this.sliderTicks;
     }
 
+    /*
+        Method Name: sliderSetSliderTicks
+        Method Parameters: 
+            sliderTicks:
+                Number of ticks selected by the slider
+        Method Description: Changes the number of slider ticks
+        Method Return: void
+    */
     sliderSetSliderTicks(sliderTicks){
         // When update -> pause
         if (!this.isReplayPaused()){
@@ -85,10 +145,14 @@ class ReplayViewer extends Gamemode {
         this.setSliderTicks(sliderTicks);
     }
 
-    setSliderTicks(sliderTicks){
-        this.sliderTicks = sliderTicks;
-    }
-
+    /*
+        Method Name: ticksToTimeStamp
+        Method Parameters: 
+            ticks:
+                Number of ticks
+        Method Description: Converts a tick number to a string
+        Method Return: String
+    */
     ticksToTimeStamp(ticks){
         let totalSeconds = Math.floor(this.getGame().getGameProperties()["ms_between_ticks"] * ticks / 1000);
         let hours = Math.floor(totalSeconds / (60 * 60));
@@ -117,6 +181,12 @@ class ReplayViewer extends Gamemode {
         return hoursString + ":" + minutesString + ":" + secondsString;
     }
 
+    /*
+        Method Name: setupUI
+        Method Parameters: None
+        Method Description: Sets up the UI
+        Method Return: void
+    */
     setupUI(){
         let pauseColour = MSD["replay_viewer"]["pause_colour_code"];
         let playColour = MSD["replay_viewer"]["play_colour_code"];
@@ -170,10 +240,24 @@ class ReplayViewer extends Gamemode {
         });
     }
 
+    /*
+        Method Name: isRunning
+        Method Parameters: None
+        Method Description: Checks if the game is currently running
+        Method Return: boolean
+    */
     isRunning(){
         return this.running && !this.winningScreen.isActive() && !this.paused;
     }
 
+    /*
+        Method Name: launchLocal
+        Method Parameters: 
+            localReplayName:
+                Name of a local replay
+        Method Description: Loads a local replay
+        Method Return: void
+    */
     launchLocal(localReplayName){
         this.mode = "local";
         // Find and launch
@@ -186,7 +270,15 @@ class ReplayViewer extends Gamemode {
         throw new Error("Failed to find local replay: " + localReplayName);
     }
 
-    async launchOnline(onlineReplayName){
+    /*
+        Method Name: launchOnline
+        Method Parameters: 
+            onlineReplayName:
+                The name of a server-hosted replay
+        Method Description: Starts the process of leoading a replay from the server
+        Method Return: void
+    */
+    launchOnline(onlineReplayName){
         this.mode = "online";
         // Ask for the reply
         try {
@@ -201,6 +293,12 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: checkForReplayData
+        Method Parameters: None
+        Method Description: Checks if replay data has been received from the server
+        Method Return: Promise (implicit)
+    */
     async checkForReplayData(){
         let mailBox = SC.getClientMailbox();
 
@@ -233,11 +331,27 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: launch
+        Method Parameters: 
+            replayString:
+                A string of a JSON with replay data
+        Method Description: Launches a replay from data
+        Method Return: void
+    */
     launch(replayString){
         this.loadFromString(replayString);
         this.running = true;
     }
 
+    /*
+        Method Name: loadFromJSON
+        Method Parameters: 
+            replayJSON:
+                A JSON object with replay data
+        Method Description: Loads a replay
+        Method Return: void
+    */
     loadFromJSON(replayJSON){
         let game = this.getGame();
         let gameDetails = replayJSON["opening_message"]["game_details"];
@@ -252,8 +366,6 @@ class ReplayViewer extends Gamemode {
         // Run a check on tick rate to make sure it matches
         let lgp = GC.getLocalGameProperties();
         let fgp = game.getGameProperties();
-        //debugger;
-
         // Check tick rate matches
         if (fgp["tick_rate"] != lgp["tick_rate"]){
             throw new Error("Tick rates are not equal: " + fgp["tick_rate"].toString() + ',' + lgp["tick_rate"].toString());
@@ -267,8 +379,6 @@ class ReplayViewer extends Gamemode {
         // set up wind to mirror server
         game.getWind().reset();
 
-        // TODO: Check for other relevant incongruencies
-
         // Add ships
         for (let shipJSON of gameDetails["ships"]){
             // Add game
@@ -277,23 +387,49 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: loadFromString
+        Method Parameters: 
+            replayString:
+                A string with replay data (JSON as string) 
+        Method Description: Loads a replay from a string
+        Method Return: void
+    */
     loadFromString(replayString){
         this.replayJSON = JSON.parse(replayString);
         this.loadFromJSON(this.replayJSON);
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Handles pause actions
+        Method Return: void
+    */
     handlePause(){
         if (!GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().pause();
         }
     }
 
+    /*
+        Method Name: handleUnpause
+        Method Parameters: None
+        Method Description: Handles unpause actions
+        Method Return: void
+    */
     handleUnpause(){
         if (GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().unpause();
         }
     }
 
+    /*
+        Method Name: applyPendingDecisions
+        Method Parameters: None
+        Method Description: Applies pending decisions
+        Method Return: void
+    */
     applyPendingDecisions(){
         // If run out of timeline
         if (this.timeline.length <= this.currentTimelineIndex){
@@ -323,7 +459,6 @@ class ReplayViewer extends Gamemode {
             // Modify based on the update
             for (let decisionName of Object.keys(update["decisions_updated"])){
                 pendingDecisionsForShip[decisionName] = update["decisions_updated"][decisionName];
-                //debugger;
             }
         }
 
@@ -331,6 +466,12 @@ class ReplayViewer extends Gamemode {
         this.currentTimelineIndex++;
     }
 
+    /*
+        Method Name: end
+        Method Parameters: None
+        Method Description: Ends a replay
+        Method Return: void
+    */
     end(){
         let winnerShipID = null;
         let aliveCount = 0;
@@ -350,6 +491,14 @@ class ReplayViewer extends Gamemode {
         this.handleGameOver(gameCompleted);
     }
 
+    /*
+        Method Name: handleGameOver
+        Method Parameters: 
+            hasWinner:
+                Boolean specifying if there is a winner
+        Method Description: Handles game over events
+        Method Return: void
+    */
     handleGameOver(hasWinner){
         let game = this.getGame();
 
@@ -370,6 +519,12 @@ class ReplayViewer extends Gamemode {
         this.winningScreen.setUp(winningText, colourCode);
     }
 
+    /*
+        Method Name: checkWin
+        Method Parameters: None
+        Method Description: Checks if there is a winner / or just if the game ends
+        Method Return: void
+    */
     checkWin(){
         let ships = this.getGame().getShips();
         let shipsAlive = 0;
@@ -386,10 +541,22 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: getMode
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getMode(){
         return this.mode;
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Ticks the game
+        Method Return: Promise (implicit)
+    */
     async tick(){
         // Check ui
         this.tickUI();
@@ -405,6 +572,12 @@ class ReplayViewer extends Gamemode {
         this.tickGame();
     }
 
+    /*
+        Method Name: tickGame
+        Method Parameters: None
+        Method Description: Ticks the game
+        Method Return: void
+    */
     tickGame(){
         // Check win
         this.checkWin();
@@ -416,6 +589,12 @@ class ReplayViewer extends Gamemode {
         this.applyPendingDecisions();
     }
 
+    /*
+        Method Name: tickUI
+        Method Parameters: None
+        Method Description: Ticks the replay UI
+        Method Return: void
+    */
     tickUI(){
         let leftClick = GC.getGameUserInputManager().isActivated("left_click_ticked");
         if (leftClick){
@@ -432,12 +611,30 @@ class ReplayViewer extends Gamemode {
         }
     }
 
+    /*
+        Method Name: getName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getName(){ return "replay_viewer"; }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LasGame
+    */
     getGame(){
         return GC.getGameInstance();
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display game
         this.getGame().display();
@@ -455,11 +652,23 @@ class ReplayViewer extends Gamemode {
         this.displayUI();
     }
 
+    /*
+        Method Name: displayUI
+        Method Parameters: None
+        Method Description: Displays the UI
+        Method Return: void
+    */
     displayUI(){
         this.playPauseButton.display();
         this.slider.display();
     }
 
+    /*
+        Method Name: displayHUD
+        Method Parameters: None
+        Method Description: Displays the HUD
+        Method Return: void
+    */
     displayHUD(){
         let hud = GC.getHUD();
 

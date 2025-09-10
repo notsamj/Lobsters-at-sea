@@ -158,6 +158,12 @@ class TickScheduler {
         return this.lastTickTime;
     }
 
+    /*
+        Method Name: getDisplayMSSinceLastTick
+        Method Parameters: None
+        Method Description: Gets the time in miliseconds since last tick (for display purposes)
+        Method Return: int (ms)
+    */
     getDisplayMSSinceLastTick(){
         // If the game is paused -> return the time between tick and display at the start of the pause
         if (this.isPaused()){

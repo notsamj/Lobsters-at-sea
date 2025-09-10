@@ -232,6 +232,7 @@ class Radar {
             // Add to the list of data to add
             radarDataToAdd.push({"x": sX, "y": sY});
         }
+
         // If worth displaying
         if (shipFoundFarEnough){
             for (let dataPoint of radarDataToAdd){

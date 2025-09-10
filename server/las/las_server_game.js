@@ -311,10 +311,10 @@ class LasServerGame extends LasGame {
         let tickDataMessageJSON = {
             "subject": "tick_data",
             "server_tick": this.tickCount,
-            "cannon_ball_hits": cannonBallHits.toList(),
-            "cannon_ball_sinkings": cannonBallSinkings.toList(),
-            "ship_sinkings": shipSinkings.toList(),
-            "new_cannon_shots": newCannonShots.toList()
+            "cannon_ball_hits": cannonBallHits.toArray(),
+            "cannon_ball_sinkings": cannonBallSinkings.toArray(),
+            "ship_sinkings": shipSinkings.toArray(),
+            "new_cannon_shots": newCannonShots.toArray()
         }
 
         // Add ship positions
@@ -457,7 +457,7 @@ class LasServerGame extends LasGame {
     processKills(){
         let shipSinkings = this.getTickTimeline().getEventsOfType("ship_sunk");
 
-        let vampireHealthAmount = this.getGameProperties()["saved_models"][0]["health"];
+        let vampireHealthAmount = this.getGameProperties()["saved_models"][0]["ship_json"]["health"];
 
         // Apply vampire effect
         for (let [shipSinkingObj, shipSinkingIndex] of shipSinkings){

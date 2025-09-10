@@ -19,6 +19,12 @@ class SoundManager {
         this.audioContext = undefined; 
     }
 
+    /*
+        Method Name: getAudioContext
+        Method Parameters: None
+        Method Description: Gets the audio context (creates if doesn't exist)
+        Method Return: AudioContext
+    */
     getAudioContext(){
         // Note: Assume if this is called then user has made an action so it's safe
         if (this.audioContext === undefined){
@@ -41,6 +47,14 @@ class SoundManager {
         }
     }
 
+    /*
+        Method Name: createAudioArrayBuffer
+        Method Parameters: 
+            audioString:
+                A string representation of audio
+        Method Description: Creates an audio array buffer
+        Method Return: ArrayBuffer
+    */
     async createAudioArrayBuffer(audioString){
         return await (await fetch(audioString)).arrayBuffer();
     }
@@ -64,14 +78,38 @@ class SoundManager {
         this.findSound(soundName).play(xOffset, yOffset);
     }
 
+    /*
+        Method Name: queueUp
+        Method Parameters: 
+            soundName:
+                The name of the sound
+            xOffset:
+                The offset of the sound from center in x
+            yOffset:
+                The offset of the sound from center in y
+        Method Description: Queues up a sound
+        Method Return: void
+    */
     queueUp(soundName, xOffset, yOffset){
         this.soundQueue.push({"sound_name": soundName, "x_offset": xOffset, "y_offset": yOffset});
     }
 
+    /*
+        Method Name: clearSoundQueue
+        Method Parameters: None
+        Method Description: Clears the sound queue
+        Method Return: void
+    */
     clearSoundQueue(){
         this.soundQueue.clear();
     }
 
+    /*
+        Method Name: playSounds
+        Method Parameters: None
+        Method Description: Plays all the sounds in queue
+        Method Return: void
+    */
     playSounds(){
         for (let [soundObj, soundObjIndex] of this.soundQueue){
             this.play(soundObj["sound_name"], soundObj["x_offset"], soundObj["y_offset"]);
@@ -200,6 +238,12 @@ class Sound {
         return this.name;
     }
 
+    /*
+        Method Name: load
+        Method Parameters: None
+        Method Description: Loads the sound
+        Method Return: Promise (implicit)
+    */
     async load(){
         // Indicate loading has started
         this.loadingLock.lock();
@@ -243,7 +287,7 @@ class Sound {
         audioPanner.panningModel = "HRTF";
         audioPanner.distanceModel = "inverse";
         audioPanner.refDistance = 8;
-        audioPanner.maxDistance = 1500; // TODO: Set this up in settings
+        audioPanner.maxDistance = 1500;
         audioPanner.rolloffFactor = 0.25;
         audioPanner.coneInnerAngle = 360;
         audioPanner.coneOuterAngle = 0;

@@ -1,10 +1,26 @@
+/*
+    Class Name: Skirmish
+    Description: The skirmish gamemode
+*/
 class Skirmish extends Gamemode {
 
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(){
         super();
         this.winScreen = new WinningScreen();
     }
 
+    /*
+        Method Name: applyVampireEffect
+        Method Parameters: None
+        Method Description: Applies the vampire effect (heal killer of newly dead ship)
+        Method Return: void
+    */
     applyVampireEffect(){
         let game = this.getGame();
         let shipSinkings = game.getTickTimeline().getEventsOfType("ship_sunk");
@@ -21,6 +37,14 @@ class Skirmish extends Gamemode {
         }
     }
 
+    /*
+        Method Name: startUp
+        Method Parameters: 
+            setupJSON=null:
+                JSON with setup info
+        Method Description: Sets up the game
+        Method Return: void
+    */
     startUp(setupJSON=null){
         let game = this.getGame();
         // Randomzie the wind
@@ -42,6 +66,16 @@ class Skirmish extends Gamemode {
         this.running = true;
     }
 
+    /*
+        Method Name: applySpawnDataToShipJSON
+        Method Parameters: 
+            shipJSON:
+                A JSON with ship details
+            setupJSON:
+                Setup JSON for the gammeode
+        Method Description: Applies spawn details to a shipJSON
+        Method Return: void
+    */
     applySpawnDataToShipJSON(shipJSON, setupJSON){
         let spawnDistance = setupJSON["spread"];
         let spawnAngle = randomFloatBetween(0, 2*Math.PI);
@@ -58,6 +92,14 @@ class Skirmish extends Gamemode {
         shipJSON["game_instance"] = game;
     }
 
+    /*
+        Method Name: spawnUser
+        Method Parameters: 
+            setupJSON:
+                Setup JSON for the gammeode
+        Method Description: Spawns in the user
+        Method Return: void
+    */
     spawnUser(setupJSON){
         let perfectReferenceModel = copyObject(MD["saved_models"][0]);
 
@@ -78,12 +120,28 @@ class Skirmish extends Gamemode {
         game.getHumanShipController().setUsingAutomatedSails(setupJSON["user_automatic_sails"]);
     }
 
+    /*
+        Method Name: spawnBots
+        Method Parameters: 
+            setupJSON:
+                Setup JSON for the gammeode
+        Method Description: Spawns in the bots
+        Method Return: void
+    */
     spawnBots(setupJSON){
         for (let i = 0; i < setupJSON["bot_count"]; i++){
             this.spawnBot(setupJSON);
         }
     }
 
+    /*
+        Method Name: spawnBot
+        Method Parameters: 
+            setupJSON:
+                Setup JSON for the gammeode
+        Method Description: Spawns in a bot
+        Method Return: void
+    */
     spawnBot(setupJSON){
         let botModel = undefined;
 
@@ -118,18 +176,36 @@ class Skirmish extends Gamemode {
         game.addBotShipController(botShipController);
     }
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Handles actions on pause
+        Method Return: void
+    */
     handlePause(){
         if (!GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().pause();
         }
     }
 
+    /*
+        Method Name: handleUnpause
+        Method Parameters: None
+        Method Description: Handles actions on unpause
+        Method Return: void
+    */
     handleUnpause(){
         if (GC.getGameTickScheduler().isPaused()){
             GC.getGameTickScheduler().unpause();
         }
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Ticks the gamemode
+        Method Return: void
+    */
     tick(){
         if (!this.isRunning()){
             return;
@@ -145,6 +221,12 @@ class Skirmish extends Gamemode {
         this.checkGameEvents();
     }
 
+    /*
+        Method Name: checkGameEvents
+        Method Parameters: None
+        Method Description: Checks for events in the game (only one ship surviving)
+        Method Return: void
+    */
     checkGameEvents(){
         let ships = this.getGame().getShips();
 
@@ -172,6 +254,14 @@ class Skirmish extends Gamemode {
 
     }
 
+    /*
+        Method Name: handleGameOver
+        Method Parameters: 
+            winnerShipID:
+                ID Of winning ship
+        Method Description: Handles game over actions
+        Method Return: void
+    */
     handleGameOver(winnerShipID){
         let game = this.getGame();
 
@@ -200,16 +290,40 @@ class Skirmish extends Gamemode {
         this.winScreen.setUp(winningText, colourCode);
     }
 
+    /*
+        Method Name: isRunning
+        Method Parameters: None
+        Method Description: Check if running
+        Method Return: boolean
+    */
     isRunning(){
         return this.running;
     }
 
+    /*
+        Method Name: getName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getName(){ return "skirmish"; }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LasGame
+    */
     getGame(){
         return GC.getGameInstance();
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display game
         this.getGame().display();
@@ -221,6 +335,12 @@ class Skirmish extends Gamemode {
         }
     }
 
+    /*
+        Method Name: displayHUD
+        Method Parameters: None
+        Method Description: Displays the HUD
+        Method Return: void
+    */
     displayHUD(){
         let hud = GC.getHUD();
 

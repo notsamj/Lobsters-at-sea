@@ -47,7 +47,7 @@ class SelectionSlider extends OptionSlider {
     */
     updateSliderX(){
         let currentValue = this.accessValue();
-        let currentIndex = getIndexOfElementInList(this.options, currentValue);
+        let currentIndex = getIndexOfElementInArray(this.options, currentValue);
         let currentPercentage = (currentIndex) / (this.options.length-1); // Assuming not zero
         let pxToMove = this.width - this.cursorWidth;
         this.sliderX = this.getX() + Math.round(currentPercentage * pxToMove);

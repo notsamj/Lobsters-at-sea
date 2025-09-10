@@ -13,7 +13,19 @@ if (typeof window === "undefined"){
     getIntervalOverlapDetails = require("../general/math_helper.js").getIntervalOverlapDetails;
 }
 
+/*
+    Class Name: LasGame
+    Class Description: The base game for Lobsters At Sea
+*/
 class LasGame {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            gameProperties:
+                Game properties JSON
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(gameProperties){
         this.gameProperties = gameProperties;
         this.tickTimeline = new TickTimeline();
@@ -28,6 +40,12 @@ class LasGame {
         this.shipPositions = new NotSamLinkedList(); // Temporary data
     }
 
+    /*
+        Method Name: resetColours
+        Method Parameters: None
+        Method Description: Resets the colours available
+        Method Return: void
+    */
     resetColours(){
         // Remove colours
         while (this.colours.length > 0){
@@ -39,15 +57,33 @@ class LasGame {
         }
     }
 
+    /*
+        Method Name: pickShipColour
+        Method Parameters: None
+        Method Description: Picks a color for a ship
+        Method Return: String
+    */
     pickShipColour(){
         if (this.colours.length === 0){ throw new Error("No colors remaining.")}
         return this.colours.shift();
     }
 
+    /*
+        Method Name: getCannonBalls
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LinkedList<CannonBall>
+    */
     getCannonBalls(){
         return this.cannonBalls;
     }
 
+    /*
+        Method Name: recordCannonBallPositions
+        Method Parameters: None
+        Method Description: Records cannon ball positions
+        Method Return: void
+    */
     recordCannonBallPositions(){
         // Reset
         this.cannonBallPositions.clear();
@@ -58,6 +94,12 @@ class LasGame {
         }
     }
 
+    /*
+        Method Name: recordShipPositions
+        Method Parameters: None
+        Method Description: Records ship positions
+        Method Return: void
+    */
     recordShipPositions(){
         // Reset
         this.shipPositions.clear();
@@ -66,6 +108,14 @@ class LasGame {
         }
     }
 
+    /*
+        Method Name: findCannonBall
+        Method Parameters: 
+            cannonBallID:
+                ID of a cannon ball
+        Method Description: Finds a cannon ball
+        Method Return: void
+    */
     findCannonBall(cannonBallID){
         for (let [cannonBall, cannonBallIndex] of this.cannonBalls){
             if (cannonBall.getID() === cannonBallID){
@@ -75,6 +125,12 @@ class LasGame {
         throw new Error("Failed to find cannonball with id: " + cannonBallID);
     }
 
+    /*
+        Method Name: handleCannonBallCollisionsAndDeaths
+        Method Parameters: None
+        Method Description: Finds/creates cannon ball collisions and deaths
+        Method Return: void
+    */
     handleCannonBallCollisionsAndDeaths(){
         // Check each cannon ball
         let cannonBallsToDelete = new NotSamLinkedList();
@@ -123,6 +179,12 @@ class LasGame {
         }
     }
 
+    /*
+        Method Name: handleNewCannonShots
+        Method Parameters: None
+        Method Description: Proceses new cannon shots
+        Method Return: void
+    */
     handleNewCannonShots(){
         let newCannonShots = this.getTickTimeline().getEventsOfType("cannon_shot");
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
@@ -134,11 +196,65 @@ class LasGame {
         }
     }
 
+    /*
+        Method Name: checkCannonBallCollisionInTick
+        Method Parameters: 
+            cannonBallStartX:
+                Starting X location of the cannon ball
+            cannonBallStartY:
+                Starting Y location of the cannon ball
+            cannonBallEndX:
+                Ending X location of the cannon ball
+            cannonBallEndY:
+                Ending Y location of the cannon ball
+            shipStartX:
+                Starting X location of the ship
+            shipStartY:
+                Starting Y location of the ship
+            shipEndX:
+                Ending X location of the ship
+            shipEndY:
+                Ending Y location of the ship
+            shipWidth:
+                Width of the ship
+            shipHeight:
+                Height of the ship
+        Method Description: Checks for collisions between a ship and a cannon ball within the time of atick
+        Method Return: JSON
+    */
     checkCannonBallCollisionInTick(cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight){
         let timeAsProportionOfASecond = this.getGameProperties()["tick_proportion_of_a_second"];
         return this.checkCannonBallCollisionOverTime(timeAsProportionOfASecond, cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight);
     }
 
+    /*
+        Method Name: checkCannonBallCollisionOverTime
+        Method Parameters: 
+            timeAsProportionOfASecond:
+                Time as a propotion of a second (e.g. 50ms = 0.05s -> 0.05)
+            cannonBallStartX:
+                Starting X location of the cannon ball
+            cannonBallStartY:
+                Starting Y location of the cannon ball
+            cannonBallEndX:
+                Ending X location of the cannon ball
+            cannonBallEndY:
+                Ending Y location of the cannon ball
+            shipStartX:
+                Starting X location of the ship
+            shipStartY:
+                Starting Y location of the ship
+            shipEndX:
+                Ending X location of the ship
+            shipEndY:
+                Ending Y location of the ship
+            shipWidth:
+                Width of the ship
+            shipHeight:
+                Height of the ship
+        Method Description: Checks for collisions between a ship and a cannon ball within the time proivded
+        Method Return: JSON
+    */
     checkCannonBallCollisionOverTime(timeAsProportionOfASecond, cannonBallStartX, cannonBallStartY, cannonBallEndX, cannonBallEndY, shipStartX, shipStartY, shipEndX, shipEndY, shipWidth, shipHeight){
         let cannonBallSettings = this.getGameProperties()["cannon_ball_settings"];
         let cannonBallWidth = cannonBallSettings["cannon_ball_width"];
@@ -254,6 +370,14 @@ class LasGame {
         return {"collision": false};
     }
 
+    /*
+        Method Name: getShipByID
+        Method Parameters: 
+            shipID:
+                ID of a ship
+        Method Description: Finds a ship with the given ID
+        Method Return: Ship or null
+    */
     getShipByID(shipID){
         let ships = this.getShips();
         for (let [ship, shipIndex] of ships){
@@ -264,48 +388,117 @@ class LasGame {
         return null;
     }
 
+    /*
+        Method Name: incrementTickCount
+        Method Parameters: None
+        Method Description: Increments the tick count
+        Method Return: void
+    */
     incrementTickCount(){
         this.tickCount++;
     }
 
+    /*
+        Method Name: getTickCount
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getTickCount(){
         return this.tickCount;
     }
 
+    /*
+        Method Name: getTickTimeline
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: TickTimeline
+    */
     getTickTimeline(){
         return this.tickTimeline;
     }
 
+    /*
+        Method Name: getIDManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: IDManager
+    */
     getIDManager(){
         return this.idManager;
     }
 
+    /*
+        Method Name: getShips
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LinkedList<Ship>
+    */
     getShips(){
         return this.ships;
     }
 
+    /*
+        Method Name: addShip
+        Method Parameters: 
+            newShip:
+                Ship to add
+        Method Description: Adds a ship to the game
+        Method Return: void
+    */
     addShip(newShip){
         this.ships.add(newShip);
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Placeholder
+        Method Return: void
+    */
     tick(){
-        throw new Exception("Expect to be overwritten.");
+        throw new Error("Expect to be overwritten.");
     }
 
+    /*
+        Method Name: getGameProperties
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getGameProperties(){
         return this.gameProperties;
     }
 
+    /*
+        Method Name: setGameProperties
+        Method Parameters: 
+            gamePropertiesJSON:
+                Properties for the game
+        Method Description: Setter
+        Method Return: void
+    */
     setGameProperties(gamePropertiesJSON){
         this.gameProperties = gamePropertiesJSON;
     }
 
+    /*
+        Method Name: getWind
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Wind
+    */
     getWind(){
         return this.wind;
     }
 
+    /*
+        Method Name: reset
+        Method Parameters: None
+        Method Description: Retting the game
+        Method Return: void
+    */
     reset(){
-        console.debug("Reset in las_game.js")
         // Resets world data
         this.wind.reset();
         this.idManager.reset();

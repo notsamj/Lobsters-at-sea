@@ -8,3 +8,9 @@ server/run_server.bat
 /sounds/sound_originals
 /sounds
 run_http_server.bat
+/scripts_modified
+server/make certificates.txt
+server/san.cnf
+server/make certificates.sh
+server/replay_backup.replay
+server/replay_backup.replay

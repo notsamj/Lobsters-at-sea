@@ -16,6 +16,12 @@ class HUD {
         this.hudJSON = hudJSON;
     }
 
+    /*
+        Method Name: getHUDJSON
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getHUDJSON(){
         return this.hudJSON;
     }

@@ -1,9 +1,16 @@
 /*
-    TODO: Add NSRequire thing
-        registerAllKeybinds
-        loadImages
+    Class Name: LasLocalGame
+    Description: Local running Lobsters At Sea Game
 */
 class LasLocalGame extends LasGame {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            gameProperties:
+                JSON of game properties
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(gameProperties){
         super(gameProperties);
         this.seaDisplay = new LASSeaDisplay();
@@ -21,18 +28,46 @@ class LasLocalGame extends LasGame {
         this.lastUpdatedFrameMS = 0;
     }
 
+    /*
+        Method Name: getHumanShipController
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: HumanShipController
+    */
     getHumanShipController(){
         return this.humanShipController;
     }
 
+    /*
+        Method Name: addBotShipController
+        Method Parameters: 
+            botShipController:
+                Controller for a bot
+        Method Description: Adds a bot controller
+        Method Return: void
+    */
     addBotShipController(botShipController){
         this.botShipControllers.push(botShipController);
     }
 
+    /*
+        Method Name: setUpdatingFramePositions
+        Method Parameters: 
+            value:
+                New value (boolean)
+        Method Description: Setter
+        Method Return: void
+    */
     setUpdatingFramePositions(value){
         this.updatingFramePositions = value;
     }
 
+    /*
+        Method Name: getDisplayMSSinceLastTick
+        Method Parameters: None
+        Method Description: Gets the MS since the last tick for display purposes
+        Method Return: int
+    */
     getDisplayMSSinceLastTick(){
         if (this.updatingFramePositions){
             this.lastUpdatedFrameMS = GC.getGameTickScheduler().getDisplayMSSinceLastTick();    
@@ -40,6 +75,12 @@ class LasLocalGame extends LasGame {
         return this.lastUpdatedFrameMS;
     }
 
+    /*
+        Method Name: tickHumanController
+        Method Parameters: None
+        Method Description: Ticks the human controller (or camera if applicable)
+        Method Return: void
+    */
     tickHumanController(){
         if (this.hasFocusedShip()){
             this.humanShipController.tick();
@@ -48,6 +89,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: tickBotControllers
+        Method Parameters: None
+        Method Description: Ticks the bot controllers
+        Method Return: void
+    */
     tickBotControllers(){
         for (let botShipController of this.botShipControllers){
             if (botShipController.getShip().isDead()){continue;}
@@ -55,6 +102,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: displayHumanController
+        Method Parameters: None
+        Method Description: Displays and human or camera thingsn needed
+        Method Return: void
+    */
     displayHumanController(){
         if (this.hasFocusedShip()){
             this.humanShipController.display();
@@ -63,6 +116,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Runs tick processes
+        Method Return: void
+    */
     tick(){
         // Clean the tick timeline
         this.getTickTimeline().reset();
@@ -77,11 +136,13 @@ class LasLocalGame extends LasGame {
         this.tickBotControllers();
 
 
-        // TODO: Update ship orientations, power based on decisions
+        // Update ship orientations, power based on decisions
         this.updateShipOrientationAndSailPower();
 
-        // TODO: Move ships based on orientation and sail power
+        // Record initial positions prior to moving for collision checking later
         this.recordShipPositions();
+
+        // Move ships based on orientation and sail power
         this.moveShips();
 
         // Allow ships to shoot
@@ -103,12 +164,18 @@ class LasLocalGame extends LasGame {
         this.processNewVisualEffects();
 
         // Play sounds
-        this.playSounds(this.getFocusedFrameX(), this.getFocusedFrameY());
+        this.queueUpSounds(this.getFocusedFrameX(), this.getFocusedFrameY());
 
         // Up the tick count
         this.incrementTickCount();
     }
 
+    /*
+        Method Name: processNewVisualEffects
+        Method Parameters: None
+        Method Description: Processes new visual effects
+        Method Return: void
+    */
     processNewVisualEffects(){
         let tickTimeline = this.getTickTimeline();
 
@@ -142,12 +209,24 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: handleCannonShotMovement
+        Method Parameters: None
+        Method Description: Moves the cannon balls
+        Method Return: void
+    */
     handleCannonShotMovement(){
         for (let [cannonBall, index] of this.cannonBalls){
             cannonBall.move();
         }
     }
 
+    /*
+        Method Name: tickShips
+        Method Parameters: None
+        Method Description: Ticks the ships
+        Method Return: void
+    */
     tickShips(){
         for (let [ship, shipIndex] of this.getShips()){
             if (ship.isDead()){ continue; }
@@ -155,6 +234,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: moveShips
+        Method Parameters: None
+        Method Description: Mones the ships for a tick
+        Method Return: void
+    */
     moveShips(){
         for (let [ship, shipIndex] of this.getShips()){
             if (ship.isDead()){ continue; }
@@ -162,6 +247,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: allowShipsToShoot
+        Method Parameters: None
+        Method Description: Allows ships to shoot
+        Method Return: void
+    */
     allowShipsToShoot(){
         for (let [ship, shipIndex] of this.getShips()){
             if (ship.isDead()){ continue; }
@@ -169,6 +260,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: updateShipDecisions
+        Method Parameters: None
+        Method Description: Updates the decisions of the ships from their controllers
+        Method Return: void
+    */
     updateShipDecisions(){
         // For human ship
         if (this.hasFocusedShip()){
@@ -183,13 +280,24 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: updateShipOrientationAndSailPower
+        Method Parameters: None
+        Method Description: Tells ships to update their orientation and sail power
+        Method Return: void
+    */
     updateShipOrientationAndSailPower(){
-        
         for (let [ship, shipIndex] of this.getShips()){
             ship.updateShipOrientationAndSailPower();
         }
     }
 
+    /*
+        Method Name: getFocusedEntity
+        Method Parameters: None
+        Method Description: Gets the focused entity
+        Method Return: SpectatorCamera | Ship
+    */
     getFocusedEntity(){
         if (this.focusedShip === null){
             return this.focusedCamera;
@@ -197,40 +305,96 @@ class LasLocalGame extends LasGame {
         return this.focusedShip;
     }
 
+    /*
+        Method Name: getFocusedShip
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Ship || null
+    */
     getFocusedShip(){
         return this.focusedShip;
     }
 
+    /*
+        Method Name: setFocusedShip
+        Method Parameters: 
+            ship:
+                A ship
+        Method Description: Sets the focusd ship and adds a human controller
+        Method Return: void
+    */
     setFocusedShip(ship){
         this.focusedShip = ship; 
         this.humanShipController = new HumanShipController(this.focusedShip);
     }
 
+    /*
+        Method Name: hasFocusedShip
+        Method Parameters: None
+        Method Description: Checks if there is a focused ship
+        Method Return: boolean
+    */
     hasFocusedShip(){
         return this.getFocusedShip() != null;
     }
 
+    /*
+        Method Name: getFocusedFrameX
+        Method Parameters: None
+        Method Description: Gets the frame x of the focused entity
+        Method Return: number
+    */
     getFocusedFrameX(){
         return this.getFocusedEntity().getFrameX();
     }
 
+    /*
+        Method Name: getFocusedFrameY
+        Method Parameters: None
+        Method Description: Gets the frame y of the focused entity
+        Method Return: number
+    */
     getFocusedFrameY(){
         return this.getFocusedEntity().getFrameY();
     }
 
+    /*
+        Method Name: getFocusedTickX
+        Method Parameters: None
+        Method Description: Gets the tick x of the focused entity
+        Method Return: number
+    */
     getFocusedTickX(){
         return this.getFocusedEntity().getTickX();
     }
 
+    /*
+        Method Name: getFocusedTickY
+        Method Parameters: None
+        Method Description: Gets the tick y of the focused entity
+        Method Return: number
+    */
     getFocusedTickY(){
         return this.getFocusedEntity().getTickY();
     }
 
+    /*
+        Method Name: reset
+        Method Parameters: None
+        Method Description: Resets the game
+        Method Return: void
+    */
     reset(){
         super.reset();
         this.visualEffects.clear();
     }
 
+    /*
+        Method Name: displayVisualEffects
+        Method Parameters: None
+        Method Description: Displays visual effects
+        Method Return: void
+    */
     displayVisualEffects(){
         let visualEffectsThatExpiredIndices = new NotSamLinkedList();
 
@@ -256,6 +420,12 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the game
+        Method Return: void
+    */
     display(){
         // Display the seas
         this.seaDisplay.display(this.getFocusedFrameX(), this.getFocusedFrameY());
@@ -287,7 +457,17 @@ class LasLocalGame extends LasGame {
         GC.getSoundManager().playSounds();
     }
 
-    playSounds(centerX, centerY){
+    /*
+        Method Name: queueUpSounds
+        Method Parameters: 
+            centerX:
+                Center x (game coordinates) of the focused entity
+            centerY:
+                Center y (game coordinates) of the focused entity
+        Method Description: Plays sounds in the game
+        Method Return: void
+    */
+    queueUpSounds(centerX, centerY){
         let tickTimeline = this.getTickTimeline();
         let soundManager = GC.getSoundManager();
 
@@ -331,12 +511,13 @@ class LasLocalGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: registerAllKeybinds
+        Method Parameters: None
+        Method Description: Registers all the keybinds
+        Method Return: void
+    */
     static registerAllKeybinds(){
-        /* TODO: List out all keybinds
-            get value from DEFAULT_KEY_BIND in main_data_json
-            modify keybind if a local storage data value exists for that keybind
-            register
-        */
 
         // Read default values
         let keyCodeLeftClick = MD["default_key_binds"]["left_click_ticked"];
@@ -355,6 +536,12 @@ class LasLocalGame extends LasGame {
         let keyCodeZoom12 = MD["default_key_binds"]["zoom_1/2"];
         let keyCodeZoom1 = MD["default_key_binds"]["zoom_1"];
         let keyCodeZoom2 = MD["default_key_binds"]["zoom_2"];
+
+        let keyCodeZoomAlt18 = MD["default_key_binds"]["zoom_1/8_alt"];
+        let keyCodeZoomAlt14 = MD["default_key_binds"]["zoom_1/4_alt"];
+        let keyCodeZoomAlt12 = MD["default_key_binds"]["zoom_1/2_alt"];
+        let keyCodeZoomAlt1 = MD["default_key_binds"]["zoom_1_alt"];
+        let keyCodeZoomAlt2 = MD["default_key_binds"]["zoom_2_alt"];
 
         // Game controls
         let keyCodeSailsInc = MD["default_key_binds"]["sails_inc"];
@@ -412,6 +599,7 @@ class LasLocalGame extends LasGame {
         // Keys Menu
         gameInputManager.register("scroll_left_ticked_game", "keydown", (event) => { return event.which===keyCodeScrollL; }, true, {"ticked": true, "ticked_activation": false});
         gameInputManager.register("scroll_right_ticked_game", "keydown", (event) => { return event.which===keyCodeScrollR; }, true, {"ticked": true, "ticked_activation": false});
+        
         gameInputManager.register("1/8zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom18; }, true);
         gameInputManager.register("1/8zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoom18; }, false);
         gameInputManager.register("1/4zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom14; }, true);
@@ -422,6 +610,18 @@ class LasLocalGame extends LasGame {
         gameInputManager.register("1zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoom1; }, false);
         gameInputManager.register("2zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom2; }, true);
         gameInputManager.register("2zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoom2; }, false);
+
+        // Alt
+        gameInputManager.register("1/8zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt18; }, true);
+        gameInputManager.register("1/8zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt18; }, false);
+        gameInputManager.register("1/4zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt14; }, true);
+        gameInputManager.register("1/4zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt14; }, false);
+        gameInputManager.register("1/2zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt12; }, true);;
+        gameInputManager.register("1/2zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt12; }, false);
+        gameInputManager.register("1zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt1; }, true);
+        gameInputManager.register("1zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt1; }, false);
+        gameInputManager.register("2zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt2; }, true);
+        gameInputManager.register("2zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt2; }, false);
 
         gameInputManager.register("sails_inc", "keydown", (event) => { return event.keyCode === keyCodeSailsInc; }, true);
         gameInputManager.register("sails_inc", "keyup", (event) => { return event.keyCode === keyCodeSailsInc; }, false);
@@ -456,6 +656,12 @@ class LasLocalGame extends LasGame {
 
     }
 
+    /*
+        Method Name: loadImages
+        Method Parameters: None
+        Method Description: Loads images needed
+        Method Return: void
+    */
     static async loadImages(){
         // Load logo
         await GC.loadToImages("logo");

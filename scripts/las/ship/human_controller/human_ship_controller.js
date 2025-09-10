@@ -205,20 +205,14 @@ class HumanShipController {
         if (aimingCannons){
             let ship = this.getShip();
             let game = ship.getGame();
-            let middleOfScreenX = game.getFocusedTickX();
-            let middleOfScreenY = game.getFocusedTickY();
 
             let approximateCanvasMiddleX = getScreenWidth()/2;
             let approximateCanvasMiddleY = getScreenHeight()/2;
 
             // Get a pretty good estimate of cannon x and y
-            cannonX = GC.getGMouseX() - approximateCanvasMiddleX + middleOfScreenX;
-            cannonY = approximateCanvasMiddleY - GC.getGMouseY() + middleOfScreenY;
-
-            // Make relative to the ship
-            cannonX = cannonX - ship.getTickX();
-            cannonY = cannonY - ship.getTickY();
-                
+            cannonX = (GC.getGMouseX() - approximateCanvasMiddleX) / gameZoom;
+            cannonY = (approximateCanvasMiddleY - GC.getGMouseY()) / gameZoom;
+            
             // Round
             cannonX = Math.round(cannonX);
             cannonY = Math.round(cannonY);

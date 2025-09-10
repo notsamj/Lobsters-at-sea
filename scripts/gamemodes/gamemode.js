@@ -33,11 +33,17 @@ class Gamemode {
     /*
         Method Name: handleUnpause
         Method Parameters: None
-        Method Description: May or may not be implemeneted. Handles actions on unpause
+        Method Description: May or may not be implemented. Handles actions on unpause
         Method Return: void
     */
     handleUnpause(){}
 
+    /*
+        Method Name: handlePause
+        Method Parameters: None
+        Method Description: Handles actions on pause
+        Method Return: void
+    */
     handlePause(){
         throw new Error("Expect this to be overwritten.");
     }

@@ -295,7 +295,7 @@ class Ship {
         // Adjust based on offsets and zoom
         let zoomedXOffset = myCenterXOffsetFromScreenCenter * gameZoom;
         let zoomedYOffset = myCenterYOffsetFromScreenCenter * gameZoom;
-
+        
         // Determine my top left coordinates (float)
         let myXScreenCoordFL = zeroXScreenCoordFL + zoomedXOffset;
         let myYScreenCoordFL = zeroYScreenCoordFL - zoomedYOffset; // when doing screen coordinates, y is inversed

@@ -135,7 +135,7 @@ class ServerConnection {
     }
 
     createWSSObject(){
-        let fullAddrString = "wss:" + SCD["address"] + ':' + SCD["port"].toString();
+        let fullAddrString = "wss://" + SCD["address"] + ':' + SCD["port"].toString();
         
         // Create WS
         this.connectionWS = new WebSocket(fullAddrString);
