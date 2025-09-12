@@ -40,7 +40,7 @@ class MainMenu extends Menu {
         let logoSizeY = MSD["main_menu"]["logo_y_size"];
         let logoX = (innerWidth) => { return 0; }
         let logoY = (innerHeight) => { return innerHeight; }
-        this.components.push(new StaticImage(GC.getImage("logo"), logoX, logoY, logoSizeX, logoSizeY));
+        this.components.push(new StaticImage("logo", logoX, logoY, logoSizeX, logoSizeY));
 
         // challenge
         let challengeButtonY = (innerHeight) => { return Math.floor(innerHeight - totalInterfaceYSize)/2 + totalInterfaceYSize; }

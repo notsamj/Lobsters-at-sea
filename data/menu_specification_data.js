@@ -260,8 +260,55 @@ const MSD = {
             "images": {
                 "default": [
                     "help_menu_error" // .png
+                ],
+                "battle_menu": [
+                    "help_menu_battle_menu_1",
+                    "help_menu_battle_technical_overview",
+                    "help_menu_battle_gameplay_overview",
+                    "help_menu_battle_controls",
+                    "help_menu_battle_1",
+                ],
+                "challenge": [
+                    "help_menu_challenge_gameplay_overview",
+                    "help_menu_challenge_controls",
+                    "help_menu_challenge_1"
+                ],
+                "challenge_menu": [
+                    "help_menu_challenge_menu_1",
+                    "help_menu_challenge_menu_2",
+                    "help_menu_challenge_menu_3"
+                ],
+                "gamemode_viewer_menu": [
+                    "help_menu_gamemode_viewer_menu_1"
+                ],
+                "main_menu": [
+                    "help_menu_main_menu_1"
+                ],
+                "replay_menu": [
+                    "help_menu_replay_menu_1"
+                ],
+                "replay_viewer": [
+                    "help_menu_replay_viewer_controls",
+                    "help_menu_replay_viewer_1"
+                ],
+                "settings_menu": [
+                    "help_menu_settings_menu_1"
+                ],
+                "skirmish": [
+                    "help_menu_skirmish_gameplay_overview",
+                    "help_menu_skirmish_controls",
+                    "help_menu_skirmish_1"
+                ],
+                "skirmish_menu": [
+                    "help_menu_skirmish_menu_1",
+                    "help_menu_skirmish_menu_2",
+                    "help_menu_skirmish_menu_3"
+                ],
+                "sound_menu": [
+                    "help_menu_sound_menu_1"
                 ]
             }
+
         },
         "arrow_buttons": {
             "x_size": 100,

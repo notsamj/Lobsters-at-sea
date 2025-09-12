@@ -618,8 +618,8 @@ class LasLocalGame extends LasGame {
         Method Return: void
     */
     static async loadImages(){
-        // Load logo
-        await GC.loadToImages("logo");
+        // Load image loading
+        await GC.loadToImages("image_loading");
 
         // Load windsock
         await GC.loadToImages("wind_sock");
@@ -644,15 +644,20 @@ class LasLocalGame extends LasGame {
             await GC.loadToImages("generic_ship_up", shipPathPrefix + colour + "/", ".png", {"custom_name": "generic_ship_up_" + colour});
         }
 
-        // Load project images
-        await GC.getMenuManager().getMenuByName("my_projects_menu").loadImages();
-
-        // Load help menu images
-        await GC.getMenuManager().getMenuByName("help_menu").loadImages();
-
         // Load sounds
         await GC.getSoundManager().loadSounds();
 
-        console.log("Finished loading game images.")
+        console.log("Finished loading critical game images.")
+
+        // Slow loads
+
+        // Load logo
+        GC.slowLoadToImages("logo");
+
+        // Load project images
+        await GC.getMenuManager().getMenuByName("my_projects_menu").slowLoadImages();
+
+        // Load help menu images
+        await GC.getMenuManager().getMenuByName("help_menu").slowLoadImages();
     }
 }

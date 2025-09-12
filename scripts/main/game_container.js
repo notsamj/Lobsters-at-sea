@@ -169,10 +169,33 @@ class GameContainer {
         Method Return: Image
     */
     getImage(imageName){
+        // Image not found
         if (!this.hasImage(imageName)){
             throw new Error("Image: " + imageName + " not found.");
         }
-        return this.IMAGES[imageName];
+
+        let image = this.IMAGES[imageName];
+
+        let imageIsNotLoaded = !(image instanceof HTMLImageElement);
+
+        // If not loaded
+        if (imageIsNotLoaded){
+            // Check if loading
+            let imageIsLoading = image["loading"];
+
+            // Not loading -> Load it
+            if (!imageIsLoading){
+
+                // Mark that it's loadingso not down twice
+                image["loading"] = true;
+                this.loadToImages(image["name"], image["folder_prefix"], image["type"], image["extra_data"]);
+            }
+
+            return this.IMAGES["image_loading"];
+        }
+
+        // Else, loaded
+        return image;
     }
 
     /*
@@ -225,6 +248,25 @@ class GameContainer {
             imageName = extraData["custom_name"];
         }
         this.IMAGES[imageName] = await loadLocalImage("images/" + folderPrefix + imageFileName);
+    }
+
+    /*
+        Function Name: slowLoadToImages
+        Function Parameters: 
+            imageName:
+                The name of an image
+            folderPrefix:
+                The folder prefix in images
+            type:
+                The type of file
+            extraData:
+                JSON of extra data to submit when needed
+        Function Description: Loads an image to the image JSON
+        Function Return: Promise (implicit)
+    */
+    slowLoadToImages(imageName, folderPrefix="", type=".png", extraData={}){
+        // Store data if needed later
+        this.IMAGES[imageName] = {"loading": false, "name": imageName, "folder_prefix": folderPrefix, "type": type, "extra_data": extraData};
     }
 
     /*

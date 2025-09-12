@@ -21,18 +21,18 @@ class MyProjectsMenu extends Menu {
     }
 
     /*
-        Method Name: loadImages
+        Method Name: slowLoadImages
         Method Parameters: None
         Method Description: Loads project images
         Method Return: Promise (implicit)
     */
-    async loadImages(){
+    slowLoadImages(){
         let images = MSD["my_projects_menu"]["project_image"]["images"];
         let folderURL = "my_projects/";
         for (let imageName of images){
             // Do not load if already exists
             if (GC.hasImage(imageName)){ continue; }
-            await GC.loadToImages(imageName, folderURL);
+            GC.slowLoadToImages(imageName, folderURL);
         }
     }
 
@@ -58,7 +58,7 @@ class MyProjectsMenu extends Menu {
         Method Return: void
     */
     updateImage(){
-        this.projectImage.setImage(GC.getImage(this.imageNames[this.currentImageIndex]));
+        this.projectImage.setImageName(this.imageNames[this.currentImageIndex]);
     }
 
     /*
@@ -143,7 +143,7 @@ class MyProjectsMenu extends Menu {
         }
 
 
-        this.projectImage = new StaticImage(GC.getImage(menuDataProjectImage["images"][0]), projectImageXFunction, projectImageYFunction, projectImageXSizeFunction, projectImageYSizeFunction);
+        this.projectImage = new StaticImage(menuDataProjectImage["images"][0], projectImageXFunction, projectImageYFunction, projectImageXSizeFunction, projectImageYSizeFunction);
         this.components.push(this.projectImage);
 
         // Text about number of images

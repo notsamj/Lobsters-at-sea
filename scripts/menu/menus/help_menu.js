@@ -22,19 +22,19 @@ class HelpMenu extends Menu {
     }
 
     /*
-        Method Name: loadImages
+        Method Name: slowLoadImages
         Method Parameters: None
         Method Description: Loads the images related to help
         Method Return: Promise (implicit)
     */
-    async loadImages(){
+    slowLoadImages(){
         let imageJSON = MSD["help_menu"]["help_image"]["images"];
         let folderURL = "help/";
         for (let helpScreenName of Object.keys(imageJSON)){
             for (let imageName of imageJSON[helpScreenName]){
                 // Do not load if already exists
                 if (GC.hasImage(imageName)){ continue; }
-                await GC.loadToImages(imageName, folderURL + helpScreenName + "/");
+                GC.slowLoadToImages(imageName, folderURL + helpScreenName + "/");
             }
         }
     }
@@ -100,7 +100,7 @@ class HelpMenu extends Menu {
         Method Return: void
     */
     updateImage(){
-        this.helpImage.setImage(GC.getImage(this.imageNames[this.currentImageIndex]));
+        this.helpImage.setImageName(this.imageNames[this.currentImageIndex]);
     }
 
     /*

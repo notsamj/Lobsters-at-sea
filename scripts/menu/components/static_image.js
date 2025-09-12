@@ -6,8 +6,8 @@ class StaticImage extends Component {
     /*
         Method Name: constructor
         Method Parameters:
-            image:
-                An image
+            image name:
+                An image name
             x:
                 The x location of the top left corner
             y:
@@ -19,9 +19,9 @@ class StaticImage extends Component {
         Method Description: Constructor
         Method Return: Constructor
     */
-    constructor(image, x, y, maxWidth=null, maxHeight=null){
+    constructor(imageName, x, y, maxWidth=null, maxHeight=null){
         super();
-        this.image = image;
+        this.imageName = imageName;
         this.x = x;
         this.y = y;
         this.maxWidth = maxWidth;
@@ -108,15 +108,15 @@ class StaticImage extends Component {
     }
 
     /*
-        Method Name: setImage
+        Method Name: setImageName
         Method Parameters:
-            image:
-                An image
+            imageName:
+                An image name
         Method Description: Setter
         Method Return: void
     */
-    setImage(image){
-        this.image = image;
+    setImageName(imageName){
+        this.imageName = imageName;
     }
 
     /*
@@ -146,11 +146,21 @@ class StaticImage extends Component {
      /*
         Method Name: getImage
         Method Parameters: None
-        Method Description: Getter
+        Method Description: Gets the image from storage
         Method Return: Image
     */
     getImage(){
-        return this.image;
+        return GC.getImage(this.getImageName());
+    }
+
+     /*
+        Method Name: getImageName
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
+    getImageName(){
+        return this.imageName;
     }
 
     /*
