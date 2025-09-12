@@ -18,7 +18,9 @@ const MD = {
     "bot_settings": {
         "start_max_expected_hit_distance": 84, // Distance expected from target to hit. If less than distance expected -> shoot
         "max_expected_hit_distance": 250,
-        "constant_max_expected_hit_distance": 1500
+        "constant_max_expected_hit_distance": 1500,
+        "turn_calculation_times_ms": [50, 100, 250, 500, 1000, 2000, 4000, 8000],
+        "search_precision_ms": 5 // Check if I can hit @ x ms with precision y
     },
 
     "ship_colours": [
@@ -405,7 +407,7 @@ const MD = {
         {
             "model_name": "The Krill",
             "ship_json": {
-                "health": 20,
+                "health": 4, // 20
                 "starting_x_pos": null,
                 "starting_y_pos": null,
                 "starting_speed": 0,

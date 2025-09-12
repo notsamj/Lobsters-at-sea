@@ -5,7 +5,21 @@ const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_bal
 const GameRecorder = require("./game_recorder.js").GameRecorder;
 const BotShipController = require("../../scripts/las/ship/bot_controller/bot_ship_controller.js").BotShipController;
 
+/*
+    Class Name: LasServerGame
+    Description: A LasGame game running on a server
+*/
 class LasServerGame extends LasGame {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            gameProperties:
+                Game properties in a JSON
+            server:
+                A server class reference
+        Method Description: Constructor
+        Method Return: Constructor
+    */
     constructor(gameProperties, server){
         super(gameProperties);
         this.running = false;
@@ -21,6 +35,14 @@ class LasServerGame extends LasGame {
         this.botShipControllers = [];
     }
 
+    /*
+        Method Name: start
+        Method Parameters:
+            setupData:
+                JSON with setup data
+        Method Description: Starts the game
+        Method Return: Promise (implicit)
+    */
     async start(setupData){
         let clientList = setupData["client_data"];
         let clientsArePlayers = setupData["expected_players_data"]["player_role"] === 1;
@@ -41,6 +63,16 @@ class LasServerGame extends LasGame {
         this.spawnClientsAndSendOpeningMessage(clientsArePlayers, setupData["gamemode_data"]);
     }
 
+    /*
+        Method Name: addBots
+        Method Parameters:
+            botData:
+                JSON with bot info
+            gamemodeData:
+                JSON with info about the gammode
+        Method Description: Adds bots to the game
+        Method Return: void
+    */
     addBots(botData, gamemodeData){
         // Find bot model
         let botModel = undefined;
@@ -86,11 +118,28 @@ class LasServerGame extends LasGame {
     
     }
 
+    /*
+        Method Name: addBotShipController
+        Method Parameters:
+            botShipController:
+                JSON with bot ship controller info
+        Method Description: Adds a bot ship controller
+        Method Return: void
+    */
     addBotShipController(botShipController){
         this.botShipControllers.push(botShipController);
     }
 
-
+    /*
+        Method Name: spawnClientsAndSendOpeningMessage
+        Method Parameters:
+            clientsArePlayers:
+                Boolean specifying if clients are playing or spectating
+            gamemodeData:
+                JSON with gamemode info
+        Method Description: Spawns clients and send the opening message
+        Method Return: void
+    */
     spawnClientsAndSendOpeningMessage(clientsArePlayers, gamemodeData){
         let openingMessageJSON = {
             "subject": "game_start",
@@ -166,12 +215,26 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: sendAll
+        Method Parameters:
+            messageJSON:
+                A JSON to send
+        Method Description: Sends all the clients a JSON
+        Method Return: void
+    */
     sendAll(messageJSON){
         for (let [client, clientIndex] of this.clients){
             client.sendJSON(messageJSON);
         }
     }
 
+    /*
+        Method Name: tickBotControllers
+        Method Parameters: None
+        Method Description: Tick actions for bot controllers
+        Method Return: void
+    */
     tickBotControllers(){
         for (let botShipController of this.botShipControllers){
             if (botShipController.getShip().isDead()){ continue; }
@@ -179,6 +242,12 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: reset
+        Method Parameters: None
+        Method Description: Resets the game
+        Method Return: void
+    */
     reset(){
         this.running = false;
         this.clients.clear();
@@ -195,6 +264,12 @@ class LasServerGame extends LasGame {
         this.botShipControllers = [];
     }
 
+    /*
+        Method Name: end
+        Method Parameters: None
+        Method Description: End events
+        Method Return: void
+    */
     end(){
         let winnerShipID = null;
         let aliveCount = 0;
@@ -214,7 +289,7 @@ class LasServerGame extends LasGame {
         
         // If game successfully completed then get replay string
         if (gameCompleted){
-            //this.server.test(this.gameRecorder);
+            this.gameRecorder.setLastTick(this.getTickCount());
 
             this.server.addReplay(this.gameRecorder.getReplayString());
         }
@@ -228,10 +303,22 @@ class LasServerGame extends LasGame {
 
     }
 
+    /*
+        Method Name: isRunning
+        Method Parameters: None
+        Method Description: Checks if the game is still running
+        Method Return: boolean
+    */
     isRunning(){
         return this.running;
     }
 
+    /*
+        Method Name: determineIfContinuingToRun
+        Method Parameters: None
+        Method Description: Checks if the game should continue running
+        Method Return: Promise (implicit)
+    */
     async determineIfContinuingToRun(){
         // Purge clients
         let shipsIDsToKill = await this.checkActiveParticipants();
@@ -273,6 +360,12 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: checkActiveParticipants
+        Method Parameters: None
+        Method Description: Checks for participants taht are still active
+        Method Return: Promise (implicit)
+    */
     async checkActiveParticipants(){
         let removalFunc = async (client) => {
             return client.connectionIsDead() || (!(await client.checkForStatus("desire_to_play_battle")));
@@ -297,6 +390,12 @@ class LasServerGame extends LasGame {
         return shipIDsToDelete;
     }
 
+    /*
+        Method Name: sendClientsTickAndPositionData
+        Method Parameters: None
+        Method Description: Sends clients needed data
+        Method Return: void
+    */
     sendClientsTickAndPositionData(){
         let cannonBallSinkings = this.getTickTimeline().getEventsOfType("cannon_ball_sunk");
         let cannonBallHits = this.getTickTimeline().getEventsOfType("cannon_ball_hit");
@@ -326,22 +425,48 @@ class LasServerGame extends LasGame {
         this.sendAll(tickDataMessageJSON);
     }
 
+    /*
+        Method Name: isReadyToTick
+        Method Parameters: None
+        Method Description: Checks if the gamemode is ready to tick
+        Method Return: boolean
+    */
     isReadyToTick(){
         let now = Date.now();
         let expectedTicks = this.calculateExpectedTicks();
         return expectedTicks > this.getTickCount();
     }
 
+    /*
+        Method Name: calculateExpectedTicks
+        Method Parameters: None
+        Method Description: Calculates the number of ticks expected
+        Method Return: float
+    */
     calculateExpectedTicks(){
         return (Date.now() - (this.gameStartTime)) / this.tickGapMS;
     }
 
+    /*
+        Method Name: clearAllClientPendingDecisions
+        Method Parameters: None
+        Method Description: Clears pending decision mailboxes
+        Method Return: Promise (implicit)
+    */
     async clearAllClientPendingDecisions(){
         for (let [client, clientIndex] of this.clients){
             await this.clearClientPendingDecisions(client.getMailBox());
         }
     }
 
+    /*
+        Method Name: clearClientPendingDecisions
+        Method Parameters:
+            mailBox:
+                A mailbox
+        Method Description: Clears client pending decisions
+        Method Return: Promise (implicit)
+    */
     async clearClientPendingDecisions(mailBox){
         // Get access
         await mailBox.requestAccess();
@@ -357,12 +482,26 @@ class LasServerGame extends LasGame {
         mailBox.relinquishAccess();
     }
 
+    /*
+        Method Name: takeAllUserPendingDecisions
+        Method Parameters: None
+        Method Description: Reads user pending decisions
+        Method Return: Promise (implicit)
+    */
     async takeAllUserPendingDecisions(){
         for (let [client, clientIndex] of this.clients){
             await this.takeUserPendingDecisions(client.getMailBox());
         }
     }
 
+    /*
+        Method Name: takeUserPendingDecisions
+        Method Parameters: 
+            mailBox:
+                A mailbox
+        Method Description: Take one user's pending decisions
+        Method Return: Promise (implicit)
+    */
     async takeUserPendingDecisions(mailBox){
         // Get access
         await mailBox.requestAccess();
@@ -389,6 +528,12 @@ class LasServerGame extends LasGame {
         mailBox.relinquishAccess();
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Tick actions
+        Method Return: Promise (implicit)
+    */
     async tick(){
         // Tick cooldown
         if (!this.isReadyToTick()){
@@ -412,19 +557,19 @@ class LasServerGame extends LasGame {
             // Update from received pending decisions
             await this.takeAllUserPendingDecisions();
 
-            // Record
-            this.recordShipDecisions();
-
             // Maintenace ticks
             this.tickShips();
 
             // Tick bot controllers
             this.tickBotControllers();
 
-            // TODO: Update ship orientations, power based on decisions
-            this.updateShipOrientationAndSailPower();
+            // Updates the established decisions
+            this.updateEstablishedDecisions();
 
-            // TODO: Move ships based on orientation and sail power
+            // Record establish decisions
+            this.recordShipDecisions(); 
+
+            // Record ship positions then moves the ships
             this.recordShipPositions();
             this.moveShips();
 
@@ -454,6 +599,12 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: processKills
+        Method Parameters: None
+        Method Description: Process kills for vampire effect
+        Method Return: void
+    */
     processKills(){
         let shipSinkings = this.getTickTimeline().getEventsOfType("ship_sunk");
 
@@ -461,6 +612,8 @@ class LasServerGame extends LasGame {
 
         // Apply vampire effect
         for (let [shipSinkingObj, shipSinkingIndex] of shipSinkings){
+            // Ignore suicide where there's no vampire effect
+            if (shipSinkingObj["shooter_ship_id"] === null){ continue; }
             let killerShip = this.getShipByID(shipSinkingObj["shooter_ship_id"]);
 
             // Doesn't apply if killer is dead
@@ -469,6 +622,12 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: updateBotShipDecisions
+        Method Parameters: None
+        Method Description: Updates the bot decisions
+        Method Return: void
+    */
     updateBotShipDecisions(){
         // Bot ship controllers
         for (let botShipController of this.botShipControllers){
@@ -476,52 +635,34 @@ class LasServerGame extends LasGame {
         }
     }
 
+    /*
+        Method Name: recordShipDecisions
+        Method Parameters: None
+        Method Description: Saves ship decisions and records them
+        Method Return: void
+    */
     recordShipDecisions(){
         let shipDecisionsJSON = {
             "event_type": "ship_decisions_recording",
             "ship_decisions": []
         }
         for (let [ship, shipIndex] of this.getShips()){
+            let decisions = copyObject(ship.getEstablishedDecisions());
+
+            // Apply band-aid for trimming
+            if (!decisions["fire_cannons"]){
+                decisions["aiming_cannons_position_x"] = undefined;
+                decisions["aiming_cannons_position_y"] = undefined;
+            }
+
+
             shipDecisionsJSON["ship_decisions"].push({
                 "ship_id": ship.getID(),
-                "established_decisions": copyObject(ship.getEstablishedDecisions())
+                "established_decisions": 
             });
         }
 
         this.gameRecorder.addDecisions(this.getTickCount(), shipDecisionsJSON);
-    }
-
-    handleCannonShotMovement(){
-        for (let [cannonBall, index] of this.cannonBalls){
-            cannonBall.move();
-        }
-    }
-
-    tickShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.tick();
-        }
-    }
-
-    moveShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.moveOneTick();
-        }
-    }
-
-    allowShipsToShoot(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.checkShoot();
-        }
-    }
-
-    updateShipOrientationAndSailPower(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.updateShipOrientationAndSailPower();
-        }
     }
 
 }

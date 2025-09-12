@@ -4,6 +4,12 @@ const randomNumberInclusive = require("../scripts/general/helper_functions.js").
 // Data
 const GP = require("./game_properties.js");
 
+/*
+    Function Name: runTests
+    Function Parameters: None
+    Function Description: Runs tests on bots
+    Function Return: void
+*/
 function runTests(){
     let game = new LasTest1v1Game(GP);
 
@@ -48,6 +54,18 @@ function runTests(){
     console.log(winners);
 }
 
+/*
+    Function Name: TODO
+    Function Parameters:
+        game:
+            Game instance
+        bot1JSON:
+            JSON with details of a bot
+        bot2JSON:
+            JSON with details of another bot
+    Function Description: TODO
+    Function Return: TODO
+*/
 function runTest(game, bot1JSON, bot2JSON){
     game.reset();
     // Random seed

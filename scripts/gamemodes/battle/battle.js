@@ -203,7 +203,6 @@ class Battle extends Gamemode {
             let newCannonBall = new CannonBall(cannonShotJSON);
             
             // Catch up cannon ball, past -> now
-            //debugger;
 
             // Lock the cannon 
             this.lockShipCannon(cannonShotJSON["ship_origin_id"], cannonShotJSON["cannon_index"], currentTick - serverTickOfLaunches);
@@ -313,7 +312,6 @@ class Battle extends Gamemode {
     */
     processCannonBallHits(cannonBallHits, serverTick){
         let visaulEffectsSettings = this.getGame().getGameProperties()["visual_effect_settings"];
-        //debugger;
         for (let cBH of cannonBallHits){
             // Delete cannon ball
             this.deleteCannonBall(cBH["cannon_ball_id"]);
@@ -396,13 +394,9 @@ class Battle extends Gamemode {
         Method Return: void
     */
     killShip(shipID){
-        for (let [ship, shipIndex] of this.getGame().getShips()){
-            if (ship.getID() === shipID){
-                ship.kill();
-                return;
-            }
-        }
-        throw new Error("Error finding ship: " + shipID);
+        let ship = this.getGame().getShipByID(shipID);
+        // Kill it
+        ship.kill();
     }
 
     /*
@@ -544,8 +538,6 @@ class Battle extends Gamemode {
 
         // set up wind to mirror server
         game.getWind().reset();
-
-        // TODO: Check for other relevant incongruencies
 
         // Add ships
         for (let shipJSON of gameDetailsJSON["ships"]){
@@ -693,7 +685,6 @@ class Battle extends Gamemode {
                 // Else continue the game
 
                 // Tick the game
-                //this.getGame().getWind().print();
                 this.getGame().tick();
 
                 // Handle sending out my input

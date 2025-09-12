@@ -48,10 +48,24 @@ window.addEventListener("error", (errorEvent) => {
 })
 
 // Helper
+/*
+    Function Name: launcherTickHandler
+    Function Parameters: 
+        timeElapsedMS:
+            Time since last animation frame
+    Function Description: Calls the tick function
+    Function Return: void
+*/
 function launcherTickHandler(timeElapsedMS){
     GC.tick();
 }
 
+/*
+    Function Name: registerMenus
+    Function Parameters: None
+    Function Description: Regisers needed menus
+    Function Return: void
+*/
 function registerMenus(){
     GC.getMenuManager().registerMenu(new MyProjectsMenu());
     GC.getMenuManager().registerMenu(new BattleMenu());
@@ -63,6 +77,12 @@ function registerMenus(){
     GC.getMenuManager().registerMenu(new SkirmishMenu());
 }
 
+/*
+    Function Name: stop
+    Function Parameters: None
+    Function Description: Stops the program
+    Function Return: void
+*/
 function stop(){
     GC.stop();
     SC.shutdownConnectionIfOn();

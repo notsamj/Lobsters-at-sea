@@ -1,4 +1,16 @@
+/*
+    Class Name: HumanShipController
+    Class Description: Provides the abillity for the user to control the ship
+*/
 class HumanShipController {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            ship:
+                Ship being controlled
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(ship){
         this.ship = ship;
         this.radar = new Radar(ship, MD["radar_settings"]);
@@ -9,23 +21,55 @@ class HumanShipController {
         this.touchTapLock = new TickLock(MD["mobile_settings"]["max_tap_time_ticks"]);
     }
 
+    /*
+        Method Name: setUsingAutomatedSails
+        Method Parameters: 
+            boolValue:
+                A value specifying whether automated sails are being used
+        Method Description: Setter
+        Method Return: void
+    */
     setUsingAutomatedSails(boolValue){
         this.usingAutomatedSails = boolValue;
     }
 
+    /*
+        Method Name: isUsingAutomatedSails
+        Method Parameters: None
+        Method Description: Checks if automated sails are being used
+        Method Return: boolean
+    */
     isUsingAutomatedSails(){
         return this.usingAutomatedSails;
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Tick actions
+        Method Return: void
+    */
     tick(){
         this.radar.tick();
         this.touchTapLock.tick();
     }
 
+    /*
+        Method Name: getShip
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Ship
+    */
     getShip(){
         return this.ship;
     }
 
+    /*
+        Method Name: getDecisionJSON
+        Method Parameters: None
+        Method Description: Gets the decisions at the moment
+        Method Return: JSON
+    */
     getDecisionJSON(){
         if (GC.isMobile()){
             return this.getMobileDecisionJSON();
@@ -34,6 +78,12 @@ class HumanShipController {
         }
     }
 
+    /*
+        Method Name: getMobileDecisionJSON
+        Method Parameters: None
+        Method Description: Gets the decisions at the moment (if the user is on Mobile)
+        Method Return: JSON
+    */
     getMobileDecisionJSON(){
         let inputManager = GC.getGameUserInputManager();
 
@@ -115,6 +165,12 @@ class HumanShipController {
         return finalDecisionJSON;
     }
 
+    /*
+        Method Name: autoDetermineShipSailStrength
+        Method Parameters: None
+        Method Description: Comes up with ship sail strength
+        Method Return: float in [0,1]
+    */
     autoDetermineShipSailStrength(){
         let ship = this.getShip();
         let game = ship.getGame();
@@ -176,6 +232,12 @@ class HumanShipController {
         return finalValueSettleOn;
     }
 
+    /*
+        Method Name: getPCDecisionJSON
+        Method Parameters: None
+        Method Description: Get decision JSON when user is on PC rather than mobile
+        Method Return: JSON
+    */
     getPCDecisionJSON(){
         let inputManager = GC.getGameUserInputManager();
 
@@ -236,8 +298,13 @@ class HumanShipController {
         return finalDecisionJSON;
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the radar
+        Method Return: void
+    */
     display(){
-        let ship = this.getShip();
         this.radar.display();
     }
 }

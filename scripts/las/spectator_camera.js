@@ -28,6 +28,12 @@ class SpectatorCamera {
         this.snapLock = new Lock();
     }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LASGame
+    */
     getGame(){
         return this.game;
     }
@@ -113,10 +119,22 @@ class SpectatorCamera {
         return this.y + this.yVelocity * (this.getGame().getDisplayMSSinceLastTick()) / 1000;
     }
 
+    /*
+        Method Name: getFreeCamTickX
+        Method Parameters: None
+        Method Description: Gets the tick x of the freecam
+        Method Return: float
+    */
     getFreeCamTickX(){
         return this.x;
     }
 
+    /*
+        Method Name: getTickX
+        Method Parameters: None
+        Method Description: Gets the tick x of spectator camera
+        Method Return: float
+    */
     getTickX(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickX();
@@ -124,6 +142,12 @@ class SpectatorCamera {
         return this.getFreeCamTickX();
     }
 
+    /*
+        Method Name: getHealth
+        Method Parameters: None
+        Method Description: Gets the health of the ship (if there is a ship)
+        Method Return: float
+    */
     getHealth(){
         if (this.isFollowingAShip()){
             return this.followedShip.getHealth();
@@ -131,10 +155,22 @@ class SpectatorCamera {
         return 0; 
     }
 
+    /*
+        Method Name: getFreeCamTickXV
+        Method Parameters: None
+        Method Description: Gets the x velocity of the freecam
+        Method Return: float
+    */
     getFreeCamTickXV(){
         return this.xVelocity;
     }
 
+    /*
+        Method Name: getTickXV
+        Method Parameters: None
+        Method Description: Gets the x velocity of the camera
+        Method Return: float
+    */
     getTickXV(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickXV();
@@ -142,10 +178,22 @@ class SpectatorCamera {
         return this.getFreeCamTickXV();
     }
 
+    /*
+        Method Name: getFreeCamTickY
+        Method Parameters: None
+        Method Description: Gets the y position of the freecam
+        Method Return: float
+    */
     getFreeCamTickY(){
         return this.y;
     }
 
+    /*
+        Method Name: getTickY
+        Method Parameters: None
+        Method Description: Gets the last tick y position of the freecam
+        Method Return: float
+    */
     getTickY(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickY();
@@ -153,10 +201,22 @@ class SpectatorCamera {
         return this.getFreeCamTickY();
     }
 
+    /*
+        Method Name: getFreeCamTickYV
+        Method Parameters: None
+        Method Description: Gets the y velocity of the camera
+        Method Return: float
+    */
     getFreeCamTickYV(){
         return this.yVelocity;
     }
 
+    /*
+        Method Name: getTickYV
+        Method Parameters: None
+        Method Description: Gets the last tick y velocity of the camera
+        Method Return: float
+    */
     getTickYV(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickYV();
@@ -164,6 +224,12 @@ class SpectatorCamera {
         return this.getFreeCamTickYV();
     }
 
+    /*
+        Method Name: getTickOrientation
+        Method Parameters: None
+        Method Description: Gets the tick orientation of the spectated ship (if spectating)
+        Method Return: radians
+    */
     getTickOrientation(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickOrientation();
@@ -171,6 +237,12 @@ class SpectatorCamera {
         return 0;
     }
 
+    /*
+        Method Name: getTickSailStrength
+        Method Parameters: None
+        Method Description: Gets the tick orientation of the spectated ship (if spectating)
+        Method Return: float in [0, 1]
+    */
     getTickSailStrength(){
         if (this.isFollowingAShip()){
             return this.followedShip.getTickSailStrength();
@@ -178,6 +250,12 @@ class SpectatorCamera {
         return 0;
     }
 
+    /*
+        Method Name: getSpeed
+        Method Parameters: None
+        Method Description: Gets the speed of the spectated ship (if spectating)
+        Method Return: float
+    */
     getSpeed(){
         if (this.isFollowingAShip()){
             return this.followedShip.getSpeed();
@@ -185,6 +263,12 @@ class SpectatorCamera {
         return 0;
     }
 
+    /*
+        Method Name: getID
+        Method Parameters: None
+        Method Description: Gets the id of the spectated ship (if spectating)
+        Method Return: any
+    */
     getID(){
         if (this.isFollowingAShip()){
             return this.followedShip.getID();
@@ -376,7 +460,7 @@ class SpectatorCamera {
 
         if (wantsToScrollLeft){
             this.scrollShips(-1);
-        }else if(wantsToScrollRight){
+        }else if (wantsToScrollRight){
             this.scrollShips(1);
         }
     }
@@ -413,6 +497,12 @@ class SpectatorCamera {
         this.followedShip = null;
     }
 
+    /*
+        Method Name: checkShipIsDead
+        Method Parameters: None
+        Method Description: Checks if the spectated ship is dead
+        Method Return: void
+    */
     checkShipIsDead(){
         if (!this.isFollowingAShip()){
             return;
@@ -444,6 +534,12 @@ class SpectatorCamera {
         this.checkScrollShips();
     }
 
+    /*
+        Method Name: getTickRate
+        Method Parameters: None
+        Method Description: Gets the tick rate
+        Method Return: int
+    */
     getTickRate(){
         return this.getGame().getGameProperties()["tick_rate"];
     }
@@ -457,6 +553,12 @@ class SpectatorCamera {
     display(){
     }
 
+    /*
+        Method Name: displayWhenFocused
+        Method Parameters: None
+        Method Description: Actions for display when followed
+        Method Return: void
+    */
     displayWhenFocused(){
         if (this.isFollowingAShip()){
             this.followedShip.displayWhenFocused();

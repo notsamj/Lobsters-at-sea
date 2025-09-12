@@ -93,6 +93,12 @@ class OptionSlider extends Component {
         }
     }
 
+    /*
+        Method Name: getWidth
+        Method Parameters: None
+        Method Description: Gets or calculates width
+        Method Return: int
+    */
     getWidth(){
         if (typeof this.width === "function"){
             return this.width(getScreenWidth());
@@ -160,6 +166,12 @@ class OptionSlider extends Component {
         this.updateSliderX();
     }
 
+    /*
+        Method Name: checkMove
+        Method Parameters: None
+        Method Description: Checks if the user is trying to move the slider cursor
+        Method Return: void
+    */
     checkMove(){
         let menuManager = GC.getMenuManager();
         let gMouseX = GC.getGMouseX();

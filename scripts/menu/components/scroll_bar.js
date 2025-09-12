@@ -86,6 +86,14 @@ class ScrollBar extends Component {
         this.numEntries = newAmount;
     }
 
+    /*
+        Method Name: setNumEntries
+        Method Parameters: 
+            newAmount:
+                The new number of entries
+        Method Description: Changes the number of entries
+        Method Return: void
+    */
     setNumEntries(newAmount){
         if (newAmount > this.getMaxEntries()){
             throw new Error("Too many entries!");  

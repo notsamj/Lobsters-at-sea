@@ -26,6 +26,12 @@ class MenuManager {
         return this.activeMenu;
     }
 
+    /*
+        Method Name: getActiveMenuName
+        Method Parameters: None
+        Method Description: Gets the name of the active menu
+        Method Return: String || null
+    */
     getActiveMenuName(){
         if (!this.hasActiveMenu()){
             return null;
@@ -154,9 +160,9 @@ class MenuManager {
         Method Name: tick
         Method Parameters: None
         Method Description: Handles tick user actions
-        Method Return: void
+        Method Return: Promise (implicit)
     */
-    tick(){
+    async tick(){
         let leftClick = GC.getMenuUserInputManager().isActivated("left_click_ticked");
         if (leftClick){
             this.click(GC.getLastClickedMouseX(), GC.getLastClickedMouseY());
@@ -174,7 +180,7 @@ class MenuManager {
 
         if (this.hasActiveMenu()){
             // Tick active menu
-            this.activeMenu.tick();
+            await this.activeMenu.tick();
         }
 
     }

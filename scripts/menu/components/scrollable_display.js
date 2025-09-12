@@ -23,18 +23,44 @@ class ScrollableDisplay extends Component {
         this.setup(scrollableDisplayJSON);
     }
 
+    /*
+        Method Name: getMaxEntries
+        Method Parameters: None
+        Method Description: Gets the max number of entries allowed
+        Method Return: int
+    */
     getMaxEntries(){
         return this.scrollBar.getMaxEntries();
     }
 
+    /*
+        Method Name: getScrollBar
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: ScrollBar
+    */
     getScrollBar(){
         return this.scrollBar;
     }
 
+    /*
+        Method Name: getDisplayItems
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: NotSamLinkedList
+    */
     getDisplayItems(){
         return this.displayItems;
     }
 
+    /*
+        Method Name: addDisplayItem
+        Method Parameters: 
+            newItem:
+                An item (any type)
+        Method Description: Adds an item to the display
+        Method Return: void
+    */
     addDisplayItem(newItem){
         this.scrollBar.setNumEntries(this.displayItems.getLength() + 1);
         this.displayItems.push(newItem);

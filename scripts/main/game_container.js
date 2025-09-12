@@ -1,16 +1,14 @@
+/*
+    Class Name: GameContainer
+    Class Description: A container for games
+*/
 class GameContainer {
 
     /*
-        localGamePropertiesExpected: {
-            "tick_rate": [1,80],
-            "ms_between_ticks": float,
-            "approximate_zoom_peek_time_ms": [0, inf),
-            "game_zoom": float,
-            "ms_between_ticks_floor": int,
-            "sound_data": json,
-            "loading_screen_data": json,
-            "hud_json": json
-        }
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: Constructor
+        Method Return: Constructor
     */
     constructor(gameType, localGameProperties){
         this.gameType = gameType;
@@ -38,54 +36,138 @@ class GameContainer {
         this.setupOngoing = false;
     }
 
+    /*
+        Method Name: isMobile
+        Method Parameters: None
+        Method Description: Checks if the game is running on mobile
+        Method Return: boolean
+    */
     isMobile(){
         return navigator.maxTouchPoints > 0;
     }
 
+    /*
+        Method Name: getSoundManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: SoundManager
+    */
     getSoundManager(){
         return this.SOUND_MANAGER;
     }
 
+    /*
+        Method Name: getGMouseX
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getGMouseX(){
         return this.gMouseX;
     }
 
+    /*
+        Method Name: getGMouseY
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getGMouseY(){
         return this.gMouseY;
     }
 
+    /*
+        Method Name: getFrameCounter
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: FrameCounter
+    */
     getFrameCounter(){
         return this.FRAME_COUNTER;
     }
 
+    /*
+        Method Name: getHUD
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Hud
+    */
     getHUD(){
         return this.HUD;
     }
 
+    /*
+        Method Name: newGame
+        Method Parameters: 
+            gameType:
+                A class of LasGame
+            gamemodeType:
+                A class of Gamemode
+        Method Description: Starts a new game
+        Method Return: void
+    */
     newGame(gameType, gamemodeType){
         this.activeGameInstance = new gameType(this.localGameProperties);
         this.GAMEMODE_MANAGER.setActiveGamemode(new gamemodeType());
     }
 
+    /*
+        Method Name: getGameInstance
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LASGame
+    */
     getGameInstance(){
         return this.activeGameInstance;
     }
 
+    /*
+        Method Name: isInGame
+        Method Parameters: None
+        Method Description: Checks if a game is running
+        Method Return: boolean
+    */
     isInGame(){
         return this.GAMEMODE_MANAGER.hasActiveGamemode();
     }
 
+    /*
+        Method Name: getLastClickedMouseX
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getLastClickedMouseX(){
         return this.gLastClickedMouseX;
     }
+    /*
+        Method Name: getLastClickedMouseY
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getLastClickedMouseY(){
         return this.gLastClickedMouseY;
     }
 
+    /*
+        Method Name: getLoadingScreen
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LoadingScreen
+    */
     getLoadingScreen(){
         return this.LOADING_SCREEN;
     }
 
+    /*
+        Method Name: getImage
+        Method Parameters: 
+            imageName:
+                The requested image
+        Method Description: Gets the requested image
+        Method Return: Image
+    */
     getImage(imageName){
         if (!this.hasImage(imageName)){
             throw new Error("Image: " + imageName + " not found.");
@@ -93,14 +175,32 @@ class GameContainer {
         return this.IMAGES[imageName];
     }
 
+    /*
+        Method Name: getLocalGameProperties
+        Method Parameters: None
+        Method Description: Gets the local game's properties
+        Method Return: JSON
+    */
     getLocalGameProperties(){
         return this.localGameProperties;
     }
 
+    /*
+        Method Name: getGameUserInputManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: UserInputManager
+    */
     getGameUserInputManager(){
         return this.GAME_USER_INPUT_MANAGER;
     }
 
+    /*
+        Method Name: getMenuUserInputManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: UserInputManager
+    */
     getMenuUserInputManager(){
         return this.MENU_USER_INPUT_MANAGER;
     }
@@ -127,10 +227,24 @@ class GameContainer {
         this.IMAGES[imageName] = await loadLocalImage("images/" + folderPrefix + imageFileName);
     }
 
+    /*
+        Method Name: hasImage
+        Method Parameters: 
+            imageName:
+                Name of an image (string)
+        Method Description: Checks if an image exists
+        Method Return: boolean
+    */
     hasImage(imageName){
         return objectHasKey(this.IMAGES, imageName);
     }
 
+    /*
+        Method Name: setup
+        Method Parameters: None
+        Method Description: Sets up the game container
+        Method Return: Promise (implicit)
+    */
     async setup(){
         // Indicate taht the setup is ongoing
         this.setupOngoing = true;
@@ -203,38 +317,102 @@ class GameContainer {
         this.setupOngoing = false;
     }
 
+    /*
+        Method Name: setGMouseX
+        Method Parameters: 
+            newMouseXValue:
+                New mouse x (int)
+        Method Description: Setter
+        Method Return: void
+    */
     setGMouseX(newMouseXValue){
         this.gMouseX = newMouseXValue;
     }
 
+    /*
+        Method Name: setGMouseY
+        Method Parameters: 
+            newMouseYValue:
+                New mouse y (int)
+        Method Description: Setter
+        Method Return: void
+    */
     setGMouseY(newMouseYValue){
         this.gMouseY = newMouseYValue;
     }
 
+    /*
+        Method Name: setGLastClickedMouseX
+        Method Parameters: 
+            newMouseXValue:
+                New mouse x (int)
+        Method Description: Setter
+        Method Return: void
+    */
     setGLastClickedMouseX(newMouseXValue){
         this.gLastClickedMouseX = newMouseXValue;
     }
 
+    /*
+        Method Name: setGLastClickedMouseY
+        Method Parameters: 
+            newMouseYValue:
+                New mouse y (int)
+        Method Description: Setter
+        Method Return: void
+    */
     setGLastClickedMouseY(newMouseYValue){
         this.gLastClickedMouseY = newMouseYValue;
     }
 
+    /*
+        Method Name: setProgramOver
+        Method Parameters: 
+            booleanValue:
+                Specifies if program is over
+        Method Description: Setter
+        Method Return: void
+    */
     setProgramOver(booleanValue){
         this.programOver = booleanValue;
     }
 
+    /*
+        Method Name: getGameTickScheduler
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: TickScheduler
+    */
     getGameTickScheduler(){
         return this.GAME_TICK_SCHEDULER;
     }
 
+    /*
+        Method Name: getMenuManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: MenuManager
+    */
     getMenuManager(){
         return this.MENU_MANAGER;
     }
 
+    /*
+        Method Name: getGamemodeManager
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: GamemodeManager
+    */
     getGamemodeManager(){
         return this.GAMEMODE_MANAGER;
     }
 
+    /*
+        Method Name: getActiveGamemode
+        Method Parameters: None
+        Method Description: Gets the active gamemode
+        Method Return: Gamemode
+    */
     getActiveGamemode(){
         return this.GAMEMODE_MANAGER.getActiveGamemode();
     }
@@ -355,7 +533,7 @@ class GameContainer {
         }
 
         // Tick the menu manager
-        this.MENU_MANAGER.tick();
+        await this.MENU_MANAGER.tick();
 
         // Tick the GAME_USER_INPUT_MANAGER
         this.MENU_USER_INPUT_MANAGER.tick();

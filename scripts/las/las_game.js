@@ -507,6 +507,69 @@ class LasGame {
         this.tickCount = 0;
         this.resetColours();
     }
+
+    /*
+        Method Name: handleCannonShotMovement
+        Method Parameters: None
+        Method Description: Moves the cannon balls
+        Method Return: void
+    */
+    handleCannonShotMovement(){
+        for (let [cannonBall, index] of this.cannonBalls){
+            cannonBall.move();
+        }
+    }
+
+    /*
+        Method Name: tickShips
+        Method Parameters: None
+        Method Description: Ticks the ships
+        Method Return: void
+    */
+    tickShips(){
+        for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
+            ship.tick();
+        }
+    }
+
+    /*
+        Method Name: moveShips
+        Method Parameters: None
+        Method Description: Mones the ships for a tick
+        Method Return: void
+    */
+    moveShips(){
+        for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
+            ship.moveOneTick();
+        }
+    }
+
+    /*
+        Method Name: allowShipsToShoot
+        Method Parameters: None
+        Method Description: Allows ships to shoot
+        Method Return: void
+    */
+    allowShipsToShoot(){
+        for (let [ship, shipIndex] of this.getShips()){
+            if (ship.isDead()){ continue; }
+            ship.checkShoot();
+        }
+    }
+
+    /*
+        Method Name: updateEstablishedDecisions
+        Method Parameters: None
+        Method Description: Tells ships to update their orientation and sail power
+        Method Return: void
+    */
+    updateEstablishedDecisions(){
+        for (let [ship, shipIndex] of this.getShips()){
+            ship.updateEstablishedDecisions();
+        }
+    }
 }
 
 // If run in NodeJS

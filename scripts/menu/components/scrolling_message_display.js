@@ -33,6 +33,16 @@ class ScrollingMessageDisplay extends Component {
         this.displayMessageFeed();
     }
 
+    /*
+        Method Name: addMessage
+        Method Parameters: 
+            text:
+                Message text
+            colorCode:
+                Color code string (HEX)
+        Method Description: Adds a message
+        Method Return: void
+    */
     addMessage(text, colorCode=null){
         if (colorCode === null){
             colorCode = this.configJSON["default_message_color_code"];

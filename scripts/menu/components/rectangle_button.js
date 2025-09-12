@@ -117,6 +117,12 @@ class RectangleButton extends Component {
         }
     }
 
+    /*
+        Method Name: getColourCode
+        Method Parameters: None
+        Method Description: Gets the colour code or retrieves it with a function
+        Method Return: String in HEX (e.g. #000000)
+    */
     getColourCode(){
         if (typeof this.colourCode === "function"){
             return this.colourCode();
@@ -125,6 +131,12 @@ class RectangleButton extends Component {
         }
     }
 
+    /*
+        Method Name: getTextColourCode
+        Method Parameters: None
+        Method Description: Gets the colour code or retrieves it with a function
+        Method Return: String in HEX (e.g. #000000)
+    */
     getTextColourCode(){
         if (typeof this.textColourCode === "function"){
             return this.textColourCode();

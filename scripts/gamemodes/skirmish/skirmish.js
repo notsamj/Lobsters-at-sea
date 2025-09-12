@@ -29,6 +29,8 @@ class Skirmish extends Gamemode {
 
         // Apply vampire effect
         for (let [shipSinkingObj, shipSinkingIndex] of shipSinkings){
+            // Ignore suicide where there's no vampire effect
+            if (shipSinkingObj["shooter_ship_id"] === null){ continue; }
             let killerShip = game.getShipByID(shipSinkingObj["shooter_ship_id"]);
 
             // Doesn't apply if killer is dead

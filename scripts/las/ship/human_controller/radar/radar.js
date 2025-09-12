@@ -33,6 +33,12 @@ class Radar {
         this.tickLock = new TickLock(radarSettingsJSON["tick_lock_length"]);
     }
 
+    /*
+        Method Name: getShip
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Ship
+    */
     getShip(){
         return this.ship;
     }
@@ -201,6 +207,12 @@ class Radar {
         this.update();
     }
 
+    /*
+        Method Name: update
+        Method Parameters: None
+        Method Description: Updates the radar and ship positions on it
+        Method Return: void
+    */
     update(){
         let myShip = this.getShip();
         let allShips = myShip.getGame().getShips();

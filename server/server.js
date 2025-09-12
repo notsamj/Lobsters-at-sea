@@ -22,8 +22,19 @@ const GP = require("./game_properties.js");
 
 // Global vars
 
-
+/*
+    Class Name: LASServer
+    Description: A server for the game
+*/
 class LASServer {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            serverDataJSON:
+                Server settings json
+        Method Description: Constructor
+        Method Return: Constructor
+    */
     constructor(serverDataJSON){
         this.SDJ = serverDataJSON;
 
@@ -47,6 +58,15 @@ class LASServer {
         this.setupServer();
     }
 
+
+    /*
+        Method Name: backupReplayToFile
+        Method Parameters:
+            replayString:
+                Replay string
+        Method Description: Saves a replay to file
+        Method Return: void
+    */
     backupReplayToFile(replayString){
         // Modify to add \ infront of all " so that I can drag into the .js later
         let modifiedString = replayString.replaceAll("\"", "\\\"");
@@ -56,21 +76,16 @@ class LASServer {
         // Backup
         fs.writeFileSync("replay_backup.replay", modifiedString);
     }
+
+
     /*
-    test(gameRecorder){
-        let replayString2 = JSON.stringify(gameRecorder.replayObject);
-        let replayString1 = gameRecorder.getReplayString();
-
-        // Modify to add \ infront of all " so that I can drag into the .js later
-        let modifiedString1 = replayString1.replaceAll("\"", "\\\"");
-        let modifiedString2 = replayString2.replaceAll("\"", "\\\"");
- 
-        let fString = "const LOCAL_REPLAYS = [{\"name\": \"local_replay_1\", \"data\": \"" + modifiedString1 + "\"},{\"name\": \"local_replay_2\", \"data\": \"" + modifiedString2 + "\"}]"
-
-        // Backup
-        fs.writeFileSync("test.replay", fString);
-    }*/
-
+        Method Name: addReplay
+        Method Parameters:
+            replayString:
+                Replay string
+        Method Description: Adds a replay to the database
+        Method Return: Promise (implicit)
+    */
     async addReplay(replayString){
         // Save to file
         this.backupReplayToFile(replayString);
@@ -87,6 +102,12 @@ class LASServer {
         }
     }
 
+    /*
+        Method Name: setupServer
+        Method Parameters: None
+        Method Description: Sets up the server
+        Method Return: Promise (implicit)
+    */
     async setupServer(){
         // Set up mongo db first
         await this.setupMongoDB();
@@ -95,6 +116,12 @@ class LASServer {
         this.setupWSSServer();
     }
 
+    /*
+        Method Name: setupMongoDB
+        Method Parameters: None
+        Method Description: Sets up the mongo db server and client
+        Method Return: Promise (implicit)
+    */
     async setupMongoDB(){
         console.log("Attempting MongoDB startup");
         this.mongoDBServer = await MongoMemoryServer.create();
@@ -117,6 +144,12 @@ class LASServer {
         await this.mongoDBRefOfDB.createCollection("replays");
     }
 
+    /*
+        Method Name: kickWSSClients
+        Method Parameters: None
+        Method Description: Kicks all WSS clients
+        Method Return: Promise (implicit)
+    */
     async kickWSSClients(){
         let awaitLock = new Lock();
         for (let clientWS of this.WSSServer.clients){
@@ -140,6 +173,12 @@ class LASServer {
         }
     }
 
+    /*
+        Method Name: shutDown
+        Method Parameters: None
+        Method Description: Shuts down the server
+        Method Return: Promise (implicit)
+    */
     async shutDown(){
         console.log("Shutting down HTTPS Server...");
         let httpAwaitLock = new Lock();
@@ -171,6 +210,14 @@ class LASServer {
         console.log("Shut down MongoDB!");
     }
 
+    /*
+        Method Name: acceptNewClientsToLobby
+        Method Parameters:
+            availableLobbySlots:
+                Number of lobby slots available
+        Method Description: Accepts n new clients to the lobby
+        Method Return: Promise (implicit)
+    */
     async acceptNewClientsToLobby(availableLobbySlots){
         // Get access to clients
         this.clients.requestAccess();
@@ -214,6 +261,12 @@ class LASServer {
         this.clients.relinquishAccess();
     }
 
+    /*
+        Method Name: purgeInactiveClients
+        Method Parameters: None
+        Method Description: Purges inactive clients
+        Method Return: Promise (implicit)
+    */
     async purgeInactiveClients(){
         // Await access
         await this.clients.requestAccess();
@@ -231,11 +284,23 @@ class LASServer {
         this.clients.relinquishAccess();
     }
 
+    /*
+        Method Name: handleReplayRequests
+        Method Parameters: None
+        Method Description: Handles replay requests
+        Method Return: Promise (implicit)
+    */
     async handleReplayRequests(){
         await this.handleReplayListRequests();
         await this.handleReplayDataRequests();
     }
 
+    /*
+        Method Name: handleReplayListRequests
+        Method Parameters: None
+        Method Description: Looks for and handles client requests for replay list
+        Method Return: Promise (implicit)
+    */
     async handleReplayListRequests(){
         // Get access to clients
         this.clients.requestAccess();
@@ -265,6 +330,15 @@ class LASServer {
         this.clients.relinquishAccess();
     }
 
+    /*
+        Method Name: sendClientReplayList
+        Method Parameters:
+            client:
+                A client
+        Method Description: Sends client the replay list
+        Method Return: Promise (implicit)
+    */
+
     async sendClientReplayList(client){
         let dataList = await this.mongoDBRefOfDB.collection("replays").find({}).toArray();
         
@@ -279,6 +353,12 @@ class LASServer {
         })
     }
 
+    /*
+        Method Name: handleReplayDataRequests
+        Method Parameters: None
+        Method Description: Handles requests for replay data
+        Method Return: Promise (implicit)
+    */
     async handleReplayDataRequests(){
         // Get access to clients
         this.clients.requestAccess();
@@ -308,6 +388,16 @@ class LASServer {
         this.clients.relinquishAccess();
     }
 
+    /*
+        Method Name: sendClientReplayData
+        Method Parameters:
+            client:
+                A client
+            replayName:
+                Name of a client (String)
+        Method Description: Sends a client replay data
+        Method Return: Promise (implicit)
+    */
     async sendClientReplayData(client, replayName){
         let dataList = await this.mongoDBRefOfDB.collection("replays").find({}).toArray();
         
@@ -324,6 +414,12 @@ class LASServer {
         })
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Tick actions
+        Method Return: Promise (implicit)
+    */
     async tick(){
         // Don't tick if still running a tick
         if (this.tickLock.isLocked()){
@@ -357,25 +453,17 @@ class LASServer {
                 await this.game.start(this.lobbyManager.transferToGame());
             }
         }
-        // TODO
-        /*
-                Every 10-15ms run a tick
-                ifRunninGame:
-                    Run game
-                    If game over or all players left
-                        End game
-
-                else (not running game):
-                    *Running a lobby*
-                    Check heartbeat status on all lobby clients and remove any no longer active
-                    Accept new lobby clients (Up to max lobby count)
-                    If lobby as max pop -> start up
-        */
 
         // Unlock allowing for a new tick
         this.tickLock.unlock();
     }
 
+    /*
+        Method Name: setupWSSServer
+        Method Parameters: None
+        Method Description: Sets up the WSS server
+        Method Return: void
+    */
     setupWSSServer(){
         this.httpsServer = https.createServer({
             "cert": fs.readFileSync("./cert.pem"),
@@ -398,10 +486,18 @@ class LASServer {
 
         this.httpsServer.listen(this.SDJ["port"], () => {
             console.log("WSS Server running @", this.SDJ["port"]);
+
+            console.log("Lobby settings:", CDJ);
             launchTickSystem();
         });
     }
 
+    /*
+        Method Name: getDataJSON
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getDataJSON(){
         return this.SDJ;
     }
@@ -410,15 +506,32 @@ class LASServer {
 // Start up
 const SERVER = new LASServer(SDJ);
 
+/*
+    Function Name: launchTickSystem
+    Function Parameters: None
+    Function Description: Starts the tick loop
+    Function Return: void
+*/
 function launchTickSystem(){
     setInterval(tick, 0);
 }
 
+/*
+    Function Name: tick
+    Function Parameters: None
+    Function Description: Calls sick on the server
+    Function Return: Promise (implicit)
+*/
 async function tick(){
     SERVER.tick();
 }
 
-// Shut down
+/*
+    Function Name: shutDown
+    Function Parameters: None
+    Function Description: Shuts down the server
+    Function Return: Promise (implicit)
+*/
 async function shutDown(){
     await SERVER.shutDown();
     process.exit(0);

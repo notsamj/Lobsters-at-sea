@@ -1,4 +1,22 @@
+/*
+    Class Name: CannonBallSplash
+    Description: A cannon ball splash effect
+*/
 class CannonBallSplash extends VisualEffect {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            currentTick:
+                Current tick number
+            randomGenerator:
+                Random number generator
+            event:
+                Event information JSON
+            visualEffectSettings:
+                Settings JSON for this type of visual effect
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(currentTick, randomGenerator, event, visualEffectSettings){
         super(currentTick, currentTick + visualEffectSettings["life_length_ticks"]);
         this.colorCode = visualEffectSettings["color_code"];
@@ -6,6 +24,18 @@ class CannonBallSplash extends VisualEffect {
         this.generateCircles(randomGenerator, event, visualEffectSettings);
     }
 
+    /*
+        Method Name: generateCircles
+        Method Parameters: 
+            randomGenerator:
+                Random number generator
+            event:
+                Event JSON 
+            visualEffectSettings:
+                settings JSON for this type of visual effect
+        Method Description: Generates the circles of the effect
+        Method Return: void
+    */
     generateCircles(randomGenerator, event, visualEffectSettings){
         let numCircles = randomGenerator.getIntInRangeInclusive(visualEffectSettings["min_water_splashes"], visualEffectSettings["max_water_splashes"]);
         
@@ -23,6 +53,22 @@ class CannonBallSplash extends VisualEffect {
         }
     }
 
+    /*
+        Method Name: display
+        Method Parameters: 
+            centerXOfScreen:
+                Game X of the center of the screen
+            centerYOfScreen:
+                Game y of the center of the screen
+            currentTick:
+                Current tick number
+            msBetweenTicks:
+                Miliseconds between ticks
+            msSinceLastTick:
+                Miliseconds between 
+        Method Description: Displays the effect
+        Method Return: void
+    */
     display(centerXOfScreen, centerYOfScreen, currentTick, msBetweenTicks, msSinceLastTick){
         let msSinceCreation = (currentTick - this.getOriginTick()) * msBetweenTicks + msSinceLastTick;
         let opacity = Math.max(0, Math.min(1, 1 - (msSinceCreation / ((this.getExpirationTick() - this.getOriginTick()) * msBetweenTicks))));

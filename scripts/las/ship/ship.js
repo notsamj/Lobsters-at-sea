@@ -1,4 +1,4 @@
-// If run in NodeJS
+ // If run in NodeJS
 if (typeof window === "undefined"){
     Cannon = require("./cannon/cannon.js").Cannon;
     angleBetweenCWRAD = require("../../general/math_helper.js").angleBetweenCWRAD;
@@ -8,7 +8,19 @@ if (typeof window === "undefined"){
     displacementToRadians = require("../../general/math_helper.js").displacementToRadians;
 }
 
+/*
+    Class Name: Ship
+    Class Description: A ship
+*/
 class Ship {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            shipJSON:
+                Ship setup details JSON
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(shipJSON){
         this.id = shipJSON["id"];
 
@@ -42,6 +54,12 @@ class Ship {
         this.pendingDecisions = Ship.getDefaultDecisions();
     }
 
+    /*
+        Method Name: getDefaultDecisions
+        Method Parameters: None
+        Method Description: Gets the default decisions for a ship
+        Method Return: JSON
+    */
     static getDefaultDecisions(){
         return {
             "orientation_direction_change": 0, // is either < 0, === 0, > 0 indicating how to turn
@@ -53,30 +71,74 @@ class Ship {
         }
     }
 
+    /*
+        Method Name: setHealth
+        Method Parameters: 
+            health:
+                A health value (number)
+        Method Description: Sets the health of the ship
+        Method Return: void
+    */
     setHealth(health){
         this.health = health;
     }
 
+    /*
+        Method Name: getPendingDecisions
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getPendingDecisions(){
         return this.pendingDecisions;
     }
 
+    /*
+        Method Name: getEstablishedDecisions
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getEstablishedDecisions(){
         return this.establishedDecisions;
     }
 
+    /*
+        Method Name: getColour
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getColour(){
         return this.shipColour;
     }
 
+    /*
+        Method Name: getSpeed
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: float
+    */
     getSpeed(){
         return this.speed;
     }
 
+    /*
+        Method Name: getCannons
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Array of Cannon
+    */
     getCannons(){
         return this.cannons;
     }
 
+    /*
+        Method Name: getPositionJSON
+        Method Parameters: None
+        Method Description: Creates a JSON with position information
+        Method Return: JSON
+    */
     getPositionJSON(){
         return {
             "id": this.id,
@@ -92,10 +154,26 @@ class Ship {
         }
     }
 
+    /*
+        Method Name: getPendingDecisions
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getPendingDecisions(){
         return this.pendingDecisions;
     }
 
+    /*
+        Method Name: updateFromJSONPosition
+        Method Parameters: 
+            ticksAhead:
+                The number of ticks ahead of the position JSON that the game is currently
+            shipPositionJSON:
+                SHIP positional info JSON
+        Method Description: Updates the ship from a JSON
+        Method Return: void
+    */
     updateFromJSONPosition(ticksAhead, shipPositionJSON){
         let startingX = this.xPos;
         let startingY = this.yPos;
@@ -127,6 +205,18 @@ class Ship {
 
     }
 
+    /*
+        Method Name: hitWithCannonBall
+        Method Parameters: 
+            posX:
+                Position x of the cannon ball hit
+            posY:
+                Position y of the cannon ball hit
+            cannonBallID:
+                ID of the cannon ball
+        Method Description: Handles a hit from a cannon ball
+        Method Return: void
+    */
     hitWithCannonBall(posX, posY, cannonBallID){
         let game = this.getGame();
 
@@ -154,33 +244,83 @@ class Ship {
         }
     }
 
+    /*
+        Method Name: kill
+        Method Parameters: None
+        Method Description: Kills the ship
+        Method Return: void
+    */
     kill(){
         this.health = 0;
+
+        this.getGame().getTickTimeline().addToTimeline({
+            "event_type": "ship_sunk",
+            "ship_id": this.getID(),
+            "x_pos": this.xPos,
+            "y_pos": this.yPos,
+            "shooter_ship_id": null
+        });
     }
 
+    /*
+        Method Name: isDead
+        Method Parameters: None
+        Method Description: Checks if the ship is dead
+        Method Return: boolean
+    */
     isDead(){
         return this.getHealth() <= 0;
     }
 
+    /*
+        Method Name: isAlive
+        Method Parameters: None
+        Method Description: Checks if the ship is alive
+        Method Return: boolean
+    */
     isAlive(){
         return !this.isDead();
     }
 
+    /*
+        Method Name: getHealth
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: float
+    */
     getHealth(){
         return this.health;
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Handles tick actions
+        Method Return: void
+    */
     tick(){
         // Maintenance
         this.tickCannons();
     }
 
+    /*
+        Method Name: tickCannons
+        Method Parameters: None
+        Method Description: Ticks the cannons
+        Method Return: void
+    */
     tickCannons(){
         for (let cannon of this.cannons){
             cannon.tick();
         }
     }
 
+    /*
+        Method Name: setupCannons
+        Method Parameters: None
+        Method Description: Sets up the cannons
+        Method Return: void
+    */
     setupCannons(){
         let cannonJSONList = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["cannons"];
         let gameCannonSettings = this.getGame().getGameProperties()["cannon_settings"];
@@ -189,48 +329,94 @@ class Ship {
         }
     }
 
+    /*
+        Method Name: getID
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: any
+    */
     getID(){
         return this.id;
     }
 
+    /*
+        Method Name: getTickSailStrength
+        Method Parameters: None
+        Method Description: Gets the tick sail strength at the current tick
+        Method Return: float in [0, 1]
+    */
     getTickSailStrength(){
         return this.shipSailStrength;
     }
 
-    /*resetPendingDecisions(){
-        let defaultDecisions = this.getDefaultDecisions();
-        for (let key of Object.keys(defaultDecisions)){
-            this.pendingDecisions[key] = defaultDecisions[key];
-        }
-    }*/
-
+    /*
+        Method Name: getShipModel
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getShipModel(){
         return this.shipModel;
     }
 
+    /*
+        Method Name: getAdjustedCannonAimingX
+        Method Parameters: None
+        Method Description: Calculate the position the ship is aiming at
+        Method Return: void
+    */
     getAdjustedCannonAimingX(){
         return this.getTickX() + this.pendingDecisions["aiming_cannons_position_x"];
     }
 
+    /*
+        Method Name: getAdjustedCannonAimingY
+        Method Parameters: None
+        Method Description: Calculate the position the ship is aiming at
+        Method Return: void
+    */
     getAdjustedCannonAimingY(){
         return this.getTickY() + this.pendingDecisions["aiming_cannons_position_y"];
     }
 
+    /*
+        Method Name: updateFromPilot
+        Method Parameters: 
+            updateJSON:
+                Decision update JSON
+        Method Description: Updates the decisions
+        Method Return: void
+    */
     updateFromPilot(updateJSON){
         for (let key of Object.keys(updateJSON)){
             this.pendingDecisions[key] = updateJSON[key];
         }
     }
 
-    // local
+    /*
+        Method Name: displayWhenFocused
+        Method Parameters: None
+        Method Description: Displays the crosshair
+        Method Return: void
+        Method Note: Local only
+    */
     displayWhenFocused(){
         // Display cannon crosshair
         this.displayCannonCrosshair();
     }
 
+    /*
+        Method Name: checkShoot
+        Method Parameters: None
+        Method Description: Checks if the ship is going to shoot
+        Method Return: void
+    */
     checkShoot(){
         // If not bothing aiming and firing then you can't shoot
-
+        if (this.establishedDecisions["fire_cannons"]){
+            console.log("Dec", this.establishedDecisions["fire_cannons"], this.establishedDecisions["aiming_cannons"], this.getAdjustedCannonAimingX(), this.getAdjustedCannonAimingY(), this.getGame().getTickCount())
+        }
+        
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
@@ -243,11 +429,18 @@ class Ship {
         for (let cannon of this.cannons){
             if (cannon.canAimAt(aimingCannonsPositionX, aimingCannonsPositionY) && cannon.isLoaded()){
                 cannon.fire(aimingCannonsPositionX, aimingCannonsPositionY);
+                console.log("fire", this.getGame().getTickCount());
             }
         }
     }
 
-    // local
+    /*
+        Method Name: displayCannonCrosshair
+        Method Parameters: None
+        Method Description: Displays the cannon crosshair
+        Method Return: void
+        Method Note: Local only
+    */
     displayCannonCrosshair(){
         // Allowed to display?
         if (!this.establishedDecisions["aiming_cannons"]){
@@ -333,7 +526,13 @@ class Ship {
 
 
 
-    updateShipOrientationAndSailPower(){
+    /*
+        Method Name: updateEstablishedDecisions
+        Method Parameters: None
+        Method Description: Updates the ship's established decisions
+        Method Return: void
+    */
+    updateEstablishedDecisions(){
         // orientationDirectionChange is either < 0, === 0, > 0 indicating how to turn
         this.establishedDecisions["orientation_direction_change"] = this.pendingDecisions["orientation_direction_change"];
 
@@ -344,12 +543,14 @@ class Ship {
         this.establishedDecisions["fire_cannons"] = this.pendingDecisions["fire_cannons"];
         this.establishedDecisions["aiming_cannons_position_x"] = this.pendingDecisions["aiming_cannons_position_x"];
         this.establishedDecisions["aiming_cannons_position_y"] = this.pendingDecisions["aiming_cannons_position_y"];
-
-
-        // Reset the pending decisions
-        //this.resetPendingDecisions();
     }
 
+    /*
+        Method Name: moveOneTick
+        Method Parameters: None
+        Method Description: Moves the ship one tick
+        Method Return: void
+    */
     moveOneTick(){
         let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
         let positionInfo = this.getPositionInfoInMS(tickMS);
@@ -377,6 +578,28 @@ class Ship {
         this.shipSailStrength = result["new_ship_sail_strength"];
     }
 
+    /*
+        Method Name: moveOneTick
+        Method Parameters: 
+            positionInfo:
+                JSON with info on ship's new position
+            xPos:
+                X position
+            yPos:
+                Y position
+            orientationDirectionChange:
+                1, 0, -1 -> Whether the orientation will change
+            orientationRAD:
+                Orientation of the ship
+            turningRadiusDegrees:
+                The turning radius of the ship
+            newSailStrength:
+                The new ship sail strength
+            shipSailStrength:
+                The current ship sail strength
+        Method Description: Moves the ship by one tick and returns resulting values
+        Method Return: void
+    */
     static moveOneTick(positionInfo, xPos, yPos, orientationDirectionChange, orientationRAD, turningRadiusDegrees, newSailStrength, shipSailStrength){
         // Get old positions
         let oldX = xPos;
@@ -403,7 +626,7 @@ class Ship {
         }
 
         // Update power
-        let changeAmount = 0.01; // TODO save this somewhere (how fast you can change the sails)
+        let changeAmount = 0.01;
         let changeVector = 0;
         // Clearly articulating the two options for a change vector other than zero
         if (newSailStrength != null && newSailStrength > shipSailStrength){
@@ -421,55 +644,151 @@ class Ship {
         return {"new_x_pos": newXPos, "new_y_pos": newYPos, "new_x_v": newXV, "new_y_v": newYV, "new_speed": newSpeed, "new_orientation_rad": newOrientation, "new_ship_sail_strength": newShipSailStrength}
     }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Gets the game instance of the ship
+        Method Return: LASGame
+    */
     getGame(){
         return this.gameInstance;
     }
 
+    /*
+        Method Name: getTickX
+        Method Parameters: None
+        Method Description: Gets the x position at the latest tick
+        Method Return: float
+    */
     getTickX(){
         return this.xPos;
     }
 
+    /*
+        Method Name: getTickY
+        Method Parameters: None
+        Method Description: Gets the y position at the latest tick
+        Method Return: float
+    */
     getTickY(){
         return this.yPos;
     }
 
+    /*
+        Method Name: getTickXV
+        Method Parameters: None
+        Method Description: Gets the x velocity at the latest tick
+        Method Return: float
+    */
     getTickXV(){
         return this.xV;
     }
 
+    /*
+        Method Name: getTickYV
+        Method Parameters: None
+        Method Description: Gets the y velocity at the latest tick
+        Method Return: float
+    */
     getTickYV(){
         return this.yV;
     }
 
-    // Note: Local only
+    /*
+        Method Name: getFrameX
+        Method Parameters: None
+        Method Description: Calculates the x value at the current frame
+        Method Return: float
+        Method Note: local only
+    */
     getFrameX(){
         return this.getXInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
-    // Note: Local only
+    /*
+        Method Name: getFrameY
+        Method Parameters: None
+        Method Description: Calculates the y value at the current frame
+        Method Return: float
+        Method Note: local only
+    */
     getFrameY(){
         return this.getYInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
-    // Note: Local only
+    /*
+        Method Name: getFrameOrientation
+        Method Parameters: None
+        Method Description: Gets the same 
+        Method Return: radians
+        Method Note: Local only
+    */
     getFrameOrientation(){
         return this.getOrientationInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
+    /*
+        Method Name: getOrientationInMS
+        Method Parameters: 
+            ms:
+                Miliseconds into the future
+        Method Description: Finds the orientation after some time
+        Method Return: void
+    */
     getOrientationInMS(ms){
-        // TODO: Change this angle
-        return this.orientationRAD;
+        let orientationDirectionChange = this.establishedDecisions["orientation_direction_change"];
+        let positionInfo = this.getPositionInfoInMS(ms);
+        let newXPos = positionInfo["x_pos"];
+        let newYPos = positionInfo["y_pos"];
+
+        let oldX = this.getTickX();
+        let oldY = this.getTickY();
+
+        let distanceMoved = calculateEuclideanDistance(oldX, oldY, newXPos, newYPos);
+        let turningRadiusDegrees = this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["turning_radius_degrees"];
+        
+        // Update orientation
+        let orientationRAD = this.getTickOrientation();
+        let newOrientation = orientationRAD;
+        if (orientationDirectionChange > 0){
+            newOrientation = rotateCWRAD(orientationRAD, distanceMoved / 1000 * toRadians(turningRadiusDegrees));
+        }else if (orientationDirectionChange < 0){
+            newOrientation = rotateCCWRAD(orientationRAD, distanceMoved / 1000 * toRadians(turningRadiusDegrees));
+        }
+        return newOrientation;
     }
 
+    /*
+        Method Name: getWidth
+        Method Parameters: None
+        Method Description: Gets the ship width
+        Method Return: int
+    */
     getWidth(){
         return this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_width"];
     }
 
+    /*
+        Method Name: getHeight
+        Method Parameters: None
+        Method Description: Gets the ship height
+        Method Return: int
+    */
     getHeight(){
         return this.getGame().getGameProperties()["ship_data"][this.getShipModel()]["ship_height"];
     }
 
-    // Note: Local only
+    /*
+        Method Name: display
+        Method Parameters: 
+            centerXOfScreen:
+                The game x of the screen center
+            centerYOfScreen:
+                The game y of the screen center
+        Method Description: Displays the ship
+        Method Return: void
+        Method Note: local only
+    */
     display(centerXOfScreen, centerYOfScreen){
         let myCenterXOffsetFromScreenCenter = this.getFrameX() - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = this.getFrameY() - centerYOfScreen;
@@ -584,22 +903,62 @@ class Ship {
         translate(-1 * rotateX, -1 * rotateY);
     }
 
+    /*
+        Method Name: calculateWindEffect
+        Method Parameters: 
+            shipOrientationRAD:
+                The ship's orientation
+            windOrientationRAD:
+                The wind's orientation
+        Method Description: Calculates the effect of the wind on the sails
+        Method Return: float in [-1, 1]
+    */
     static calculateWindEffect(shipOrientationRAD, windOrientationRAD){
         return Math.sin(Math.abs(shipOrientationRAD - windOrientationRAD) + toRadians(90))
     }
 
+    /*
+        Method Name: calculateWindEffectMagnitude
+        Method Parameters: 
+            shipOrientationRAD:
+                The ship's orientation
+            windOrientationRAD:
+                The wind's orientation
+        Method Description: Calculates the effect of the wind on the sails
+        Method Return: float in [0, 1]
+    */
     static calculateWindEffectMagnitude(shipOrientationRAD, windOrientationRAD){
         return Math.abs(Ship.calculateWindEffect(shipOrientationRAD, windOrientationRAD));
     }
 
+    /*
+        Method Name: getTickOrientation
+        Method Parameters: None
+        Method Description: Gets orientation of the ship at the last tikc
+        Method Return: radian
+    */
     getTickOrientation(){
         return this.orientationRAD;
     }
 
+    /*
+        Method Name: getPropulsionConstant
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: float in [0, 1]
+    */
     getPropulsionConstant(){
         return this.propulsionConstant;
     }
 
+    /*
+        Method Name: getPositionInfoInMS
+        Method Parameters: 
+            ms:
+                Miliseconds since the last tick
+        Method Description: Calculates the position information at a given time since the last tick
+        Method Return: JSON
+    */
     getPositionInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
@@ -619,6 +978,36 @@ class Ship {
         return res;
     }
 
+    /*
+        Method Name: getPositionInfoInMS
+        Method Parameters: 
+            ms:
+                Miliseconds since the last tick
+            windXA:
+                Wind acceleration 
+            windYA:
+                Wind acceleration 
+            shipSailStrength:
+                Ships' sail strength
+            tickOrientation:
+                Orientation of the ship
+            windDirectionRAD:
+                Wind direction in radians
+            shipAirAffectednessCoefficient:
+                The coefficient for how much the ship is affected by the wind
+            willReductionOnAccountOfSailStrengthExponent:
+                The reduction of will-power based on having lower wind 
+            propulsionConstant:
+                The propulsion constant for the sip
+            speed:
+                The speed of the ship
+            xPos:
+                The x position of the ship
+            yPos:
+                The y position of the ship
+        Method Description: Gets the y position of the ship
+        Method Return: JSON
+    */
     static getPositionInfoInMS(ms, windXA, windYA, shipSailStrength, tickOrientation, windDirectionRAD, shipAirAffectednessCoefficient, willReductionOnAccountOfSailStrengthExponent, propulsionConstant, speed, xPos, yPos){
         let msProportionOfASecond = ms / 1000;
         // How strong the sails are affects the wind
@@ -635,7 +1024,6 @@ class Ship {
 
         // Modify based on sail strength
 
-        //debugger;
         // Modify
         let exponent = willReductionOnAccountOfSailStrengthExponent;
         willPowerA *= Math.pow(shipSailStrength, exponent);
@@ -655,10 +1043,26 @@ class Ship {
         return {"x_pos": newXP, "x_v": newXV, "y_pos": newYP, "y_v": newYV, "speed": newSpeed}
     }
 
+    /*
+        Method Name: getXInMS
+        Method Parameters: 
+            ms:
+                miliseconds since the last tick
+        Method Description: Calculates the x position at a given time
+        Method Return: float
+    */
     getXInMS(ms){
         return this.getPositionInfoInMS(ms)["x_pos"];
     }
 
+    /*
+        Method Name: getYInMS
+        Method Parameters: 
+            ms:
+                miliseconds since the last tick
+        Method Description: Calculates the x position at a given time
+        Method Return: float
+    */
     getYInMS(ms){
         return this.getPositionInfoInMS(ms)["y_pos"];
     }

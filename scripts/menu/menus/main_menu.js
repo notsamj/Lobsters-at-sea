@@ -23,6 +23,10 @@ class MainMenu extends Menu {
         let buttonSizeX = MSD["main_menu"]["button_x_size"];
         let buttonSizeY = MSD["main_menu"]["button_y_size"];
         let gapSize = MSD["main_menu"]["gap_size"];
+
+        let numButtons = 5; // challenge, gamemodes, replays, myprojects, settings
+        let totalInterfaceYSize = gapSize * (numButtons-1) + buttonSizeY * numButtons;
+
         let buttonX = (innerWidth) => { return (innerWidth - buttonSizeX)/2; }
 
         let buttonColorCode = MSD["main_menu"]["button_color_code"];
@@ -39,7 +43,7 @@ class MainMenu extends Menu {
         this.components.push(new StaticImage(GC.getImage("logo"), logoX, logoY, logoSizeX, logoSizeY));
 
         // challenge
-        let challengeButtonY = (innerHeight) => { return innerHeight - gapSize; };
+        let challengeButtonY = (innerHeight) => { return Math.floor(innerHeight - totalInterfaceYSize)/2 + totalInterfaceYSize; }
         this.components.push(new RectangleButton("Challenge", buttonColorCode, buttonTextColorCode, buttonX, challengeButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
             GC.newGame(LasLocalGame, Challenge);
             GC.getActiveGamemode().startUp();
@@ -55,7 +59,6 @@ class MainMenu extends Menu {
         // Replays
         let replayButtonY = (innerHeight) => { return gamemodeViewerY(innerHeight) - buttonSizeY - gapSize; }
         this.components.push(new RectangleButton("Replays", buttonColorCode, buttonTextColorCode, buttonX, replayButtonY, buttonSizeX, buttonSizeY, (menuInstance) => {
-            // TODO: Go to Replays menu
             GC.getMenuManager().switchTo("replay_menu");
         }));
 

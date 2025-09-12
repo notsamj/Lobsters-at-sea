@@ -67,6 +67,12 @@ class BattleMenu extends Menu {
         SC.getEventHandler().addHandler("server_message", serverMessageHandlerFunction);
     }
 
+    /*
+        Method Name: lobbyJoinFunc
+        Method Parameters: None
+        Method Description: Sends lobby join request
+        Method Return: void
+    */
     lobbyJoinFunc(){
         if (!this.isActiveMenu()){ return; }
 
@@ -83,6 +89,12 @@ class BattleMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: sendNotInterestedInGame
+        Method Parameters: None
+        Method Description: Tells the server that it is not interested in joining the game
+        Method Return: void
+    */
     sendNotInterestedInGame(){
         // This is the active menu
         let lobbbyQuitRequest = {
@@ -97,8 +109,15 @@ class BattleMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: serverMessage
+        Method Parameters: 
+            eventJSON:
+                Event information JSON
+        Method Description: Checks a server message for game_start and may launch game
+        Method Return: void
+    */
     serverMessage(eventJSON){
-        //console.log(GC.isInGame(), eventJSON["message_json"]["subject"], eventJSON)
         // Ignore if in game
         if (GC.isInGame()){
             return;
@@ -106,21 +125,35 @@ class BattleMenu extends Menu {
 
         // Expect a game_start message
         let messageJSON = eventJSON["message_json"];
+
+        // Checks for game start
         if (messageJSON["subject"] === "game_start"){
             GC.newGame(LasRemoteGame, Battle);
             GC.getGamemodeManager().getActiveGamemode().setup(messageJSON["game_details"]);
             GC.getMenuManager().switchTo("game");
-        }else{
-            //throw new Error("Unexpected message from server: " + JSON.stringify(eventJSON));
         }
     }
 
+    /*
+        Method Name: statusUpdate
+        Method Parameters: 
+            eventJSON:
+                Event JSON with information
+        Method Description: Displays a meessage on status update
+        Method Return: void
+    */
     statusUpdate(eventJSON){
         let messageText = eventJSON["text"];
         let messageCategory = eventJSON["category"];
         this.scrollingMessageDisplay.addMessage(messageText, MSD["battle_menu"]["category_to_color_code"][messageCategory]);
     }
 
+    /*
+        Method Name: informSwitchedTo
+        Method Parameters: None
+        Method Description: Handles switched to event
+        Method Return: void
+    */
     informSwitchedTo(){
         SC.initiateConnection();
 
@@ -128,6 +161,12 @@ class BattleMenu extends Menu {
         this.lobbyJoinFunc();
     }
 
+    /*
+        Method Name: informChangedToMainMenu
+        Method Parameters: None
+        Method Description: Handles changed to main menu event
+        Method Return: void
+    */
     informChangedToMainMenu(){
         let lobbbyQuitRequest = {
             "subject": "desire_to_play_battle",

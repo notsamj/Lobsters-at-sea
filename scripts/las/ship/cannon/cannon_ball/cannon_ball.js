@@ -2,7 +2,19 @@
 if (typeof window === "undefined"){
     displacementToRadians = require("../../../../general/math_helper.js").displacementToRadians;
 }
+/*
+    Class Name: CannonBall
+    Class Description: A cannon ball
+*/
 class CannonBall {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            cannonBallJSON:
+                Details about this cannon ball instance
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(cannonBallJSON){
         this.cannonBallID = cannonBallJSON["cannon_ball_id"];
         this.shooterID = cannonBallJSON["ship_origin_id"];
@@ -14,34 +26,86 @@ class CannonBall {
         this.deathTick = cannonBallJSON["death_tick"];
     }
 
+    /*
+        Method Name: hasHitWater
+        Method Parameters: 
+            tick:
+                A tick (int)
+        Method Description: Checks if the cannon ball has hit the water
+        Method Return: boolean
+    */
     hasHitWater(tick){
         return tick >= this.deathTick;
     }
 
+    /*
+        Method Name: getTickX
+        Method Parameters: None
+        Method Description: Gets the x position at a tick
+        Method Return: float
+    */
     getTickX(){
         return this.xPos;
     }
 
+    /*
+        Method Name: getTickY
+        Method Parameters: None
+        Method Description: Gets the y position at a tick
+        Method Return: float
+    */
     getTickY(){
         return this.yPos;
     }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Gets the game instance
+        Method Return: LASGame
+    */
     getGame(){
         return this.gameInstance;
     }
 
+    /*
+        Method Name: getOrientationRAD
+        Method Parameters: None
+        Method Description: Determines the current orientation
+        Method Return: radians
+    */
     getOrientationRAD(){
         return displacementToRadians(this.xV, this.vY);
     }
 
+    /*
+        Method Name: getShooterID
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: any
+    */
     getShooterID(){
         return this.shooterID;
     }
 
+    /*
+        Method Name: getID
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: any
+    */
     getID(){
         return this.cannonBallID;
     }
 
+    /*
+        Method Name: updateMovementOneTickWithWind
+        Method Parameters: 
+            windDataJSON:
+                data about the wind
+        Method Description: Updates the movement for one tick with wind data
+        Method Return: void
+    */
     updateMovementOneTickWithWind(windDataJSON){
         let xA = Math.cos(windDataJSON["wind_direction_rad"]) * windDataJSON["wind_magntiude"];
         let yA = Math.sin(windDataJSON["wind_direction_rad"]) * windDataJSON["wind_magntiude"];
@@ -68,6 +132,12 @@ class CannonBall {
         this.yV = yInfo["y_v"];
     }
 
+    /*
+        Method Name: move
+        Method Parameters: None
+        Method Description: Moves the cannon ball 1 tick
+        Method Return: void
+    */
     move(){
         let tickMS = this.getGame().getGameProperties()["ms_between_ticks"];
 
@@ -91,10 +161,24 @@ class CannonBall {
         this.yV = yInfo["y_v"];
     }
 
+    /*
+        Method Name: getTickOrientation
+        Method Parameters: None
+        Method Description: Determines the current orientation
+        Method Return: radians
+    */
     getTickOrientation(){
-        return displacementToRadians(this.xV, this.yV);
+        return this.getOrientationRAD();
     }
 
+    /*
+        Method Name: getXInfoInMS
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+        Method Description: Gets the x location information after a given ms
+        Method Return: JSON
+    */
     getXInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
@@ -103,6 +187,16 @@ class CannonBall {
         return this.getXInfoInMSWithXA(ms, windXA);
     }
 
+    /*
+        Method Name: getXInfoInMSWithXA
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+            windXA:
+                Wind x acceleration quantity
+        Method Description: Gets the x location information after a given ms
+        Method Return: JSON
+    */
     getXInfoInMSWithXA(ms, windXA){
         let game = this.getGame();
         let msProportionOfASecond = ms / 1000;
@@ -115,10 +209,26 @@ class CannonBall {
         return {"x_pos": newXP, "x_v": newXV}
     }
 
+    /*
+        Method Name: getXInMS
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+        Method Description: Gets the x position information after a given ms
+        Method Return: float
+    */
     getXInMS(ms){
         return this.getXInfoInMS(ms)["x_pos"];
     }
 
+    /*
+        Method Name: getYInfoInMS
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+        Method Description: Gets the y location information after a given ms
+        Method Return: JSON
+    */
     getYInfoInMS(ms){
         let game = this.getGame();
         let windObJ = this.getGame().getWind();
@@ -126,6 +236,16 @@ class CannonBall {
         return this.getYInfoInMSWithYA(ms, windYA);
     }
 
+    /*
+        Method Name: getYInfoInMSWithYA
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+            windXA:
+                Wind y acceleration quantity
+        Method Description: Gets the y location information after a given ms
+        Method Return: JSON
+    */
     getYInfoInMSWithYA(ms, windYA){
         let game = this.getGame();
         let msProportionOfASecond = ms / 1000;
@@ -137,25 +257,62 @@ class CannonBall {
         return {"y_pos": newYP, "y_v": newYV}
     }
 
+    /*
+        Method Name: getYInMS
+        Method Parameters: 
+            ms:
+                Miliseconds ahead of the last saved position
+        Method Description: Gets the y position information after a given ms
+        Method Return: float
+    */
     getYInMS(ms){
         return this.getYInfoInMS(ms)["y_pos"];
     }
 
-    // Note: Local only
+    /*
+        Method Name: getFrameX
+        Method Parameters: None
+        Method Description: Gets the X of the cannon ball at the current frame
+        Method Return: float
+        Note: Local only
+    */
     getFrameX(){
         return this.getXInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
-    // Note: Local only
+    /*
+        Method Name: getFrameY
+        Method Parameters: None
+        Method Description: Gets the Y of the cannon ball at the current frame
+        Method Return: float
+        Method Note: Local only
+    */
     getFrameY(){
         return this.getYInMS(this.getGame().getDisplayMSSinceLastTick());
     }
 
+    /*
+        Method Name: getFrameOrientation
+        Method Parameters: None
+        Method Description: Gets the orientation of the cannon ball at the current frame
+        Method Return: radians
+        Method Note: well this is actually last tick so it's a little delayed
+    */
     getFrameOrientation(){
         return this.getTickOrientation();
     }
 
-    // Note: Local only
+    /*
+        Method Name: display
+        Method Parameters: 
+            centerXOfScreen:
+                The game x center of the screen
+            centerYOfScreen:
+                The game y center of the screen
+        Method Description: Displays the cannon ball
+        Method Return: void
+        Method Note: Local only
+    */
     display(centerXOfScreen, centerYOfScreen){
         let myCenterXOffsetFromScreenCenter = this.getFrameX() - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = this.getFrameY() - centerYOfScreen;
@@ -222,7 +379,6 @@ class CannonBall {
         scale(gameZoom * 1 / cannonBallImageSizeConstantX, gameZoom * 1 / cannonBallImageSizeConstantY);
 
         // Display Cannonball
-        // TEMP
         displayImage(GC.getImage("cannon_ball"), 0 - (cannonBallWidth-1) / 2 * cannonBallImageSizeConstantX, 0 - (cannonBallHeight-1) / 2 * cannonBallImageSizeConstantY); 
 
         // Undo game zoom
@@ -231,9 +387,6 @@ class CannonBall {
         // Reset the rotation and translation
         rotate(displayImageOrientation);
         translate(-1 * rotateX, -1 * rotateY);
-
-        // Temp
-        //stop();
     }
 }
 

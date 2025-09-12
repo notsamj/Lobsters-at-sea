@@ -21,6 +21,12 @@ class HelpMenu extends Menu {
         this.currentImageIndex = 0;
     }
 
+    /*
+        Method Name: loadImages
+        Method Parameters: None
+        Method Description: Loads the images related to help
+        Method Return: Promise (implicit)
+    */
     async loadImages(){
         let imageJSON = MSD["help_menu"]["help_image"]["images"];
         let folderURL = "help/";

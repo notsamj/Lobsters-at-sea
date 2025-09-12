@@ -1,4 +1,26 @@
+/*
+    Class Name: DebugCircle
+    Description: A line for debugging
+*/
 class DebugLine extends VisualEffect {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            colorCode:
+                Colour of the line
+            startX:
+                Starting x of the line
+            startY:
+                Starting y of the line
+            endX:
+                Ending x of the line
+            endY:
+                Ending y of the line
+            thickness:
+                Thickness of the line
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(colorCode, startX, startY, endX, endY, thickness){
         super(0, 9999999);
         this.colorCode = colorCode;
@@ -17,6 +39,20 @@ class DebugLine extends VisualEffect {
         this.calculateRectangleSimulation();
     }
 
+    /*
+        Method Name: update
+        Method Parameters: 
+            startX:
+                Starting x of the line
+            startY:
+                Starting y of the line
+            endX:
+                Ending x of the line
+            endY:
+                Ending y of the line
+        Method Description: Updates the line position
+        Method Return: void
+    */
     update(startX, startY, endX, endY){
         this.startX = startX;
         this.startY = startY;
@@ -26,6 +62,12 @@ class DebugLine extends VisualEffect {
         this.calculateRectangleSimulation();
     }
 
+    /*
+        Method Name: calculateRectangleSimulation
+        Method Parameters: None
+        Method Description: Reculate the details for display as a rectangle
+        Method Return: void
+    */
     calculateRectangleSimulation(){
         this.centerX = (this.startX + this.endX)/2;
         this.centerY = (this.startY + this.endY)/2;
@@ -33,6 +75,22 @@ class DebugLine extends VisualEffect {
         this.angleRAD = rotateCWRAD(displacementToRadians(this.endX-this.startX, this.endY-this.startY), toRadians(90));
     }
 
+    /*
+        Method Name: display
+        Method Parameters: 
+            centerXOfScreen:
+                Game X of the center of the screen
+            centerYOfScreen:
+                Game y of the center of the screen
+            currentTick:
+                Current tick number
+            msBetweenTicks:
+                Miliseconds between ticks
+            msSinceLastTick:
+                Miliseconds between 
+        Method Description: Displays the circle
+        Method Return: void
+    */
     display(centerXOfScreen, centerYOfScreen, currentTick, msBetweenTicks, msSinceLastTick){
         // displayColoredRectangle(centerXOfScreen, centerYOfScreen, rectangleColorCode, rectangleCenterX, rectangleCenterY, rectangleWidth, rectangleHeight, opacity=1
         

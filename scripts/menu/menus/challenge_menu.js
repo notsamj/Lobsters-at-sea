@@ -67,6 +67,12 @@ class ChallengeMenu extends Menu {
     }
 
 
+    /*
+        Method Name: toggleAutomaticSails
+        Method Parameters: None
+        Method Description: Toggles the automatic sails
+        Method Return: void
+    */
     toggleAutomaticSails(){
         this.automaticSails = !this.automaticSails;
         let switchedToAutomaticSails = this.automaticSails;
@@ -80,6 +86,12 @@ class ChallengeMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: toggleHealMode
+        Method Parameters: None
+        Method Description: Toggles the healing mode
+        Method Return: void
+    */
     toggleHealMode(){
         this.healMode = !this.healMode;
         let switchedToHealMode = this.healMode;
@@ -93,6 +105,12 @@ class ChallengeMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: checkIfSailSettingShouldBeEnabled
+        Method Parameters: None
+        Method Description: Checks if the sail settings should be enabled 
+        Method Return: void
+    */
     checkIfSailSettingShouldBeEnabled(){
         if (this.characterImage.getImageName() === "freecam"){
             this.switchToAutomaticButton.fullDisable();

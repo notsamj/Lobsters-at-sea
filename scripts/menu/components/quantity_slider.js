@@ -45,6 +45,14 @@ class QuantitySlider extends OptionSlider {
         this.updateSliderX();
     }
 
+    /*
+        Method Name: setMaxValue
+        Method Parameters: 
+            maxValue:
+                New max value
+        Method Description: Sets the max value for the slider
+        Method Return: void
+    */
     setMaxValue(maxValue){
         let currentValue = this.accessValue();
         if (currentValue > maxValue){

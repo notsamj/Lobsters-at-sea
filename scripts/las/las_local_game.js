@@ -1,6 +1,6 @@
 /*
     Class Name: LasLocalGame
-    Description: Local running Lobsters At Sea Game
+    Description: Locally running Lobsters At Sea Game
 */
 class LasLocalGame extends LasGame {
     /*
@@ -82,7 +82,7 @@ class LasLocalGame extends LasGame {
         Method Return: void
     */
     tickHumanController(){
-        if (this.hasFocusedShip()){
+        if (this.hasFocusedLivingShip()){
             this.humanShipController.tick();
         }else{
             this.focusedCamera.tick();
@@ -109,7 +109,7 @@ class LasLocalGame extends LasGame {
         Method Return: void
     */
     displayHumanController(){
-        if (this.hasFocusedShip()){
+        if (this.hasFocusedLivingShip()){
             this.humanShipController.display();
         }else{
             this.focusedCamera.display();
@@ -135,9 +135,8 @@ class LasLocalGame extends LasGame {
         // Tick bot controllers
         this.tickBotControllers();
 
-
         // Update ship orientations, power based on decisions
-        this.updateShipOrientationAndSailPower();
+        this.updateEstablishedDecisions();
 
         // Record initial positions prior to moving for collision checking later
         this.recordShipPositions();
@@ -210,57 +209,6 @@ class LasLocalGame extends LasGame {
     }
 
     /*
-        Method Name: handleCannonShotMovement
-        Method Parameters: None
-        Method Description: Moves the cannon balls
-        Method Return: void
-    */
-    handleCannonShotMovement(){
-        for (let [cannonBall, index] of this.cannonBalls){
-            cannonBall.move();
-        }
-    }
-
-    /*
-        Method Name: tickShips
-        Method Parameters: None
-        Method Description: Ticks the ships
-        Method Return: void
-    */
-    tickShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.tick();
-        }
-    }
-
-    /*
-        Method Name: moveShips
-        Method Parameters: None
-        Method Description: Mones the ships for a tick
-        Method Return: void
-    */
-    moveShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.moveOneTick();
-        }
-    }
-
-    /*
-        Method Name: allowShipsToShoot
-        Method Parameters: None
-        Method Description: Allows ships to shoot
-        Method Return: void
-    */
-    allowShipsToShoot(){
-        for (let [ship, shipIndex] of this.getShips()){
-            if (ship.isDead()){ continue; }
-            ship.checkShoot();
-        }
-    }
-
-    /*
         Method Name: updateShipDecisions
         Method Parameters: None
         Method Description: Updates the decisions of the ships from their controllers
@@ -268,7 +216,7 @@ class LasLocalGame extends LasGame {
     */
     updateShipDecisions(){
         // For human ship
-        if (this.hasFocusedShip()){
+        if (this.hasFocusedLivingShip()){
             let controllerOutputJSON = this.humanShipController.getDecisionJSON();
 
             this.focusedShip.updateFromPilot(controllerOutputJSON);
@@ -281,28 +229,26 @@ class LasLocalGame extends LasGame {
     }
 
     /*
-        Method Name: updateShipOrientationAndSailPower
-        Method Parameters: None
-        Method Description: Tells ships to update their orientation and sail power
-        Method Return: void
-    */
-    updateShipOrientationAndSailPower(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.updateShipOrientationAndSailPower();
-        }
-    }
-
-    /*
         Method Name: getFocusedEntity
         Method Parameters: None
         Method Description: Gets the focused entity
         Method Return: SpectatorCamera | Ship
     */
     getFocusedEntity(){
-        if (this.focusedShip === null){
-            return this.focusedCamera;
+        if (this.hasFocusedLivingShip()){
+            return this.focusedShip;
         }
-        return this.focusedShip;
+        return this.focusedCamera;
+    }
+
+    /*
+        Method Name: hasFocusedLivingShip
+        Method Parameters: None
+        Method Description: Checks if there is a focused living ship
+        Method Return: boolean
+    */
+    hasFocusedLivingShip(){
+        return this.focusedShip != null && this.focusedShip.isAlive();
     }
 
     /*
@@ -558,8 +504,6 @@ class LasLocalGame extends LasGame {
         let keyCodeCameraMoveUp = MD["default_key_binds"]["camera_move_up"];
         let keyCodeCameraMoveDown = MD["default_key_binds"]["camera_move_down"];
         let keyCodeCameraSnapToggle = MD["default_key_binds"]["camera_snap_follow_toggle"];
-
-        // TODO: Read modified keybinds
 
         let menuInputManager = GC.getMenuUserInputManager();
 

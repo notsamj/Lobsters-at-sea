@@ -1,4 +1,14 @@
+/*
+    Class Name: ServerConnection
+    Class Description: A connection to the server
+*/
 class ServerConnection {
+    /*
+        Method Name: constructor
+        Method Parameters: None
+        Method Description: Constructor
+        Method Return: Constructor
+    */
     constructor(defaultFolderSettingsJSON={}){
         this.eventHandler = new NSEventHandler();
         this.clientMailbox = new ClientMailbox(defaultFolderSettingsJSON);
@@ -11,6 +21,16 @@ class ServerConnection {
         this.connectionIsActive = false;
     }
 
+    /*
+        Method Name: sendNowOrOnConnection
+        Method Parameters: 
+            message:
+                A message to send to the server (JSON)
+            id:
+                ID for the message (prevents duplication)
+        Method Description: Sends a message now or when connection is established
+        Method Return: Promise (implicit)
+    */
     async sendNowOrOnConnection(message, id=null){
         // Send now if connected
         if (this.hasConnectionActive()){
@@ -41,6 +61,14 @@ class ServerConnection {
         this.messageQueue.relinquishAccess();
     }
 
+    /*
+        Method Name: sendJSON
+        Method Parameters: 
+            jsonObj:
+                A JSON object to send
+        Method Description: Sends a JSON object
+        Method Return: void
+    */
     sendJSON(jsonObj){
         if (!this.hasConnectionActive()){
             throw new Error("Cannot send message whilst not connected.")
@@ -48,10 +76,22 @@ class ServerConnection {
         this.connectionWS.send(JSON.stringify(jsonObj));
     }
 
+    /*
+        Method Name: getClientMailbox
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: ClientMailbox
+    */
     getClientMailbox(){
         return this.clientMailbox;
     }
 
+    /*
+        Method Name: notifyConnectionActive
+        Method Parameters: None
+        Method Description: Handles the notification that the connection is active
+        Method Return: void
+    */
     notifyConnectionActive(){
         // Update status
         this.setConnectionActive(true);
@@ -60,6 +100,12 @@ class ServerConnection {
         this.sendPendingMessages();
     }
 
+    /*
+        Method Name: sendPendingMessages
+        Method Parameters: None
+        Method Description: Sends pending messages
+        Method Return: Promice (implicit)
+    */
     async sendPendingMessages(){
         await this.messageQueue.requestAccess();
         for (let [messageObj, messageObjIndex] of this.messageQueue){
@@ -70,6 +116,12 @@ class ServerConnection {
         this.messageQueue.relinquishAccess();
     }
 
+    /*
+        Method Name: notifyConnectionFailed
+        Method Parameters: None
+        Method Description: Handles the notification that the server connection failed
+        Method Return: void
+    */
     notifyConnectionFailed(){
         this.setConnectionActive(false);
 
@@ -78,13 +130,17 @@ class ServerConnection {
             this.setAttemptingToConnect(false);
         }
 
-        // Try again
-        this.attemptReconnection();
+        // Try again (disabled)
+        // this.attemptReconnection();
     }
 
+    /*
+        Method Name: attemptReconnection
+        Method Parameters: None
+        Method Description: Attempts a reconnection to the server
+        Method Return: void
+    */
     attemptReconnection(){
-        // Temp
-        if (true){ return; }
         this.eventHandler.emit({
             "name": "status_update",
             "category": "yellow",
@@ -93,22 +149,56 @@ class ServerConnection {
         this.initiateConnection();
     }
 
+    /*
+        Method Name: setAttemptingToConnect
+        Method Parameters: 
+            value:
+                Boolean value for attempting to connect
+        Method Description: Setter
+        Method Return: void
+    */
     setAttemptingToConnect(value){
         this.attemptingToConnect = value;
     }
 
+    /*
+        Method Name: setConnectionActive
+        Method Parameters: 
+            value:
+                Boolean value for connection being avid
+        Method Description: Setter
+        Method Return: void
+    */
     setConnectionActive(value){
         this.connectionIsActive = value;
     }
 
+    /*
+        Method Name: getEventHandler
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: EventHandler
+    */
     getEventHandler(){
         return this.eventHandler;
     }
 
+    /*
+        Method Name: shutdownConnectionIfOn
+        Method Parameters: None
+        Method Description: Shuts down the connection
+        Method Return: void
+    */
     shutdownConnectionIfOn(){
         this.terminateConnection();
     }
 
+    /*
+        Method Name: initiateConnection
+        Method Parameters: None
+        Method Description: Initiates a connection
+        Method Return: Promise (implicit)
+    */
     async initiateConnection(){
         // If has an active connection OR a connection is currently being attempted then ignore 
         if (this.hasConnectionActive() || this.isAttemptingConnection()){
@@ -134,6 +224,12 @@ class ServerConnection {
         this.createWSSObject();
     }
 
+    /*
+        Method Name: createWSSObject
+        Method Parameters: None
+        Method Description: Creates a WSS object
+        Method Return: void
+    */
     createWSSObject(){
         let fullAddrString = "wss://" + SCD["address"] + ':' + SCD["port"].toString();
         
@@ -183,6 +279,14 @@ class ServerConnection {
         })
     }
 
+    /*
+        Method Name: handleNewMessageFromServer
+        Method Parameters: 
+            event:
+                An event JSON that is from the server
+        Method Description: Handles a new message
+        Method Return: Promise (implicit)
+    */
     async handleNewMessageFromServer(event){
         let dataJSON = JSON.parse(event["data"]);
 
@@ -202,22 +306,38 @@ class ServerConnection {
         });
     }
 
+    /*
+        Method Name: hasConnectionActive
+        Method Parameters: None
+        Method Description: Checks if there is a connection active
+        Method Return: boolean
+    */
     hasConnectionActive(){
         return this.connectionIsActive;
     }
 
+    /*
+        Method Name: isAttemptingConnection
+        Method Parameters: None
+        Method Description: Checks if there is a connection being attempted
+        Method Return: boolean
+    */
     isAttemptingConnection(){
         return this.attemptingToConnect;
     }
 
+    /*
+        Method Name: terminateConnection
+        Method Parameters: None
+        Method Description: Terminates a connection
+        Method Return: void
+    */
     terminateConnection(){
         // Do nothing if connection is not active and also not attempting to connect
         if ((!this.hasConnectionActive()) && (!this.isAttemptingConnection())){
             return;
         }
 
-        // TODO 
-        // SEND BYE MESSAGE?
         this.connectionWS.close();
         this.setConnectionActive(false);
 

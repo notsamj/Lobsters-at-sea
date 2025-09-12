@@ -3,7 +3,19 @@ const Ship = require("../../scripts/las/ship/ship.js").Ship;
 const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
 const BotShipController = require("../../scripts/las/ship/bot_controller/bot_ship_controller.js").BotShipController;
 
+/*
+    Class Name: LasTest1v1Game
+    Description: For modifying bot settings
+*/
 class LasTest1v1Game extends LasGame {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            gameProperties:
+                JSON with game properties
+        Method Description: Constructor
+        Method Return: Constructor
+    */
     constructor(gameProperties){
         super(gameProperties);
         this.running = false;
@@ -14,10 +26,26 @@ class LasTest1v1Game extends LasGame {
         this.botShipControllers = [];
     }
 
+    /*
+        Method Name: getWinnerID
+        Method Parameters: None
+        Method Description: Gets the winner ID
+        Method Return: any
+    */
     getWinnerID(){
         return this.winnerID;
     }
 
+    /*
+        Method Name: start
+        Method Parameters:
+            bot1JSON:
+                JSON details for bot 1
+            bot2JSON:
+                JSON details for bot 2
+        Method Description: Starts the game
+        Method Return: void
+    */
     start(bot1JSON, bot2JSON){
         // Set running
         this.running = true;
@@ -38,12 +66,24 @@ class LasTest1v1Game extends LasGame {
         this.addBotShipController(bot2Controller);
     }
 
+    /*
+        Method Name: tickBotControllers
+        Method Parameters: None
+        Method Description: Ticks the bot controllers
+        Method Return: void
+    */
     tickBotControllers(){
         for (let botShipController of this.botShipControllers){
             botShipController.tick();
         }
     }
 
+    /*
+        Method Name: reset
+        Method Parameters: None
+        Method Description: Resets the game
+        Method Return: void
+    */
     reset(){
         this.running = false;
         this.tickTimeline.reset();
@@ -57,10 +97,25 @@ class LasTest1v1Game extends LasGame {
         this.botShipControllers = [];
     }
 
+    /*
+        Method Name: addBotShipController
+        Method Parameters:
+            botShipController:
+                JSON with bot ship controller info
+        Method Description: Adds a bot ship controller
+        Method Return: void
+    */
     addBotShipController(botShipController){
         this.botShipControllers.push(botShipController);
     }
 
+
+    /*
+        Method Name: end
+        Method Parameters: None
+        Method Description: End events
+        Method Return: void
+    */
     end(){
         let winnerShipID = "tie";
         let aliveCount = 0;
@@ -81,10 +136,22 @@ class LasTest1v1Game extends LasGame {
 
     }
 
+    /*
+        Method Name: isRunning
+        Method Parameters: None
+        Method Description: Checks if the game is still running
+        Method Return: boolean
+    */
     isRunning(){
         return this.running;
     }
 
+    /*
+        Method Name: determineIfContinuingToRun
+        Method Parameters: None
+        Method Description: Checks if the game should continue running
+        Method Return: void
+    */
     determineIfContinuingToRun(){
         let shipsAlive = 0;
         for (let [ship, shipIndex] of this.ships){
@@ -99,6 +166,12 @@ class LasTest1v1Game extends LasGame {
         }
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Tick actions
+        Method Return: void
+    */
     tick(){
         // Check if game still going
         this.determineIfContinuingToRun();
@@ -114,10 +187,10 @@ class LasTest1v1Game extends LasGame {
             // Tick bot controllers
             this.tickBotControllers();
 
-            // TODO: Update ship orientations, power based on decisions
-            this.updateShipOrientationAndSailPower();
+            // Updates the established decisions
+            this.updateEstablishedDecisions();
 
-            // TODO: Move ships based on orientation and sail power
+            // Record ship positions then moves the ships
             this.recordShipPositions();
             this.moveShips();
 
@@ -141,36 +214,12 @@ class LasTest1v1Game extends LasGame {
         }
     }
 
-    handleCannonShotMovement(){
-        for (let [cannonBall, index] of this.cannonBalls){
-            cannonBall.move();
-        }
-    }
-
-    tickShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.tick();
-        }
-    }
-
-    moveShips(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.moveOneTick();
-        }
-    }
-
-    allowShipsToShoot(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.checkShoot();
-        }
-    }
-
-    updateShipOrientationAndSailPower(){
-        for (let [ship, shipIndex] of this.getShips()){
-            ship.updateShipOrientationAndSailPower();
-        }
-    }
-
+    /*
+        Method Name: updateBotShipDecisions
+        Method Parameters: None
+        Method Description: Updates the bot decisions
+        Method Return: void
+    */
     updateShipDecisions(){
         // Bot ship controllers
         for (let botShipController of this.botShipControllers){

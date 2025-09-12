@@ -20,6 +20,12 @@ class MyProjectsMenu extends Menu {
         this.currentImageIndex = 0;
     }
 
+    /*
+        Method Name: loadImages
+        Method Parameters: None
+        Method Description: Loads project images
+        Method Return: Promise (implicit)
+    */
     async loadImages(){
         let images = MSD["my_projects_menu"]["project_image"]["images"];
         let folderURL = "my_projects/";

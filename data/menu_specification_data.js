@@ -2,8 +2,8 @@ const MSD = {
     "text_box_padding_proportion": 0.1,
     "main_menu": {
         "button_x_size": 800,
-        "button_y_size": 120,
-        "gap_size": 40,
+        "button_y_size": 100,
+        "gap_size": 20,
         "logo_x_size": 512,
         "logo_y_size": 512,
         "button_color_code": "#3bc44b",
@@ -12,6 +12,21 @@ const MSD = {
         "info_y_size": 200,
         "info_text": "Made by notsamj.\nPress 'H' at any time for help!",
         "info_color_code": "#000000"
+    },
+    "pause_menu": {
+        "button_x_size": 800,
+        "button_y_size": 160,
+        "button_y_gap": 120,
+        "resume_button": {
+            "text": "Resume Game",
+            "button_colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4"
+        },
+        "main_menu_button": {
+            "text": "Return to the Main Menu",
+            "button_colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4"
+        }
     },
     "challenge_menu": {
         "back_button": {

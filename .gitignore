@@ -14,3 +14,4 @@ server/san.cnf
 server/make certificates.sh
 server/replay_backup.replay
 server/replay_backup.replay
+*.replay

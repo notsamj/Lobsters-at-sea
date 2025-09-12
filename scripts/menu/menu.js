@@ -17,6 +17,12 @@ class Menu {
         this.components = [];
     }
 
+    /*
+        Method Name: isActiveMenu
+        Method Parameters: None
+        Method Description: Checks if a menu is the active menu
+        Method Return: boolean
+    */
     isActiveMenu(){
         return GC.getMenuManager().getActiveMenuName() === this.getName();
     }

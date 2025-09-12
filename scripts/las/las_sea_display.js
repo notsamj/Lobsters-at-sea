@@ -14,7 +14,13 @@ class LASSeaDisplay {
         this.lasSeaDisplayJSON = MD["las_sea_data"];
     }
 
-    getlasSeaDisplayJSON(){
+    /*
+        Method Name: getLASSeaDisplayJSON
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
+    getLASSeaDisplayJSON(){
         return this.lasSeaDisplayJSON;
     }
 
@@ -165,7 +171,7 @@ class LASSeaMesh {
         Method Return: void
     */
     createTiles(){
-        let lasSeaDisplayJSON = this.backgroundManager.getlasSeaDisplayJSON();
+        let lasSeaDisplayJSON = this.backgroundManager.getLASSeaDisplayJSON();
         let meshWidth = lasSeaDisplayJSON["mesh_width"];
         let meshHeight = lasSeaDisplayJSON["mesh_height"];
         let tileWidth = lasSeaDisplayJSON["tile_width"];

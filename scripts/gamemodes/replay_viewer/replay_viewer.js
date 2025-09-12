@@ -16,6 +16,7 @@ class ReplayViewer extends Gamemode {
         this.winningScreen = new WinningScreen();
 
         this.timeline = undefined; // Placeholder
+        this.lastTick = undefined;
         this.currentTimelineIndex = 0;
 
         this.mode = undefined;
@@ -99,9 +100,6 @@ class ReplayViewer extends Gamemode {
         while (game.getTickCount() != this.sliderTicks){
             let before = game.getTickCount();
             this.tickGame();
-            if (game.getTickCount() === before){
-                debugger;
-            }
         }
         GC.getSoundManager().clearSoundQueue();
 
@@ -130,19 +128,19 @@ class ReplayViewer extends Gamemode {
     }
 
     /*
-        Method Name: sliderSetSliderTicks
+        Method Name: setSliderTicks
         Method Parameters: 
             sliderTicks:
                 Number of ticks selected by the slider
         Method Description: Changes the number of slider ticks
         Method Return: void
     */
-    sliderSetSliderTicks(sliderTicks){
+    setSliderTicks(sliderTicks){
         // When update -> pause
         if (!this.isReplayPaused()){
             this.pauseReplay();
         }
-        this.setSliderTicks(sliderTicks);
+        this.sliderTicks = sliderTicks;
     }
 
     /*
@@ -232,7 +230,7 @@ class ReplayViewer extends Gamemode {
             return replayViewerInstance.getSliderTicks();
         }
         let setSliderValue = (newValue) => {
-            return replayViewerInstance.sliderSetSliderTicks(newValue);
+            return replayViewerInstance.setSliderTicks(newValue);
         }
         this.slider = new QuantitySlider(getSliderX, getSliderY, getSliderWidth, sliderHeight, sliderTextHeight, sliderKnobWidth, getSliderValue, setSliderValue, 0, undefined, false);
         this.slider.setToStringFunction((value) => {
@@ -356,7 +354,8 @@ class ReplayViewer extends Gamemode {
         let game = this.getGame();
         let gameDetails = replayJSON["opening_message"]["game_details"];
         this.timeline = replayJSON["timeline"];
-        this.slider.setMaxValue(this.timeline[this.timeline.length-1]["tick"]);
+        this.lastTick = replayJSON["last_tick"];
+        this.slider.setMaxValue(this.lastTick);
 
         // Set data received
 
@@ -473,6 +472,9 @@ class ReplayViewer extends Gamemode {
         Method Return: void
     */
     end(){
+        // Set running to false
+        this.running = false;
+
         let winnerShipID = null;
         let aliveCount = 0;
 
@@ -579,15 +581,55 @@ class ReplayViewer extends Gamemode {
         Method Return: void
     */
     tickGame(){
+        let game = this.getGame();
+        // If there's an error
+        if (game.getTickCount() > this.lastTick){
+            this.running = false;
+            this.handleGameOver(false);
+            return;
+        }
+
         // Check win
         this.checkWin();
 
-        // Tick the game
-        this.getGame().tick();
+        // If running
+        if (this.isRunning()){
+            // Tick the game
+            game.tick();
 
-        // Set up pending decisions
-        this.applyPendingDecisions();
+            // Vampire effect
+            this.applyVampireEffect();
+
+            // Set up pending decisions
+            this.applyPendingDecisions();
+        }
     }
+
+    /*
+        Method Name: applyVampireEffect
+        Method Parameters: None
+        Method Description: Applies the vampire effect (heal killer of newly dead ship)
+        Method Return: void
+    */
+    applyVampireEffect(){
+        let game = this.getGame();
+        let shipSinkings = game.getTickTimeline().getEventsOfType("ship_sunk");
+
+        let vampireHealthAmount = MD["saved_models"][0]["ship_json"]["health"];
+
+        // Apply vampire effect
+        for (let [shipSinkingObj, shipSinkingIndex] of shipSinkings){
+            // Ignore suicide where there's no vampire effect
+            if (shipSinkingObj["shooter_ship_id"] === null){ continue; }
+            let killerShip = game.getShipByID(shipSinkingObj["shooter_ship_id"]);
+
+            // Doesn't apply if killer is dead
+            if (killerShip.isDead()){ continue; }
+            console.log(killerShip.getHealth() + vampireHealthAmount)
+            killerShip.setHealth(killerShip.getHealth() + vampireHealthAmount);
+        }
+    }
+
 
     /*
         Method Name: tickUI

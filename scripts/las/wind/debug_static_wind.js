@@ -7,7 +7,19 @@ if (typeof window === "undefined"){
     TickLock = require("../../general/tick_lock.js").TickLock;
 }
 
+/*
+    Class Name: DebugStaticWind
+    Class Description: A tool to replace wind for testing
+*/
 class DebugStaticWind {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            game:
+                LASGame instance
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(game){
         this.game = game;
         this.windMagntiude = 30.0;
@@ -20,47 +32,66 @@ class DebugStaticWind {
         this.windDirectionChangeLock = new TickLock(1);
     }
 
+    /*
+        Method Name: print
+        Method Parameters: None
+        Method Description: Prints info to console
+        Method Return: void
+    */
     print(){
         console.log(`Mag ${this.windMagntiude}, Dir ${this.windDirectionRAD}`);
     }
 
-    reset(){
-        this.randomizer.setSeed(this.game.getGameProperties()["random_seed"]);
-        this.initialize();   
-    }
+    /*
+        Method Name: reset
+        Method Parameters: None
+        Method Description: Rests the wind object (disabled)
+        Method Return: void
+    */
+    reset(){}
 
+    /*
+        Method Name: getRandom
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: SeededRandomizer
+    */
     getRandom(){
         return this.randomizer;
     }
 
+    /*
+        Method Name: getGame
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: LasGame
+    */
     getGame(){
         return this.game;
     }
 
-    initialize(){
-        let windSettings = this.game.getGameProperties()["wind_settings"];
-        let initialWindMagnitude = this.getRandom().getFloatInRange(windSettings["wind_min_magnitude"], windSettings["wind_max_magnitude"]);
-        let initialWindDirection = this.getRandom().getFloatInRange(0, 2*Math.PI);
+    /*
+        Method Name: initialize
+        Method Parameters: None
+        Method Description: Initializes the wind object (disabled)
+        Method Return: void
+    */
+    initialize(){}
 
-        this.windMagntiude = initialWindMagnitude;
-        this.windDirectionRAD = initialWindDirection;
+    /*
+        Method Name: updateMagnitudeTarget
+        Method Parameters: None
+        Method Description: Updates the wind magnitude target (disabled)
+        Method Return: void
+    */
+    updateMagnitudeTarget(){}
 
-        this.updateMagnitudeTarget();
-        this.updateDirectionTarget();
-    }
-
-    updateMagnitudeTarget(){
-        let windSettings = this.game.getGameProperties()["wind_settings"];
-        let magnitudeTarget = this.getRandom().getFloatInRange(windSettings["wind_min_magnitude"], windSettings["wind_max_magnitude"]);
-        let ticksToHit = this.getRandom().getIntInRangeInclusive(windSettings["wind_min_magnitude_movement_ticks"], windSettings["wind_max_magnitude_movement_ticks"]);
-        let difference = magnitudeTarget - this.windMagntiude;
-
-        this.windMagnitudeChangePerTick = difference / ticksToHit;
-
-        // Replace num ticks and lock the lock
-        this.windMagnitudeChangeLock.replace(ticksToHit, false);
-    }
-
+    /*
+        Method Name: updateDirectionTarget
+        Method Parameters: None
+        Method Description: Updates the direction target (disabled)
+        Method Return: void
+    */
     updateDirectionTarget(){
         let windSettings = this.game.getGameProperties()["wind_settings"];
         let directionTarget = this.getRandom().getFloatInRange(0, 2*Math.PI);
@@ -79,26 +110,61 @@ class DebugStaticWind {
         this.windDirectionChangeLock.replace(ticksToHit, false);
     }
 
-    tickUpdate(){
-    }
+    /*
+        Method Name: tickUpdate
+        Method Parameters: None
+        Method Description: Updates in a tick (disabled)
+        Method Return: void
+    */
+    tickUpdate(){}
 
+    /*
+        Method Name: getXA
+        Method Parameters: None
+        Method Description: Calculates the X acceleration of the wind
+        Method Return: number
+    */
     getXA(){
         return Math.cos(this.windDirectionRAD) * this.windMagntiude;
     }
 
+    /*
+        Method Name: getYA
+        Method Parameters: None
+        Method Description: Calculates the Y acceleration of the wind
+        Method Return: number
+    */
     getYA(){
         return Math.sin(this.windDirectionRAD) * this.windMagntiude;
     }
 
+    /*
+        Method Name: getWindDirectionRAD
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: radians
+    */
     getWindDirectionRAD(){
         return this.windDirectionRAD;
     }
 
+    /*
+        Method Name: getWindMagnitude
+        Method Parameters: None
+        Method Description: Gets the wind magnitude
+        Method Return: number
+    */
     getWindMagnitude(){
         return this.windMagntiude;
     }
 
-    // Local only
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: Displays the wind sock
+        Method Return: void
+        Method Note: Local only
+    */
     display(){
         let image = GC.getImage("wind_sock");
         let imageWidth = image.width;

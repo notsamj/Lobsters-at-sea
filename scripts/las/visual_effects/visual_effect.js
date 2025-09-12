@@ -1,24 +1,86 @@
+/*
+    Class Name: VisualEffect
+    Class Description: A visual effect
+*/
 class VisualEffect {
 
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            originTick:
+                The time of spawn for the visual effect
+            expirationTick:
+                The time of expiration for the visual effect
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(originTick, expirationTick){
         this.originTick = originTick;
         this.expirationTick = expirationTick;
     }
 
+    /*
+        Method Name: display
+        Method Parameters: None
+        Method Description: A required method for all visual effects
+        Method Return: void
+    */
     display(){ throw new Error("Must be implemented"); }
 
+    /*
+        Method Name: getOriginTick
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getOriginTick(){
         return this.originTick;
     }
 
+    /*
+        Method Name: getExpirationTick
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getExpirationTick(){
         return this.expirationTick;
     }
 
+    /*
+        Method Name: isExpired
+        Method Parameters: 
+            currentTick:
+                Current tick
+        Method Description: Checks if the effect has expired
+        Method Return: boolean
+    */
     isExpired(currentTick){
         return currentTick >= this.getExpirationTick(); 
     }
 
+    /*
+        Method Name: displayColoredRectangle
+        Method Parameters: 
+            centerXOfScreen:
+                Game X of the center of the screen
+            centerYOfScreen:
+                Game y of the center of the screen
+            rectangleColorCode:
+                The color code for the rectangle
+            rectangleCenterX:
+                X location of the rectangle center
+            rectangleCenterY:
+                Y location of the rectangle center
+            rectangleWidth:
+                Width of the rectangle
+            rectangleHeight:
+                Height of the rectangle
+            opacity:
+                Opacity of the rectangle
+        Method Description: Displays the rectangle
+        Method Return: void
+    */
     static displayColoredRectangle(centerXOfScreen, centerYOfScreen, rectangleColorCode, rectangleCenterX, rectangleCenterY, rectangleWidth, rectangleHeight, opacity=1){
         let myCenterXOffsetFromScreenCenter = rectangleCenterX - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = rectangleCenterY - centerYOfScreen;
@@ -81,6 +143,26 @@ class VisualEffect {
         translate(-1 * translateX, -1 * translateY);
     }
 
+    /*
+        Method Name: displayColoredCircle
+        Method Parameters: 
+            centerXOfScreen:
+                Game X of the center of the screen
+            centerYOfScreen:
+                Game y of the center of the screen
+            circleColorCode:
+                Colour code of the circle
+            circleCenterX:
+                Center x of the circle
+            circleCenterY:
+                Center y of the circle
+            circleDiameter:
+                Diameter of the circle
+            opacity:
+                Opacity of the circle, float in [0,1]
+        Method Description: Displays the circle on the screen
+        Method Return: void
+    */
     static displayColoredCircle(centerXOfScreen, centerYOfScreen, circleColorCode, circleCenterX, circleCenterY, circleDiameter, opacity=1){
         let myCenterXOffsetFromScreenCenter = circleCenterX - centerXOfScreen;
         let myCenterYOffsetFromScreenCenter = circleCenterY - centerYOfScreen;

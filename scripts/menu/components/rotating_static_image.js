@@ -47,6 +47,12 @@ class RotatingStaticImage extends StaticImage {
         return this.imageSelection[this.imageIndex];
     }
 
+    /*
+        Method Name: getImage
+        Method Parameters: None
+        Method Description: Gets the image
+        Method Return: Image
+    */
     getImage(){
         return GC.getImage(this.getImageName());
     }

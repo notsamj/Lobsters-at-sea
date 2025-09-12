@@ -5,7 +5,19 @@ if (typeof window === "undefined"){
     randomFloatBetween = require("../../../general/helper_functions.js").randomFloatBetween;
     fixRadians = require("../../../general/math_helper.js").fixRadians;
 }
+/*
+    Class Name: BotShipController
+    Class Description: A controller for bots
+*/
 class BotShipController {
+    /*
+        Method Name: constructor
+        Method Parameters: 
+            botShipControllerJSON:
+                JSON with information on the bot controller
+        Method Description: constructor
+        Method Return: constructor
+    */
     constructor(botShipControllerJSON){
         this.ship = botShipControllerJSON["ship"];
 
@@ -27,6 +39,14 @@ class BotShipController {
         this.decisions = copyObject(Ship.getDefaultDecisions());
     }
 
+    /*
+        Method Name: getOffset
+        Method Parameters: 
+            offsetName:
+                The name of the offset
+        Method Description: Gets an offset value for a given offset type
+        Method Return: Array with 2 elements, both float
+    */
     getOffset(offsetName){
         if (objectHasKey(this.offsets, offsetName)){
             return this.offsets[offsetName];
@@ -34,15 +54,35 @@ class BotShipController {
         throw new Error("Offet: " + offsetName + " not found.");
     }
 
+    /*
+        Method Name: generateOffset
+        Method Parameters: 
+            offsetName:
+                Name of the offset
+        Method Description: Generates a value given an offet with properties
+        Method Return: float
+    */
     generateOffset(offsetName){
         let offset = this.getOffset(offsetName);
         return randomFloatBetween(offset[0], offset[1]);
     }
 
+    /*
+        Method Name: resetDecisions
+        Method Parameters: None
+        Method Description: Resets the decisions
+        Method Return: void
+    */
     resetDecisions(){
         copyOverObject(Ship.getDefaultDecisions(), this.decisions);
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Handles tick actions
+        Method Return: void
+    */
     tick(){
         // Update tick locks
         this.updateBestEnemyLock.tick();
@@ -59,6 +99,12 @@ class BotShipController {
         this.makeDecisions();
     }
 
+    /*
+        Method Name: updatePerception
+        Method Parameters: None
+        Method Description: Updates the bot perception
+        Method Return: void
+    */
     updatePerception(){
         let currentTick = this.workingData["tick"];
 
@@ -124,27 +170,28 @@ class BotShipController {
         this.perception.inputData("enemy_ship_data", allShipData, currentTick);
     }
 
+    /*
+        Method Name: makeDecisions
+        Method Parameters: None
+        Method Description: Makes decisions
+        Method Return: void
+    */
     makeDecisions(){
         // If no data -> No decision changes
         if (!this.perception.hasDataToReactTo("default", this.workingData["tick"])){ return; }
 
-        /*
-            Determine best target ship
-            Aim to go upwind of the target ship
-            desermineBestEnemy:
-                Find the enemy who can shoot at me best
-            determineDesiredHeading();
-                Find the most dangerous ship to you. Aim upwind of it.
-            determineShooting();
-                Find all ships that you can hit. Shoot at them.
-        */
         this.determineBestEnemy();
         this.determineDesiredHeading();
         this.determineSailStrength();
         this.determineShooting();
-        //this.testDetermineShooting();
     }
 
+    /*
+        Method Name: determineDesiredHeading
+        Method Parameters: None
+        Method Description: Comes up with a heading for the ship
+        Method Return: void
+    */
     determineDesiredHeading(){
         if (this.updateHeadingLock.isLocked() || this.workingData["best_enemy"] === undefined){
             return;
@@ -186,7 +233,7 @@ class BotShipController {
         let enemyCanAimAtMe = currentCannonResultEnemyOnMe["cannon_count_aim"] > 0;
 
         // Turn procedure
-        let turnTimesMS = [50, 100, 250, 500, 1000, 2000, 4000, 8000]; // TODO: Record this in settings
+        let turnTimesMS = game.getGameProperties()["bot_settings"]["turn_calculation_times_ms"];
         let tickMS = game.getGameProperties()["ms_between_ticks"];
         let turningRadiusDegrees = game.getGameProperties()["ship_data"][myShip.getShipModel()]["turning_radius_degrees"];
         let shipSailStrength = this.perception.getDataToReactTo("my_ship_sail_strength", currentTick);
@@ -342,7 +389,6 @@ class BotShipController {
             }
             // Else -> They have the advantage -> Consider a turn
             else{
-                //debugger;
                 let turnResult = considerTurn();
 
                 // If turn helps me -> Follow turn procedure
@@ -375,6 +421,12 @@ class BotShipController {
         }
     }
 
+    /*
+        Method Name: determineBestEnemy
+        Method Parameters: None
+        Method Description: Determines which opponent to target
+        Method Return: void
+    */
     determineBestEnemy(){
         let enemyIsAliveAndWell = false;
         let currentTick = this.workingData["tick"];
@@ -425,6 +477,16 @@ class BotShipController {
         this.workingData["best_enemy"] = closestShip;
     }
 
+    /*
+        Method Name: getCannonFireResult
+        Method Parameters: 
+            enemyShipData:
+                JSON with enemy ship data
+            myShipData:
+                JSON with data about my ship
+        Method Description: Finds out information on shooting a cannon from my ship at an enemy ship
+        Method Return: void
+    */
     getCannonFireResult(enemyShipData, myShipData){
         let currentTick = this.workingData["tick"];
         let myShip = this.getShip();
@@ -449,7 +511,7 @@ class BotShipController {
         let myCannons = myShip.getCannons();
         let myCannonData = this.perception.getDataToReactTo("my_cannon_data", currentTick);
 
-        let searchPrecision = 5; // ms
+        let searchPrecision = game.getGameProperties()["bot_settings"]["search_precision_ms"]; // ms
 
         let mdfStart = game.getGameProperties()["bot_settings"]["start_max_expected_hit_distance"];
         let mdfMax = game.getGameProperties()["bot_settings"]["max_expected_hit_distance"];
@@ -521,7 +583,6 @@ class BotShipController {
         let currentResult;
 
         // Loop until percision is found
-        //debugger;
         while (maxTime - minTime > searchPrecision){
             let rightLeftDifference = maxTime - minTime;
             let pointM1 = minTime + rightLeftDifference / 3;
@@ -611,9 +672,15 @@ class BotShipController {
         return shootCannonsResult;
     }
 
+    /*
+        Method Name: determineShooting
+        Method Parameters: None
+        Method Description: Determine whether or not I should shoot and where
+        Method Return: void
+    */
     determineShooting(){
         /*
-            Get shot flyin time ms
+            Get shot flying time ms
             Multiply by shot speed
             Filter ships that are within that distance
             Sort ships by close to far
@@ -677,47 +744,6 @@ class BotShipController {
             return a["distance"] - b["distance"];
         }
         shipsWithinRange.sort(sortLeastToMoveFunc);
-        /*
-        let countCannons = (shipData, timeStampMS, reactionTimeMS) => {
-            let shipXAtTime = shipData["x"] + shipData["x_v"] * (reactionTimeMS + timeStampMS) / 1000;
-            let shipYAtTime = shipData["y"] + shipData["y_v"] * (reactionTimeMS + timeStampMS) / 1000; 
-
-            let windDiplacementInTimeX = 0.5 * windXA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
-            let windDiplacementInTimeY = 0.5 * windYA * windEffectCoefficient * Math.pow(timeStampMS / 1000, 2);
-
-            let aimAtX = shipXAtTime - windDiplacementInTimeX;
-            let aimAtY = shipYAtTime - windDiplacementInTimeY;
-
-            let angleToPoint = displacementToRadians(aimAtX - myShipX, aimAtY - myShipY);
-
-            let cannonBallXV = myShipXV + Math.cos(angleToPoint) * shotSpeed;
-            let cannonBallYV = myShipYV + Math.sin(angleToPoint) * shotSpeed; 
-            let cannonBallEndX = myShipXAfterReactionTime + cannonBallXV * timeStampMS / 1000;
-            let cannonBallEndY = myShipYAfterReactionTime + cannonBallYV * timeStampMS / 1000;
-
-            let expectedHitX = cannonBallEndX + windDiplacementInTimeX;
-            let expectedHitY = cannonBallEndY + windDiplacementInTimeY;
-
-            // Check the number of cannons LOADED and CAN_AIM_AT_LOCATION
-            let cannonCount = 0;
-            for (let cannon of myCannons){
-                let cannonIsLoaded = myCannonData[cannon.getCannonIndex()]["is_loaded"];
-                if (!cannonIsLoaded){ continue; }
-                let rangeCWL = cannon.getRangeCWL();
-                let rangeCWR = cannon.getRangeCWR();
-                let cannonXCenterOffset = cannon.getXCenterOffset();
-                let cannonYCenterOffset = cannon.getYCenterOffset();
-                let cannonTickX = Cannon.getTickX(myShipXAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
-                let cannonTickY = Cannon.getTickY(myShipYAfterReactionTime, myShipTickOrientation, cannonXCenterOffset, cannonYCenterOffset);
-
-                let cannonCouldAimAtIt = Cannon.couldAimAt(rangeCWL, rangeCWR, myShipTickOrientation, cannonTickX, cannonTickY, aimAtX, aimAtY);
-                // Record that 1 more cannon can aim at it
-                if (cannonCouldAimAtIt){
-                    cannonCount += 1;
-                }
-            }
-            return {"aim_at_x": aimAtX, "aim_at_y": aimAtY, "cannon_count": cannonCount, "time": timeStampMS, "shipXAtTime": shipXAtTime, "shipYAtTime": shipYAtTime, "expectedHitX": expectedHitX, "expectedHitY": expectedHitY}
-        }*/
 
         let myShipData = {
             "x": myShipX,
@@ -755,6 +781,12 @@ class BotShipController {
         this.decisions["fire_cannons"] = false;
     }
 
+    /*
+        Method Name: determineSailStrength
+        Method Parameters: None
+        Method Description: Comes up with a sail strength for the ship
+        Method Return: void
+    */
     determineSailStrength(){
         if (this.updateSailTickLock.isLocked()){
             return;
@@ -821,10 +853,22 @@ class BotShipController {
         this.decisions["new_sail_strength"] = finalValueSettleOn;
     }
 
+    /*
+        Method Name: getShip
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: Ship
+    */
     getShip(){
         return this.ship;
     }
 
+    /*
+        Method Name: getDecisionJSON
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: JSON
+    */
     getDecisionJSON(){
         return this.decisions;
     }

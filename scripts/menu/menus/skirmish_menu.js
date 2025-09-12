@@ -47,23 +47,57 @@ class SkirmishMenu extends Menu {
         GC.getMenuManager().switchTo("game");
     }
 
+    /*
+        Method Name: getBotShipCount
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: int
+    */
     getBotShipCount(){
         return this.botShipCount;
     }
 
+    /*
+        Method Name: setBotShipCount
+        Method Parameters: 
+            newBotShipCount:
+                The number of bot ships
+        Method Description: Setter
+        Method Return: void
+    */
     setBotShipCount(newBotShipCount){
         this.botShipCount = newBotShipCount;
     }
 
+    /*
+        Method Name: getBotShipModel
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: String
+    */
     getBotShipModel(){
         return this.botShipModel;
     }
 
+    /*
+        Method Name: setBotShipModel
+        Method Parameters: 
+            newBotShipModel:
+                New ship model (string)
+        Method Description: Setter
+        Method Return: void
+    */
     setBotShipModel(newBotShipModel){
         this.botShipModel = newBotShipModel;
     }
 
 
+    /*
+        Method Name: toggleAutomaticSails
+        Method Parameters: None
+        Method Description: Toggles automatic sails for the user
+        Method Return: void
+    */
     toggleAutomaticSails(){
         this.automaticSails = !this.automaticSails;
         let switchedToAutomaticSails = this.automaticSails;
@@ -77,6 +111,12 @@ class SkirmishMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: onUserTypeChange
+        Method Parameters: None
+        Method Description: Handles actions on user type change
+        Method Return: void
+    */
     onUserTypeChange(){
         // Handle button
         if (this.characterImage.getImageName() === "freecam"){

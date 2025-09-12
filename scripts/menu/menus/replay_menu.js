@@ -62,6 +62,14 @@ class ReplayMenu extends Menu {
         this.components.push(scrollableDisplay);
     }
 
+    /*
+        Method Name: updateWithNewReplays
+        Method Parameters: 
+            replayListJSON:
+                JSON with info on replays available
+        Method Description: Updates the display with replays
+        Method Return: void
+    */
     updateWithNewReplays(replayListJSON){
         let replays = replayListJSON["replays"];
 
@@ -95,6 +103,12 @@ class ReplayMenu extends Menu {
         }
     }
 
+    /*
+        Method Name: checkForReplayList
+        Method Parameters: None
+        Method Description: Checks for replays from the server
+        Method Return: Promise (implicit)
+    */
     async checkForReplayList(){
         let mailBox = SC.getClientMailbox();
 
@@ -120,6 +134,12 @@ class ReplayMenu extends Menu {
 
     }
 
+    /*
+        Method Name: informSwitchedTo
+        Method Parameters: None
+        Method Description: Handles events on "switch-to"
+        Method Return: void
+    */
     informSwitchedTo(){
         // Tell SC to connec
         SC.initiateConnection();
@@ -130,6 +150,12 @@ class ReplayMenu extends Menu {
         }, "get_replay_list");
     }
 
+    /*
+        Method Name: tick
+        Method Parameters: None
+        Method Description: Tick actions
+        Method Return: Promise (implicit)
+    */
     async tick(){
         // Skip if busy
         if (this.replayMenuTickLock.isLocked()){
@@ -142,5 +168,8 @@ class ReplayMenu extends Menu {
 
         // Release
         this.replayMenuTickLock.unlock();
+
+        // Regular component tick
+        super.tick();
     }
 }
