@@ -1,5 +1,6 @@
 const MD = require("../data/main_data_json.js").MD;
 const SD = require("../data/ship_data_json.js").SD;
+const randomNumberInclusive = require("../scripts/general/helper_functions.js").randomNumberInclusive;
 
 let gameRecordingSettings = {
     "crosshair_display_around_shooting_ms": 500,
@@ -22,7 +23,7 @@ module.exports = {
     "tick_proportion_of_a_second": MD["game_properties"]["ms_between_ticks"] / 1000,
     "ship_data": SD,
     "wind_settings": MD["wind_settings"],
-    "random_seed": 5,
+    "random_seed": randomNumberInclusive(1, 100000),
     "camera_settings": MD["camera_settings"],
     "cannon_settings": MD["cannon_settings"],
     "cannon_ball_settings": MD["cannon_ball_settings"],

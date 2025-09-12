@@ -20,32 +20,29 @@ class SoundMenu extends Menu {
         Method Return: void
     */
     setup(){
-        let sectionYSize = 50;
         // Background
         this.components.push(new LoadingScreenComponent());
 
+        let menuData = MSD["sound_menu"];
+
         // Back Button
-        let backButtonX = () => { return 50; }
-        let backButtonY = (innerHeight) => { return innerHeight-27; }
-        let backButtonXSize = 200;
-        let backButtonYSize = 76;
-        this.components.push(new RectangleButton("Settings Menu", "#3bc44b", "#e6f5f4", backButtonX, backButtonY, backButtonXSize, backButtonYSize, (instance) => {
-            GC.getMenuManager().switchTo("settings_menu");
+        let menuDataBackButton = menuData["back_button"];
+        let backButtonY = (innerHeight) => { return innerHeight-menuDataBackButton["y_offset"]; }
+        let backButtonXSize = menuDataBackButton["x_size"];
+        let backButtonYSize = menuDataBackButton["y_size"];
+        this.components.push(new RectangleButton(menuDataBackButton["text"], menuDataBackButton["colour_code"], menuDataBackButton["text_colour_code"], menuDataBackButton["x"], backButtonY, backButtonXSize, backButtonYSize, (instance) => {
+            GC.getMenuManager().switchTo("main_menu");
         }));
 
         // Interface for sound amounts
         let i = 0;
+
+        // Create main volume
         this.createSoundSettings("main volume", i++);
+
         for (let soundData of GC.getLocalGameProperties()["sound_data"]["sounds"]){
             this.createSoundSettings(soundData["name"], i++);
         }
-
-        // Information
-        let infoY = 700;
-        let infoXSize = 600;
-        let infoYSize = 400;
-        this.components.push(new TextComponent("Note: I must caution the use of sounds.\nI find them useful, however,\n these are of poor quality\nand may be loud and annoying.\nThis is why I have\n disabled them by default.", "#000000", 20, infoY, infoXSize, infoYSize));
-        
     }
 
     /*
@@ -59,23 +56,34 @@ class SoundMenu extends Menu {
         Method Return: void
     */
     createSoundSettings(soundName, offSetIndex){
-        let width = 200;
-        let height = 50;
-        let sectionYSize = 100;
+        let menuData = MSD["sound_menu"];
+        let saData = menuData["sound_area"];
+        let width = saData["width"];
+        let height = saData["height"];
+        let sectionYSize = saData["section_y_size"];
         let sectionYStart = sectionYSize * offSetIndex;
 
-        let soundLabelXSize = 300;
-        let soundLabelX = 600;
-        let soundLabelYSize = 100;
-        let soundLabelY = (innerHeight) => { return innerHeight - 27 - sectionYStart - sectionYSize/2 - height/2; }
+
+        let soundLabelXSize = saData["sound_label_x_size"];
+        let soundLabelX = saData["sound_label_x"];
+        let soundLabelYSize = saData["sound_label_y_size"];
+        let topBufferY = saData["top_buffer_y"];
+
+        let textHeight = height/2;
+        let sliderHeight = height/2;
+
+        let soundLabelY = (innerHeight) => { return innerHeight - topBufferY - sectionYStart - textHeight - sliderHeight/2 + 1; }
 
         let soundScaleX = soundLabelX + soundLabelXSize;
-        let soundScaleY = (innerHeight) => { return innerHeight - 27 - sectionYStart; }
+        let soundScaleY = (innerHeight) => { return innerHeight - topBufferY - sectionYStart; }
+
+        let themeColourCode = saData["theme_colour_code"];
+        let backgroundColourCode = saData["background_colour_code"];
 
         // Components
 
         // Sound Name
-        this.components.push(new TextComponent(soundName, "#f5d442", soundLabelX, soundLabelY, soundLabelXSize, soundLabelYSize, "center", "middle"));
+        this.components.push(new TextComponent(soundName, themeColourCode, soundLabelX, soundLabelY, soundLabelXSize, soundLabelYSize, "center", "middle"));
 
         let getValueFunction = () => {
             return GC.getSoundManager().getVolume(soundName);
@@ -85,7 +93,7 @@ class SoundMenu extends Menu {
             GC.getSoundManager().updateVolume(soundName, newVolume);
         }
 
-        let quantitySlider = new QuantitySlider(soundScaleX, soundScaleY, width, height/2, height/2, 30, getValueFunction, setValueFunction, 0, 100, false, "#000000", "#f5d442", "#f5d442");
+        let quantitySlider = new QuantitySlider(soundScaleX, soundScaleY, width, sliderHeight, textHeight, saData["cursor_width_px"], getValueFunction, setValueFunction, saData["min_volume"], saData["max_volume"], false, backgroundColourCode, themeColourCode, themeColourCode);
         this.components.push(quantitySlider);
     }
 }

@@ -62,7 +62,7 @@ class GameRecorder {
                 Relevant tick for the recisions
             eventObj:
                 Event info JSON
-        Method Description: Adds decisions
+        Method Description: Adds decisions to the timeline
         Method Return: void
     */
     addDecisions(tickNumber, eventObj){
@@ -110,129 +110,12 @@ class GameRecorder {
     }
 
     /*
-        Method Name: reduceCrosshairShowing
-        Method Parameters: None
-        Method Description: Reduces crosshair data to make the recording much lighter
-        Method Return: void
-    */
-    reduceCrosshairShowing(){
-        let ticksOfShowingOnEachSide = this.gameRecorderSettingsJSON["ms_crosshair_display_around_shooting_ticks"];
-
-        let shipDisplayCrosshairIntervals = {};
-
-        let getCreateIntervalTimelineObject = (shipID) => {
-            // Create if not present
-            if (!objectHasKey(shipDisplayCrosshairIntervals, shipID)){
-                shipDisplayCrosshairIntervals[shipID] = new NotSamLinkedList();
-            }
-            return shipDisplayCrosshairIntervals[shipID];
-        }
-
-        let isInInterval = (shipID, tick) =>{
-            // If not intervals exist
-            if (!objectHasKey(shipDisplayCrosshairIntervals, shipID)){
-                return false;
-            }
-
-            // Find any intervals it may be in
-            for (let interval of shipDisplayCrosshairIntervals[shipID]){
-                if (interval[0] <= tick && interval[1] >= tick){
-                    return true;
-                }
-            }
-
-            // Not found in an interval
-            return false;
-        }
-
-        // Create intervals
-        for (let tickObj of this.replayObject["timeline"]){
-            // Go through update list
-            for (let updatedDecisionsObject of tickObj["update_list"]){
-                // If we found a fire cannon decision, add an interval
-                if (objectHasKey(updatedDecisionsObject["decisions_updated"], "fire_cannons") && updatedDecisionsObject["decisions_updated"]["fire_cannons"] === true){
-                    let timelineObject = getCreateIntervalTimelineObject(updatedDecisionsObject["ship_id"]);
-                    timelineObject.push([tickObj["tick"]-ticksOfShowingOnEachSide, tickObj["tick"]+ticksOfShowingOnEachSide]);
-                }
-            }
-        }
-
-        // Merge overlapping intervals
-        for (let shipID of Object.keys(shipDisplayCrosshairIntervals)){
-            let intervalList = shipDisplayCrosshairIntervals[shipID];
-            // Loop from n-1 to 1 (last to 2nd element)
-            for (let i = intervalList.getLength() - 1; i > 0; i--){
-                let listBelow = intervalList.get(i-1);
-                let myList = intervalList.get(i);
-                let belowEnd = listBelow[1];
-                let myStart = myList[0];
-                // Attach interval
-                if (belowEnd >= myStart){
-                    let myEnd = myList[1];
-                    listBelow[1] = myEnd;
-                    // Remove this interval
-                    intervalList.pop(i);
-                }
-            }
-        }
-
-        // Clean
-        for (let i = this.replayObject["timeline"].length - 1; i >= 0; i--){
-            let tickObj = this.replayObject["timeline"][i];
-            // Go through update list
-            for (let j = tickObj["update_list"].length - 1; j >= 0; j--){
-                let updatedDecisionsObject = tickObj["update_list"][j];
-                // If we found an aiming decision, confirm it's in an interval
-                if (objectHasKey(updatedDecisionsObject["decisions_updated"], "aiming_cannons")){
-                    // If not in an interval then cleanse the decision object
-                    if (!isInInterval(updatedDecisionsObject["ship_id"], tickObj["tick"])){
-                        updatedDecisionsObject["decisions_updated"]["aiming_cannons_position_x"] = undefined;
-                        updatedDecisionsObject["decisions_updated"]["aiming_cannons_position_y"] = undefined;
-                    }
-                }
-
-                let hasAnythingUseful = false;
-                // Check if any useable keys now
-                for (let key of Object.keys(updatedDecisionsObject["decisions_updated"])){
-                    // If not undefined, it's useful
-                    if (updatedDecisionsObject["decisions_updated"][key] != undefined){
-                        hasAnythingUseful = true;
-                        break;
-                    }
-                }
-                // If nothing useful, delete this one
-                if (!hasAnythingUseful){
-                    tickObj["update_list"].splice(j, 1);
-                }
-            }
-
-            // If update list has been emptied -> Remove this tick from timeline
-            if (tickObj["update_list"].length === 0){
-                this.replayObject["timeline"].splice(i, 1);
-            }
-        }
-    }
-
-    /*
-        Method Name: reduceRecording
-        Method Parameters: None
-        Method Description: Reduces recording data to reduce size
-        Method Return: void
-    */
-    reduceRecording(){
-        // Apply reductions
-        //this.reduceCrosshairShowing();
-    }
-
-    /*
         Method Name: getReplayString
         Method Parameters: None
         Method Description: Creates a string of the replay
         Method Return: String
     */
     getReplayString(game){
-        // Reduce the size
-        this.reduceRecording();
 
         // Turn into a string
         return JSON.stringify(this.replayObject);

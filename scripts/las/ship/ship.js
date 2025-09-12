@@ -412,11 +412,6 @@ class Ship {
         Method Return: void
     */
     checkShoot(){
-        // If not bothing aiming and firing then you can't shoot
-        if (this.establishedDecisions["fire_cannons"]){
-            console.log("Dec", this.establishedDecisions["fire_cannons"], this.establishedDecisions["aiming_cannons"], this.getAdjustedCannonAimingX(), this.getAdjustedCannonAimingY(), this.getGame().getTickCount())
-        }
-        
         if (!(this.establishedDecisions["aiming_cannons"] && this.establishedDecisions["fire_cannons"])){
             return;
         }
@@ -429,7 +424,6 @@ class Ship {
         for (let cannon of this.cannons){
             if (cannon.canAimAt(aimingCannonsPositionX, aimingCannonsPositionY) && cannon.isLoaded()){
                 cannon.fire(aimingCannonsPositionX, aimingCannonsPositionY);
-                console.log("fire", this.getGame().getTickCount());
             }
         }
     }

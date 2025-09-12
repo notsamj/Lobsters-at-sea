@@ -34,6 +34,16 @@ class ReplayViewer extends Gamemode {
     }
 
     /*
+        Method Name: hasData
+        Method Parameters: None
+        Method Description: Checks if the data is present
+        Method Return: boolean
+    */
+    hasData(){
+        return this.replayJSON != undefined;
+    }
+
+    /*
         Method Name: pauseUnpauseReplay
         Method Parameters: None
         Method Description: Toggles whether the replay is paused
@@ -93,7 +103,6 @@ class ReplayViewer extends Gamemode {
     updateToNewTicks(){
         this.resetForTickJump();
         let game = this.getGame();
-
         this.loadFromJSON(this.replayJSON);
 
         // Loop until ticks match
@@ -352,6 +361,7 @@ class ReplayViewer extends Gamemode {
     */
     loadFromJSON(replayJSON){
         let game = this.getGame();
+
         let gameDetails = replayJSON["opening_message"]["game_details"];
         this.timeline = replayJSON["timeline"];
         this.lastTick = replayJSON["last_tick"];
@@ -361,6 +371,9 @@ class ReplayViewer extends Gamemode {
 
         // Update game properties
         game.setGameProperties(gameDetails["game_properties"]);
+
+        // Reset game with new properties
+        game.reset();
 
         // Run a check on tick rate to make sure it matches
         let lgp = GC.getLocalGameProperties();
@@ -539,8 +552,11 @@ class ReplayViewer extends Gamemode {
         // If 1 or fewer ships are left, game is over
         if (shipsAlive <= 1){
             this.end();
-            return;
+            return true;
         }
+
+        // Game didn't end
+        return false;
     }
 
     /*
@@ -560,18 +576,45 @@ class ReplayViewer extends Gamemode {
         Method Return: Promise (implicit)
     */
     async tick(){
+        // Don't tick when over
+        if (this.getMode() === "online" && !this.hasData()){
+            await this.checkForReplayData();
+            return;
+        }
         // Check ui
         this.tickUI();
 
-        // Don't tick when over
-        if (!this.isRunning()){
-            if (this.getMode() === "online" && this.replayString === undefined){
-                await this.checkForReplayData();
-            }
-            return;
-        }
+        // If running
+        if (this.isRunning()){
+            // Check win
+            let gameJustEnded = this.checkWin();
 
-        this.tickGame();
+            if (!gameJustEnded){
+                // If there's an error
+                if (this.getGame().getTickCount() > this.lastTick){
+                    this.running = false;
+                    this.handleGameOver(false);
+                    return;
+                }  
+
+                // Tick the game
+                this.tickGame();
+            }
+        }
+        // Allow user to fly around the camera
+        else{
+            this.tickCameraIfPossible();
+        }
+    }
+
+    /*
+        Method Name: tickCameraIfPossible
+        Method Parameters: None
+        Method Description: Ticks the camera even when paused
+        Method Return: void
+    */
+    tickCameraIfPossible(){
+        this.getGame().getCamera().tick();
     }
 
     /*
@@ -581,28 +624,14 @@ class ReplayViewer extends Gamemode {
         Method Return: void
     */
     tickGame(){
-        let game = this.getGame();
-        // If there's an error
-        if (game.getTickCount() > this.lastTick){
-            this.running = false;
-            this.handleGameOver(false);
-            return;
-        }
+        // Tick the game
+        this.getGame().tick();
 
-        // Check win
-        this.checkWin();
+        // Vampire effect
+        this.applyVampireEffect();
 
-        // If running
-        if (this.isRunning()){
-            // Tick the game
-            game.tick();
-
-            // Vampire effect
-            this.applyVampireEffect();
-
-            // Set up pending decisions
-            this.applyPendingDecisions();
-        }
+        // Set up pending decisions
+        this.applyPendingDecisions();
     }
 
     /*
@@ -625,7 +654,7 @@ class ReplayViewer extends Gamemode {
 
             // Doesn't apply if killer is dead
             if (killerShip.isDead()){ continue; }
-            console.log(killerShip.getHealth() + vampireHealthAmount)
+
             killerShip.setHealth(killerShip.getHealth() + vampireHealthAmount);
         }
     }

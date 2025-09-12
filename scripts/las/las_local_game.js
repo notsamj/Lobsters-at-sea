@@ -404,6 +404,16 @@ class LasLocalGame extends LasGame {
     }
 
     /*
+        Method Name: getCamera
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: SpectatorCamera
+    */
+    getCamera(){
+        return this.focusedCamera;
+    }
+
+    /*
         Method Name: queueUpSounds
         Method Parameters: 
             centerX:
@@ -544,6 +554,7 @@ class LasLocalGame extends LasGame {
         gameInputManager.register("scroll_left_ticked_game", "keydown", (event) => { return event.which===keyCodeScrollL; }, true, {"ticked": true, "ticked_activation": false});
         gameInputManager.register("scroll_right_ticked_game", "keydown", (event) => { return event.which===keyCodeScrollR; }, true, {"ticked": true, "ticked_activation": false});
         
+        // Zoom
         gameInputManager.register("1/8zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom18; }, true);
         gameInputManager.register("1/8zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoom18; }, false);
         gameInputManager.register("1/4zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom14; }, true);
@@ -555,7 +566,7 @@ class LasLocalGame extends LasGame {
         gameInputManager.register("2zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoom2; }, true);
         gameInputManager.register("2zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoom2; }, false);
 
-        // Alt
+        // Alt zoom
         gameInputManager.register("1/8zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt18; }, true);
         gameInputManager.register("1/8zoomhold", "keyup", (event) => { return event.keyCode === keyCodeZoomAlt18; }, false);
         gameInputManager.register("1/4zoomhold", "keydown", (event) => { return event.keyCode === keyCodeZoomAlt14; }, true);

@@ -1,6 +1,7 @@
 const LasGame = require("../../scripts/las/las_game.js").LasGame;
 const Ship = require("../../scripts/las/ship/ship.js").Ship;
 const copyObject = require("../../scripts/general/helper_functions.js").copyObject;
+const randomNumberInclusive = require("../../scripts/general/helper_functions.js").randomNumberInclusive;
 const CannonBall = require("../../scripts/las/ship/cannon/cannon_ball/cannon_ball.js").CannonBall;
 const GameRecorder = require("./game_recorder.js").GameRecorder;
 const BotShipController = require("../../scripts/las/ship/bot_controller/bot_ship_controller.js").BotShipController;
@@ -44,6 +45,9 @@ class LasServerGame extends LasGame {
         Method Return: Promise (implicit)
     */
     async start(setupData){
+        // Reset
+        this.reset();
+
         let clientList = setupData["client_data"];
         let clientsArePlayers = setupData["expected_players_data"]["player_role"] === 1;
         // Set running
@@ -249,12 +253,15 @@ class LasServerGame extends LasGame {
         Method Return: void
     */
     reset(){
+        // Reset seed
+        this.getGameProperties()["random_seed"] = randomNumberInclusive(1, 100000);
+
         this.running = false;
         this.clients.clear();
         this.tickTimeline.reset();
         this.gameRecorder.reset();
         this.idManager.reset();
-        this.wind.reset();
+        this.wind.resetWithNewSeed(this.getGameProperties()["random_seed"]);
         this.ships.clear();
         this.cannonBalls.clear();
         this.resetColours();
@@ -289,7 +296,7 @@ class LasServerGame extends LasGame {
         
         // If game successfully completed then get replay string
         if (gameCompleted){
-            this.gameRecorder.setLastTick(this.getTickCount());
+            this.gameRecorder.setLastTick(this.getTickCount() - 1);
 
             this.server.addReplay(this.gameRecorder.getReplayString());
         }
@@ -299,8 +306,9 @@ class LasServerGame extends LasGame {
             "winner_id": winnerShipID
         }
         this.sendAll(endMessageJSON);
-        this.reset();
 
+        // No longe running
+        this.running = false;
     }
 
     /*
@@ -655,10 +663,9 @@ class LasServerGame extends LasGame {
                 decisions["aiming_cannons_position_y"] = undefined;
             }
 
-
             shipDecisionsJSON["ship_decisions"].push({
                 "ship_id": ship.getID(),
-                "established_decisions": 
+                "established_decisions": decisions
             });
         }
 

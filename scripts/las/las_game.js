@@ -500,7 +500,7 @@ class LasGame {
     */
     reset(){
         // Resets world data
-        this.wind.reset();
+        this.wind.resetWithNewSeed(this.getGameProperties()["random_seed"]);
         this.idManager.reset();
         this.ships.clear();
         this.cannonBalls.clear();

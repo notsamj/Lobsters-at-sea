@@ -216,7 +216,7 @@ class ScrollableDisplay extends Component {
             //noStrokeRectangle(colour, this.entryXOffset, yOffset, this.entryXSize, this.entryYSize);
             
             // Add name text
-            Menu.makeText(this.displayItems.get(i)["display_name"], this.displayNameTextColour, this.entryXOffset, GC.getMenuManager().changeToScreenY(yOffset), this.displayNameXSize, this.displayNameYSize);
+            Menu.makeText(this.displayItems.get(i)["display_name"], this.displayNameTextColour, this.entryXOffset, GC.getMenuManager().changeToScreenY(yOffset + Math.floor(this.displayNameYSize/2)), this.displayNameXSize, this.displayNameYSize, "left", "middle");
 
             // Add go to menu button
             Menu.makeRectangleWithText(this.goToMenuButtonText, this.goToMenuButtonBackgroundColour.toCode(), this.goToMenuButtonTextColour.toCode(), this.entryXOffset, GC.getMenuManager().changeToScreenY(yOffset + this.displayNameYSize), this.goToMenuButtonXSize, this.goToMenuButtonYSize);

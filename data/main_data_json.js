@@ -407,7 +407,7 @@ const MD = {
         {
             "model_name": "The Krill",
             "ship_json": {
-                "health": 4, // 20
+                "health": 20, // 20
                 "starting_x_pos": null,
                 "starting_y_pos": null,
                 "starting_speed": 0,

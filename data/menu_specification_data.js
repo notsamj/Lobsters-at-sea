@@ -13,6 +13,31 @@ const MSD = {
         "info_text": "Made by notsamj.\nPress 'H' at any time for help!",
         "info_color_code": "#000000"
     },
+    "sound_menu": {
+        "back_button": {
+            "colour_code": "#3bc44b",
+            "text_colour_code": "#e6f5f4",
+            "text": "Main Menu",
+            "y_offset": 27,
+            "x": 25,
+            "x_size": 100,
+            "y_size": 50
+        },
+        "sound_area": {
+            "width": 200,
+            "height": 50,
+            "section_y_size": 100,
+            "sound_label_x_size": 300,
+            "sound_label_x": 600,
+            "sound_label_y_size": 100,
+            "top_buffer_y": 27,
+            "theme_colour_code": "#f5d442",
+            "background_colour_code": "#000000",
+            "min_volume": 0,
+            "max_volume": 100,
+            "cursor_width_px": 30
+        }
+    },
     "pause_menu": {
         "button_x_size": 800,
         "button_y_size": 160,
