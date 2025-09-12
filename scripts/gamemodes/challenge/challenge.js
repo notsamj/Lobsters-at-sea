@@ -247,7 +247,10 @@ class Challenge extends Gamemode {
         Method Return: void
     */
     endActions(){
-        this.getGame().setUpdatingFramePositions(false);
+        let game = this.getGame();
+        game.setUpdatingFramePositions(false);
+        // Snap the camera on the winner
+        game.getCamera().snapToClosestEntity();
         this.running = false;
     }
 

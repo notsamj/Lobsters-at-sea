@@ -728,6 +728,9 @@ class Battle extends Gamemode {
 
         let game = this.getGame();
 
+        // Snap the camera on the winner
+        game.getCamera().snapToClosestEntity();
+
         // Stop updating entity frame positions
         game.setUpdatingFramePositions(false);
 

@@ -39,7 +39,7 @@ class LASServer {
         this.SDJ = serverDataJSON;
 
         this.httpsServer = undefined; // placeholder
-        this.WSSServer = undefined; // placeholder
+        this.WSServer = undefined; // placeholder
 
         this.clients = new ThreadSafeLinkedList();
 
@@ -112,8 +112,25 @@ class LASServer {
         // Set up mongo db first
         await this.setupMongoDB();
 
-        // Set up the WSS Server
-        this.setupWSSServer();
+        // Sets up an WSS or WS server
+        if (this.isSecure()){
+            // Set up the WSS Server
+            this.setupWSSServer();
+        }else{
+            // Set up the WS Server
+            this.setupWSServer();
+        }
+
+    }
+
+    /*
+        Method Name: isSecure
+        Method Parameters: None
+        Method Description: Checks if using WSS instead of WS
+        Method Return: boolean
+    */
+    isSecure(){
+        return this.SDJ["web_socket_secure"];
     }
 
     /*
@@ -152,7 +169,7 @@ class LASServer {
     */
     async kickWSSClients(){
         let awaitLock = new Lock();
-        for (let clientWS of this.WSSServer.clients){
+        for (let clientWS of this.WSServer.clients){
             // If closed, skip
             if (clientWS.readyState === 3){
                 continue;
@@ -180,9 +197,54 @@ class LASServer {
         Method Return: Promise (implicit)
     */
     async shutDown(){
+        // Shut down depending on if secure
+        if (this.isSecure()){
+            await this.shutDownWSS();
+        }else{
+            await this.shutDownWS();
+        }
+    }
+
+    /*
+        Method Name: shutDownWS
+        Method Parameters: None
+        Method Description: Shuts down the server (using WS)
+        Method Return: Promise (implicit)
+    */
+    async shutDownWS(){
+        console.log("Kicking out WS Clients...");
+        // Kick out clients
+        await this.kickWSSClients();
+
+        console.log("Shutting down WS Server...");
+        let WSSAwaitLock = new Lock();
+
+        console.log("WS Shut down!");
+
+        WSSAwaitLock.lock();
+        this.WSServer.close(() => {WSSAwaitLock.unlock()});
+        await WSSAwaitLock.awaitUnlock();
+
+        console.log("Shutting down MongoDB Client...");
+        await this.mongoDBClient.close(); 
+
+        console.log("Shutting down MongoDB Server...");
+        await this.mongoDBServer.stop();
+
+        console.log("Shut down MongoDB!");
+    }
+
+    /*
+        Method Name: shutDownWSS
+        Method Parameters: None
+        Method Description: Shuts down the server (using WSS)
+        Method Return: Promise (implicit)
+    */
+    async shutDownWSS(){
         console.log("Shutting down HTTPS Server...");
         let httpAwaitLock = new Lock();
         httpAwaitLock.lock();
+        
         this.httpsServer.close(() => {httpAwaitLock.unlock()});
         // Note: Don't await HTTP here
 
@@ -198,7 +260,7 @@ class LASServer {
         console.log("HTTPS + WSS Shut down!");
 
         WSSAwaitLock.lock();
-        this.WSSServer.close(() => {WSSAwaitLock.unlock()});
+        this.WSServer.close(() => {WSSAwaitLock.unlock()});
         await WSSAwaitLock.awaitUnlock();
 
         console.log("Shutting down MongoDB Client...");
@@ -469,10 +531,10 @@ class LASServer {
             "cert": fs.readFileSync("./cert.pem"),
             "key": fs.readFileSync("./key.pem")
         });
-        this.WSSServer = new WebSocketServer( { "server": this.httpsServer } );
+        this.WSServer = new WebSocketServer( { "server": this.httpsServer } );
 
         // Set up connection handling stuff
-        this.WSSServer.on("connection", async (connection) => {
+        this.WSServer.on("connection", async (connection) => {
             // Await access
             await this.clients.requestAccess(); 
 
@@ -485,11 +547,38 @@ class LASServer {
         });
 
         this.httpsServer.listen(this.SDJ["port"], () => {
-            console.log("WSS Server running @", this.SDJ["port"]);
+            console.log("WSS (secure) Server running @", this.SDJ["port"]);
 
             console.log("Lobby settings:", CDJ);
             launchTickSystem();
         });
+    }
+    /*
+        Method Name: setupWSServer
+        Method Parameters: None
+        Method Description: Sets up the WS server
+        Method Return: void
+    */
+    setupWSServer(){
+        this.WSServer = new WebSocketServer( { "port": this.SDJ["port"] } );
+
+        // Set up connection handling stuff
+        this.WSServer.on("connection", async (connection) => {
+            // Await access
+            await this.clients.requestAccess(); 
+
+            // Create
+            let clientOBJ = new Client(connection, this.clientIDManager.generateNewID(), this, GP["default_folder_settings"]);
+            this.clients.add(clientOBJ);
+
+            // Relinquish access
+            this.clients.relinquishAccess();
+        });
+
+        console.log("WS (not secure) Server running @", this.SDJ["port"]);
+
+        console.log("Lobby settings:", CDJ);
+        launchTickSystem();
     }
 
     /*

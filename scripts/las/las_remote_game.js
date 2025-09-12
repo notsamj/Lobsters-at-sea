@@ -29,6 +29,16 @@ class LasRemoteGame extends LasGame {
     }
 
     /*
+        Method Name: getCamera
+        Method Parameters: None
+        Method Description: Getter
+        Method Return: SpectatorCamera
+    */
+    getCamera(){
+        return this.focusedCamera;
+    }
+
+    /*
         Method Name: setUpdatingFramePositions
         Method Parameters: 
             value:

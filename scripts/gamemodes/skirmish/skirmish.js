@@ -267,6 +267,9 @@ class Skirmish extends Gamemode {
     handleGameOver(winnerShipID){
         let game = this.getGame();
 
+        // Snap the camera on the winner
+        game.getCamera().snapToClosestEntity();
+
         // Stop updating entity frame positions
         this.getGame().setUpdatingFramePositions(false);
         // Stop running
