@@ -32,7 +32,7 @@ class CooldownLock extends Lock{
     */
     lock(){
         super.lock();
-        this.lastLocked = Date.now();
+        this.lastLocked = performance.now();
     }
 
     /*
@@ -42,7 +42,7 @@ class CooldownLock extends Lock{
         Method Return: boolean, true -> ready, false -> not ready
     */
     isReady(){
-        if (Date.now() > this.lastLocked + this.cooldown){
+        if (performance.now() > this.lastLocked + this.cooldown){
             this.unlock();
         }
         return this.ready;

@@ -13,7 +13,7 @@ class TickScheduler {
         Method Description: constructor
         Method Return: constructor
     */
-    constructor(tickRate, startTime=Date.now()){
+    constructor(tickRate, startTime=performance.now()){
         this.startTime = startTime;
         this.tickRate = tickRate;
         this.tickGapMS = 1000 / tickRate; // float likely
@@ -23,7 +23,7 @@ class TickScheduler {
         this.pauseStartTime = null;
         this.timeDebt = 0;
         this.latestTimeDebt = 0;
-        this.lastTickTime = Date.now();
+        this.lastTickTime = performance.now();
     }
 
     /*
@@ -44,7 +44,7 @@ class TickScheduler {
     */
     pause(){
         this.paused = true;
-        this.pauseStartTime = Date.now();
+        this.pauseStartTime = performance.now();
     }
 
     /*
@@ -55,7 +55,7 @@ class TickScheduler {
     */
     unpause(){
         this.paused = false;
-        this.addTimeDebt(Date.now() - this.pauseStartTime);
+        this.addTimeDebt(performance.now() - this.pauseStartTime);
     }
 
     /*
@@ -99,7 +99,7 @@ class TickScheduler {
         Method Description: Setter
         Method Return: void
     */
-    setStartTime(time=Date.now()){
+    setStartTime(time=performance.now()){
         this.startTime = time;
     }
 
@@ -111,7 +111,7 @@ class TickScheduler {
         Method Description: Calculates the number of ticks expected to have passed 
         Method Return: float
     */
-    getExpectedNumberOfTicksPassedFloat(time=Date.now()){
+    getExpectedNumberOfTicksPassedFloat(time=performance.now()){
         return (time - (this.startTime + this.timeDebt)) / this.tickGapMS;
     }
 
@@ -123,7 +123,7 @@ class TickScheduler {
         Method Description: Calculates the number of ticks expected to have passed
         Method Return: int
     */
-    getExpectedNumberOfTicksPassed(time=Date.now()){
+    getExpectedNumberOfTicksPassed(time=performance.now()){
         return Math.floor(this.getExpectedNumberOfTicksPassedFloat(time));
     }
 
@@ -145,7 +145,7 @@ class TickScheduler {
     */
     countTick(){
         this.numTicks++;
-        this.lastTickTime = Date.now();
+        this.lastTickTime = performance.now();
     }
 
     /*

@@ -49,7 +49,7 @@ class LasTest1v1Game extends LasGame {
     start(bot1JSON, bot2JSON){
         // Set running
         this.running = true;
-        this.gameStartTime = Date.now();
+        this.gameStartTime = performance.now();
 
         // Bot 1
         let bot1Ship = new Ship(bot1JSON["ship_json"]);

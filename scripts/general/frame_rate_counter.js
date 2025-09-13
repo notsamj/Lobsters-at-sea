@@ -37,7 +37,7 @@ class FrameRateCounter {
         Method Return: void
     */
     countFrame(){
-        let currentTime = Date.now();
+        let currentTime = performance.now();
         for (let i = 0; i < this.frameTimes.length; i++){
             if (!FrameRateCounter.fromPastSecond(currentTime, this.frameTimes[i])){
                 this.frameTimes[i] = currentTime;
@@ -54,7 +54,7 @@ class FrameRateCounter {
         Method Return: int in range [0,this.maxFPS]
     */
     getFPS(){
-        let currentTime = Date.now();
+        let currentTime = performance.now();
         let fps = 0;
         for (let i = 0; i < this.frameTimes.length; i++){
             if (FrameRateCounter.fromPastSecond(currentTime, this.frameTimes[i])){
@@ -81,7 +81,7 @@ class FrameRateCounter {
         Method Return: boolean
     */
     ready(){
-        return this.getFPS() < this.getMaxFPS() && Date.now() - this.lastFrameTime > this.minFrameGap;
+        return this.getFPS() < this.getMaxFPS() && performance.now() - this.lastFrameTime > this.minFrameGap;
     }
 
     /*

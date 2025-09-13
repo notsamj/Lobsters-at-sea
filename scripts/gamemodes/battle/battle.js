@@ -18,7 +18,7 @@ class Battle extends Gamemode {
         this.winningScreen = new WinningScreen();
 
          // Placeholder
-        this.serverStartTime = undefined;
+        this.gameStartTime = undefined;
         this.tickGapMS = undefined;
         this.maxDelayMS = undefined;
     }
@@ -54,7 +54,7 @@ class Battle extends Gamemode {
         Method Return: float
     */
     calculateExpectedTicks(){
-       return (GC.getGameTickScheduler().getLastTickTime() - (this.serverStartTime)) / this.tickGapMS;
+       return (GC.getGameTickScheduler().getLastTickTime() - (this.gameStartTime)) / this.tickGapMS;
     }
 
     /*
@@ -513,7 +513,14 @@ class Battle extends Gamemode {
     setup(gameDetailsJSON){
         let game = this.getGame();
         // Set data received
-        this.serverStartTime = gameDetailsJSON["server_start_time"];
+        /* 
+            // Old system: Agree on shared time
+            this.serverStartTime = gameDetailsJSON["server_start_time"];
+        */
+
+        // New system -> Just assume it's basically zero delay from server send start game and now
+        this.gameStartTime = performance.now();
+
 
         // Update game properties
         game.setGameProperties(gameDetailsJSON["game_properties"]);
