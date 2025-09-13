@@ -27,8 +27,11 @@ To run the server
 3. edit data/server_data.js and set port, address
 4. run run_server.bat or in cmd "npm start"
 ## Permanently keep replays
-1. Rename replay_backup.replay in /server/ to keep it from being overwritten
-2. Rename it to local_replay_storage.js and put in /data/ to add as a local replay
+1. Play a game on the server
+2. View replay in the replay menu if you wish
+3. Rename replay_backup.replay (this is the last played game on the server) in /server/ to keep it from being overwritten
+##
+Rename replay file to local_replay_storage.js and put in /data/ to add as a local replay
 ## WS vs WSS instructions
 If one knows how to get the required certificates, one can use the server with WSS. \
 To use WSS
