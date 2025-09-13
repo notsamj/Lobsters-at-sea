@@ -1,14 +1,25 @@
 # Play the game
 https://notsamj.github.io/Lobsters-at-sea/
 
-
 # Description
 A naval compat game that runs in a browser (keyboard + mouse). For information about how to play, one can open the game and press 'H' on any menu/game or watch the demo.
 
 # Demo Video
 https://www.youtube.com/watch?v=Jnje2aNqE-s
 
+# Instructions for running
+Option 1 - Play online (no steps) \
+Option 2 - Download
+1. Download REPO as ZIP
+2. unzip
+3. open las.html in a browser (Firefox rec)
+
 # Server instructions (must be downloaded)
+To set up
+1. ensure npm is installed and nodejs 
+2. open a command prompt / terminal
+3. navigate to /sever/
+4. run npm install
 To run the server
 1. edit server/lobby_settings.js (instructions in file)
 2. edit server/server_data.js and set port and ws/wss
