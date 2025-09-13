@@ -382,12 +382,6 @@ class ReplayViewer extends Gamemode {
         if (fgp["tick_rate"] != lgp["tick_rate"]){
             throw new Error("Tick rates are not equal: " + fgp["tick_rate"].toString() + ',' + lgp["tick_rate"].toString());
         }
-
-        // Check delay ms matches
-        if (fgp["max_delay_ms"] != lgp["max_delay_ms"]){
-            throw new Error("Delay MS values are not equal: " + fgp["max_delay_ms"].toString() + ',' + lgp["max_delay_ms"].toString());
-        }
-
         // set up wind to mirror server
         game.getWind().reset();
 

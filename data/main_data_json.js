@@ -51,7 +51,7 @@ const MD = {
     },
 
     "remote_data_settings": {
-        "max_delay_ms": 250, // server can be X ms slow before breaking
+        "max_delay_ms": 1000, // server can be X ms slow before breaking
         "max_delay_ticks": undefined // calculated
     },
 
