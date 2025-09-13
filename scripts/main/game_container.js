@@ -344,7 +344,7 @@ class GameContainer {
         // Set global variable drawingContext
         drawingContext = canvasDOM.getContext("2d");
 
-        this.GAME_TICK_SCHEDULER.setStartTime(Date.now());
+        this.GAME_TICK_SCHEDULER.setStartTime(performance.now());
 
         // Start loading screen
         requestAnimationFrame(launcherTickHandler);
@@ -482,7 +482,7 @@ class GameContainer {
         if (buttonCount != 1){
             // Ignore if button is null
             if (this.ZOOM_MONITOR["button"] == null){ return; }
-            let timePassed = Date.now() - this.ZOOM_MONITOR["start_time_ms"];
+            let timePassed = performance.now() - this.ZOOM_MONITOR["start_time_ms"];
             // If the button was pressed for a short amount of time then switch gamezoom to recorded
             if (timePassed < this.getLocalGameProperties()["approximate_zoom_peek_time_ms"]){
                 this.getLocalGameProperties()["game_zoom"] = gameZoom;
@@ -508,7 +508,7 @@ class GameContainer {
             // If changed which 1 button is pressed
             if (this.ZOOM_MONITOR["button"] != pressedButton){
                 this.ZOOM_MONITOR["button"] = pressedButton;
-                this.ZOOM_MONITOR["start_time_ms"] = Date.now();
+                this.ZOOM_MONITOR["start_time_ms"] = performance.now();
                 gameZoom = pressedButton;
             }
         }

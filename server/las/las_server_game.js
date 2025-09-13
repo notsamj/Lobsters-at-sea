@@ -52,7 +52,7 @@ class LasServerGame extends LasGame {
         let clientsArePlayers = setupData["expected_players_data"]["player_role"] === 1;
         // Set running
         this.running = true;
-        this.gameStartTime = Date.now();
+        this.gameStartTime = performance.now();
 
         // Add the clients
         this.clients.addAllFromLL(clientList);
@@ -440,7 +440,7 @@ class LasServerGame extends LasGame {
         Method Return: boolean
     */
     isReadyToTick(){
-        let now = Date.now();
+        let now = performance.now();
         let expectedTicks = this.calculateExpectedTicks();
         return expectedTicks > this.getTickCount();
     }
@@ -452,7 +452,7 @@ class LasServerGame extends LasGame {
         Method Return: float
     */
     calculateExpectedTicks(){
-        return (Date.now() - (this.gameStartTime)) / this.tickGapMS;
+        return (performance.now() - (this.gameStartTime)) / this.tickGapMS;
     }
 
     /*
