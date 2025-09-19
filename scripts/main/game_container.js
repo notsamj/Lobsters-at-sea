@@ -43,7 +43,8 @@ class GameContainer {
         Method Return: boolean
     */
     isMobile(){
-        return navigator.maxTouchPoints > 0;
+        // return navigator.maxTouchPoints > 0; // Disabled at moment due to issues
+        return false;
     }
 
     /*
