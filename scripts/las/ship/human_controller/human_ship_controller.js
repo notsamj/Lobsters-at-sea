@@ -71,11 +71,7 @@ class HumanShipController {
         Method Return: JSON
     */
     getDecisionJSON(){
-        if (GC.isMobile()){
-            return this.getMobileDecisionJSON();
-        }else{
-            return this.getPCDecisionJSON();
-        }
+        return this.getPCDecisionJSON();
     }
 
     /*
