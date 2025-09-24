@@ -9,6 +9,7 @@ const SD = {
         /*"cannons": [
             // right side
             {
+                "cannon_index": undefined, // calcuated
                 "x": 283,
                 "y": 141,
                 "range_cw": [55, 305]
@@ -17,106 +18,126 @@ const SD = {
         "cannons": [
             // Front cannon
             {
+                "cannon_index": undefined, // calcuated
                 "x": 248,
                 "y": 107,
                 "range_cw": [135, 45]
             },
             // Front cannon
             {
+                "cannon_index": undefined, // calcuated
                 "x": 250,
                 "y": 107,
                 "range_cw": [135, 45]
             },
             // Front cannon
             {
+                "cannon_index": undefined, // calcuated
                 "x": 252,
                 "y": 107,
                 "range_cw": [135, 45]
             },
             // right side
             {
+                "cannon_index": undefined, // calcuated
                 "x": 283,
                 "y": 141,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 292,
                 "y": 180,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 297,
                 "y": 206,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 304,
                 "y": 238,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 305,
                 "y": 267,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 304,
                 "y": 292,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 307,
                 "y": 314,
                 "range_cw": [55, 305]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 306,
                 "y": 314,
                 "range_cw": [55, 305]
             },
             // left side
             {
+                "cannon_index": undefined, // calcuated
                 "x": 221,
                 "y": 138,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 214,
                 "y": 181,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 212,
                 "y": 205,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 207,
                 "y": 235,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 200,
                 "y": 265,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 197,
                 "y": 293,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 195,
                 "y": 316,
                 "range_cw": [235, 125]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 202,
                 "y": 350,
                 "range_cw": [235, 125]
             },
             // front
             {
+                "cannon_index": undefined, // calcuated
                 "x": 250,
                 "y": 107,
                 "range_cw": [135, 45]
@@ -124,11 +145,13 @@ const SD = {
             /*
             // back
             {
+                "cannon_index": undefined, // calcuated
                 "x": 229,
                 "y": 398,
                 "range_cw": [315, 225]
             },
             {
+                "cannon_index": undefined, // calcuated
                 "x": 282,
                 "y": 399,
                 "range_cw": [315, 225]

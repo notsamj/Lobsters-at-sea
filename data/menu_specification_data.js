@@ -7,7 +7,7 @@ const MSD = {
         "logo_x_size": 512,
         "logo_y_size": 512,
         "button_color_code": "#3bc44b",
-        "button_text_color_code": "#36f5f4",
+        "button_text_color_code": "#ffffff",
         "info_y": 250,
         "info_y_size": 200,
         "info_text": "Made by notsamj.\nPress 'H' at any time for help!",

@@ -201,7 +201,7 @@ class Playground extends Gamemode {
         hud.updateElement("wind force", this.getGame().getWind().getWindMagnitude().toFixed(2));
 
         // Display HUD for focused ship
-        hud.updateElement("health", this.getGame().getFocusedEntity().getHealth());
+        hud.updateElement("health", this.getGame().getFocusedEntity().getHealth().toFixed(2));
         hud.updateElement("x", this.getGame().getFocusedEntity().getTickX().toFixed(2));
         hud.updateElement("x_v", this.getGame().getFocusedEntity().getTickXV().toFixed(2));
         hud.updateElement("y", this.getGame().getFocusedEntity().getTickY().toFixed(2));
